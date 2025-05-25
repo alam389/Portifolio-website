@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
-// Replace the missing styles with regular classes until you create a CSS module
-// import styles from './projects.module.css';
-
-// Add these temporary icon components until you create the actual ones
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 const Github = ({ size = 16 }) => (
   <span style={{ fontSize: size + 'px' }}>📂</span>
 );
@@ -71,9 +68,16 @@ export default function FeatureProjects() {
             
             {/* Project Navigation */}
             <div className="project-navigation">
-                <button onClick={handlePrevProject} className="nav-button">Previous</button>
+            
+                <button onClick={handlePrevProject} className="nav-button">
+                    <ChevronLeft size={16} />
+                    Previous
+                </button>
                 <span>{currentProject + 1} of {projects.length}</span>
-                <button onClick={handleNextProject} className="nav-button">Next</button>
+                <button onClick={handleNextProject} className="nav-button">
+                    <ChevronRight size={16} />
+                    Next
+                </button>
             </div>
             
             {/* Featured Project */}

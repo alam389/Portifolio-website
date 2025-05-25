@@ -1,0 +1,72 @@
+.section {
+  padding: 4rem 2rem;
+  background-color: #f9fafb;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.aboutContainer {
+  width: 100%;
+  margin: 0;
+  text-align: left;
+}
+
+.sectionLabel {
+  font-size: 0.875rem;
+  letter-spacing: 0.1em;
+  color: #6b7280;
+  margin-bottom: 0.125rem !important; /* super small gap */
+  text-transform: uppercase;
+}
+
+.mainTitle {
+  font-size: 3.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0; /* remove extra margin */
+  /* you can add a small margin-bottom if needed */
+  margin-bottom: 2rem;
+  color: #111827;
+}
+
+.description {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: #374151;
+  margin-bottom: 2rem;
+}
+
+/* Carousel for Skills */
+.skillsCarousel {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  margin-top: 2rem;
+}
+
+.skillsContainer {
+  display: inline-flex;
+  gap: 0.75rem;
+  white-space: nowrap; /* prevents wrapping into multiple lines */
+  animation: scroll 20s linear infinite;
+}
+
+/* Auto-scrolling keyframes */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    /* Adjust -50% as needed based on your content width */
+    transform: translateX(-50%);
+  }
+}
+
+.skill {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 9999px; /* pill shape (semi-circular corners) */
+  font-size: 0.875rem;
+  background-color: white;
+  color: #374151;
+}

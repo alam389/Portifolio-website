@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Linkedin, GitHub as GitHubIcon } from 'lucide-react'; // Use the updated icon name
+import { Mail, Linkedin, Github } from 'lucide-react'; // Use 'Github' instead of 'GitHub'
 
 export default function Footer() {
   return (
@@ -43,7 +43,7 @@ export default function Footer() {
           rel="noopener noreferrer"
           className="contact-button"
         >
-          <GitHubIcon size={16} />
+          <Github size={16} />
           <span>GitHub</span>
         </a>
       </div>

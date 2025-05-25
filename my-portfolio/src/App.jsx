@@ -1,5 +1,6 @@
 import Header from './components/header/header.jsx'
 import './App.css'
+import Landing from './components/landing/landing.jsx'
 import AboutMe from './components/about-me/about-me.jsx'
 import FeatureProjects from './components/feature-projects/projects.jsx'
 import Experiences from './components/experiences/experiences.jsx'
