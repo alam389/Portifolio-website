@@ -1,0 +1,26 @@
+.breadcrumbSeparator {
+    margin: 0 8px;
+    color: gray;
+    font-weight: bold;
+}
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.breadcrumbItem {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #111827;
+}
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem;
+}
+.container {
+    min-height: 100vh;
+    background-color: #f9fafb;
+}
