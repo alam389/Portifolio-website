@@ -84,15 +84,19 @@
 .bio {
   font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 400;
   color: #111;
   max-width: 260px;
   line-height: 1.5;
   text-align: left;
 }
 
-/* Subtle noise/gradient effect on the right */
-.heroContainer::after {
+.bio strong {
+  font-weight: 700;
+}
+
+/* Removing the gradient effect */
+/* .heroContainer::after {
   content: '';
   position: absolute;
   top: 0; right: 0; bottom: 0; left: 40%;
@@ -100,7 +104,7 @@
   background: radial-gradient(circle at 80% 50%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.03) 60%, transparent 100%);
   opacity: 0.7;
   z-index: 0;
-}
+} */
 
 @media (max-width: 900px) {
   .heroContainer {

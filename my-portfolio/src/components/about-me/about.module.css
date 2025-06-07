@@ -1,5 +1,5 @@
 .section {
-  padding: 4rem 2rem; /* Standardized padding to match other sections */
+  padding: 4rem 0; /* Remove left/right padding for perfect alignment */
   background-color: #f9fafb;
   display: flex;
   justify-content: flex-start;
@@ -10,6 +10,9 @@
   max-width: 1200px; /* Standardized max-width */
   margin: 0 auto; /* Center the container */
   text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .sectionLabel {
@@ -22,12 +25,19 @@
 
 .mainTitle {
   font-size: 3.75rem;
-  font-weight: 700;
+  font-weight: 200;
   line-height: 1.1;
-  margin: 0; /* remove extra margin */
-  /* you can add a small margin-bottom if needed */
+  margin: 0;
   margin-bottom: 2rem;
   color: #111827;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  letter-spacing: 0.01em;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.contentContainer {
+  /* Intentionally left blank to inherit alignment and width */
 }
 
 .description {
@@ -43,7 +53,8 @@
   overflow: hidden;
   position: relative;
   width: 100%;
-  margin-top: 2rem;
+  margin: 2rem 0;
+  background: linear-gradient(to right, #f9fafb, transparent 20%, transparent 80%, #f9fafb);
 }
 
 .skillsContainer {
@@ -51,6 +62,7 @@
   gap: 0.75rem;
   white-space: nowrap; /* prevents wrapping into multiple lines */
   animation: scroll 20s linear infinite;
+  padding: 1rem 0;
 }
 
 /* Auto-scrolling keyframes */
@@ -71,4 +83,26 @@
   font-size: 0.875rem;
   background-color: white;
   color: #374151;
+  transition: all 0.2s ease;
+}
+
+.skill:hover {
+  background-color: #f3f4f6;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .mainTitle {
+    font-size: 2.5rem;
+  }
+  
+  .description {
+    font-size: 1rem;
+  }
+  
+  .contentContainer {
+    padding: 0 0.5rem;
+  }
 }

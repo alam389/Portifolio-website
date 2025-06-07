@@ -3,7 +3,7 @@
   width: 100%;
   background-color: #ffffff;
   text-align: left;
-  padding: 4rem 2rem; /* Standardized padding to match other sections */
+  padding: 4rem 0; /* Remove left/right padding for perfect alignment */
   margin: 0 auto;
   max-width: 1200px;
   position: relative;
@@ -93,11 +93,14 @@
 }
 
 .projectTitle {
-   font-size: 3.5rem;
-  font-weight: 700;
+  font-size: 3.5rem;
+  font-weight: 200;
   color: #111827;
   margin-bottom: 1.5rem;
+  margin-top: 0; /* Ensure no extra top margin */
   line-height: 1.1;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  letter-spacing: 0.01em;
 }
 
 .projectDescription {

@@ -24,17 +24,17 @@ export default function Contact() {
     };
 
     return (
-        <section className={styles.contactSection}>
+        <section className={styles.contactSection} id="contact">
             <div className={styles.contactContainer}>
                 <div className={styles.contactHeader}>
                     <p className={styles.contactLabel}>CONTACT:</p>
-                    <h2 className={styles.contactHeading}>Let's Work Together</h2>
+                    <h2 className={styles.contactHeading}>Let's chat</h2>
                 </div>
                 
                 <div className={styles.contactContent}>
                     <div className={styles.contactLeft}>
                         <p className={styles.contactDescription}>
-                            I'm always interested in new opportunities and exciting projects. Whether you have a question or just want to say hi, feel free to reach out!
+                            I'm always interested in new opportunities and exciting projects. If you have questions for want advice, or just want to chat, feel free to reach out.
                         </p>
                         
                         <div className={styles.contactButtons}>

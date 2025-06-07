@@ -52,13 +52,12 @@ export default function FeatureProjects() {
   const currentProj = projects[0]; // Just show the first project for now
 
   return (
-    <section className={styles.featureProjects}>
+    <section className={styles.featureProjects} id="projects">
       <div className={styles.headerContainer}>
         <p className={styles.sectionTitle}>FEATURE PROJECTS:</p>
       </div>
 
       <section className={styles.projectSection}>
-        <p className={styles.sectionLabel}>PROJECT:</p>
         <h2 className={styles.projectTitle}>{currentProj.title}</h2>
         <p className={styles.projectDescription}>{currentProj.description}</p>
 

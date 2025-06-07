@@ -1,6 +1,6 @@
 .contactSection {
   width: 100%;
-  padding: 4rem 2rem; /* Standardized padding */
+  padding: 4rem 0; /* Remove left/right padding for perfect alignment */
   background-color: #f9fafb;
 }
 
@@ -25,18 +25,21 @@
 }
 
 .contactHeading {
-  font-size: 3.5rem; /* Standardized heading size */
-  font-weight: 700; /* Changed from 800 to match others */
+  font-size: 3.5rem;
+  font-weight: 200;
   color: #111827;
   margin-bottom: 1.5rem;
+  margin-top: 0; /* Ensure no extra top margin */
   line-height: 1.1;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  letter-spacing: 0.01em;
 }
 
 .contactContent {
   display: flex;
   flex-direction: row;
   gap: 4rem;
-  align-items: flex-start;
+  align-items: flex-start; /* Ensure columns are top-aligned */
   width: 100%;
   max-width: 900px; /* Match other content sections */
 }
@@ -58,6 +61,7 @@
   max-width: 80%;
   margin-left: 0; /* Add this to ensure left alignment */
   margin-right: 0; /* Add this to ensure left alignment */
+  margin-top: 0; /* Remove any extra top margin */
 }
 
 /* Adjust button sizing to match navigation buttons in projects section */
@@ -117,6 +121,7 @@
   flex-direction: column;
   gap: 1rem;
   width: 100%;
+  margin-top: 0; /* Remove any extra top margin */
 }
 
 .formGroup {
