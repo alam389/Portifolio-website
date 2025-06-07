@@ -1,0 +1,120 @@
+.experienceSection {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 2rem; /* Standardized padding */
+  background-color: #ffffff;
+}
+
+/* Standardized heading styles */
+.journeyTitle {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 2rem;
+  line-height: 1.1;
+}
+
+.sectionTitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  text-align: left;
+  align-self: flex-start;
+  width: 100%
+}
+
+.experienceList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.experienceCard {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  transition: all 0.3s ease;
+  padding-bottom: 2rem;  /* Add more padding at the bottom of each card */
+  margin-bottom: 2rem;  /* Add margin between experience cards */
+}
+
+.experienceCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.experienceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.jobTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.period {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.companyName {
+  font-size: 1.125rem;
+  color: #4b5563;
+  margin: 0 0 1rem 0;
+  text-align: left;
+  width: 100%;
+  display: block;
+  margin-bottom: 1.25rem;  /* Increase from default */
+}
+
+.jobDescription {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #4b5563;
+  margin: 0;
+}
+
+/* Add or update these styles for better bullet point spacing */
+
+.bulletPoints {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-top: 1rem;  /* Increase top margin */
+  margin-bottom: 0.5rem;  /* Add some bottom margin */
+}
+
+.bulletPoint {
+  margin-bottom: 1rem;  /* Increase from 0.5rem to 1rem for more spacing between items */
+  line-height: 1.6;  /* Increase line height for better readability */
+  color: #4b5563;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .journeyTitle {
+    font-size: 2.5rem;
+  }
+  
+  .experienceCard {
+    padding: 1.5rem;
+  }
+  
+  .jobTitle {
+    font-size: 1.25rem;
+  }
+  
+  .experienceHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}

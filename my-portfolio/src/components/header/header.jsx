@@ -10,17 +10,7 @@ export default function Header({ prevProject, nextProject }) {
                 <span className={styles.breadcrumbSeparator}>/</span>
                 <span className={styles.breadcrumbItem}>PORTFOLIO</span>
             </div>
-            <div className={styles.navigation}>
-                <button onClick={prevProject} className={styles.navButton}>
-                    <ChevronLeft size={16} />
-                    PREVIOUS
-                </button>
-                <span className={styles.breadcrumbSeparator}>/</span>
-                <button onClick={nextProject} className={styles.navButton}>
-                    NEXT
-                    <ChevronRight size={16} />
-                </button>
-            </div>
+
         </header>
     );
 }

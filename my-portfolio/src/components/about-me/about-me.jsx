@@ -23,7 +23,7 @@ export default function AboutMe() {
           ABOUT ME:
         </p>
         <h1 className={styles.mainTitle}>
-          Software Engineer & Problem Solver
+          Software Engineer
         </h1>
          <div className={styles.skillsCarousel}>
           <div className={styles.skillsContainer}>

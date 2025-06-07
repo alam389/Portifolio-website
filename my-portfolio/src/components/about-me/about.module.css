@@ -1,5 +1,5 @@
 .section {
-  padding: 4rem 2rem;
+  padding: 4rem 2rem; /* Standardized padding to match other sections */
   background-color: #f9fafb;
   display: flex;
   justify-content: flex-start;
@@ -7,7 +7,8 @@
 
 .aboutContainer {
   width: 100%;
-  margin: 0;
+  max-width: 1200px; /* Standardized max-width */
+  margin: 0 auto; /* Center the container */
   text-align: left;
 }
 
@@ -30,10 +31,11 @@
 }
 
 .description {
-  font-size: 1.25rem;
+  font-size: 1.125rem; /* Standardized font size */
   line-height: 1.6;
-  color: #374151;
+  color: #4b5563; /* Standardized text color */
   margin-bottom: 2rem;
+  max-width: 80%; /* More balanced width */
 }
 
 /* Carousel for Skills */

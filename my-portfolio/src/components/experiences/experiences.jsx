@@ -1,40 +1,54 @@
 import React from 'react';
+import styles from './experiences.module.css';
 
 export default function Experiences() {
-    // Sample experiences data - you can expand this with your actual experiences
+    // Sample experiences data
     const experiences = [
         {
-            company: "Tech Company XYZ",
-            period: "Jan 2024 - Present",
-            title: "Software Engineer Intern",
-            description: "I have worked on various projects during my internship, focusing on backend development and database management. I have experience with Java, Spring Boot, Node.js, and PostgreSQL."
+            title: "Database Developer",
+            company: "McGregor Allsop",
+            period: "May 2025 - August 2025",
+            description: [
+                "Worked with Microsoft SSMS to optimize workflow to support engineering and financial operations.",
+                "Filtered, extracted, and organized large data sets using machine learning libraries for use by engineering and project management teams.",
+                "Built and hosted database-driven applications using Java Springboot on their servers to streamline data entry for their engineers and added functionalities to their pre-existing system.",
+                "Created customized financial reports and project tracking tools using SQL queries and programming scripts (Java, Python)."        
+            ]
         },
         {
-            company: "Startup ABC",
-            period: "Jun 2023 - Dec 2023",
-            title: "Web Development Intern",
-            description: "Developed and maintained responsive web applications using React and Next.js. Collaborated with design team to implement UI/UX improvements."
+            title: "Project Manager",
+            company: "Tech for Social Impact",
+            period: "May 2024 - Present",
+            description: [
+                "Delivered a web traffic tracker solution for Boys and Girls Club London as measured by a 40% increase in visibility by leading a student team by seamless integration with Google Analytics.",
+                "Managing a cross-functional team of 4 developers to design and develop a React Native-powered mental health app for EmpowerHERto, providing personalized wellness resources for minority girls.",
+                "Led Agile project execution, fostering transparent stakeholder communication and ensuring iterative improvements aligned with user needs.",
+                "Optimized sprint planning and backlog prioritization, reducing development roadblocks and increasing team efficiency through structured workflows in Jira."
+            ]
         },
-        {
-            company: "University Project",
-            period: "Jan 2023 - May 2023",
-            title: "Team Lead",
-            description: "Led a team of 4 students to develop a campus navigation app. Managed project timeline and delegated tasks while contributing to the frontend development."
-        }
     ];
 
     return (
-        <section className="experience-section">
-            <h2 className="section-title">EXPERIENCE</h2>
-            <div className="experience-grid">
+        <section className={styles.experienceSection}>
+            <h2 className={styles.sectionTitle}>EXPERIENCE:</h2>
+            <h1 className={styles.journeyTitle}>Professional Journey</h1>
+            
+            <div className={styles.experienceList}>
                 {experiences.map((exp, index) => (
-                    <div key={index} className="experience-card">
-                        <div className="experience-header">
-                            <span className="experience-company">{exp.company}</span>
-                            <span className="experience-period">{exp.period}</span>
+                    <div key={index} className={styles.experienceCard}>
+                        <div className={styles.experienceHeader}>
+                            <h3 className={styles.jobTitle}>{exp.title}</h3>
+                            <span className={styles.period}>{exp.period}</span>
                         </div>
-                        <h3 className="experience-title">{exp.title}</h3>
-                        <p className="experience-description">{exp.description}</p>
+                        <p className={styles.companyName}>{exp.company}</p>
+                        <ul className={styles.bulletPoints}>
+                            {Array.isArray(exp.description) ? 
+                                exp.description.map((bullet, i) => (
+                                    <li key={i} className={styles.bulletPoint}>{bullet}</li>
+                                )) : 
+                                <li className={styles.bulletPoint}>{exp.description}</li>
+                            }
+                        </ul>
                     </div>
                 ))}
             </div>

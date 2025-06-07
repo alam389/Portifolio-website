@@ -1,0 +1,79 @@
+/* Global layout and sizing standards for consistent UI */
+
+/* Section containers - All main sections use this */
+.section-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+}
+
+/* Content areas - For text and elements inside sections */
+.content-wrapper {
+  max-width: 900px;
+  width: 100%;
+  margin: 0;
+}
+
+/* Text containers - For paragraphs and descriptions */
+.text-container {
+  max-width: 80%;
+  margin-left: 0;
+  margin-right: 0;
+  line-height: 1.6;
+}
+
+/* Standard flex patterns */
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.space-between {
+  justify-content: space-between;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+/* Standard header */
+.section-header {
+  margin-bottom: 3rem;
+  width: 100%;
+}
+
+/* Standard image containers */
+.standard-image {
+  width: 100%;
+  max-width: 900px;
+  height: auto;
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .section-container {
+    padding: 2rem 1.5rem;
+  }
+  
+  .text-container {
+    max-width: 100%;
+  }
+  
+  .flex-row {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+}

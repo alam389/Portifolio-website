@@ -1,0 +1,77 @@
+.footer {
+  background-color: #ffffff;
+  padding: 4rem 2rem; /* Match other sections' padding */
+  width: 100%;
+}
+
+.footerContent {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  max-width: 1200px; /* Match other container widths */
+  width: 100%;
+  margin: 0 auto;
+  gap: 2rem;
+}
+
+.footerSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.footerLabel {
+  font-size: 0.75rem;
+  color: #000000;
+  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+.footerText {
+  font-size: 0.875rem;
+  color: #999a9c;
+  font-weight: 500;
+}
+
+.contactActions {
+  max-width: 1200px;
+  width: 100%; /* Set full width */
+  margin: 2.5rem auto 0;
+  display: flex;
+  justify-content: flex-start; /* Left-align like other sections */
+  gap: 1rem;
+}
+
+.contactButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background-color: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #f3f4f6;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.contactButton:hover {
+  background-color: #374151;
+  transform: translateY(-1px);
+}
+
+/* Better responsive behavior to match other sections */
+@media (max-width: 768px) {
+  .footer {
+    padding: 2rem 1.5rem; /* Match other sections' mobile padding */
+  }
+  
+  .footerContent {
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 100%;
+  }
+}
