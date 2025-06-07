@@ -6,6 +6,9 @@
   padding: 4rem 2rem; /* Standardized padding to match other sections */
   margin: 0 auto;
   max-width: 1200px;
+  position: relative;
+  overflow: hidden; /* Hide overflow content during transitions */
+  outline: none; /* Remove focus outline when tabbed to */
 }
 
 /* Header Container */
@@ -202,35 +205,80 @@
   background-color: #1f2937;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .featureProjects {
-    padding: 2rem 1.5rem; /* Reduce padding further on mobile */
+/* Scroll indicators */
+.scrollIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+  padding: 0.5rem;
+  margin: 1rem 0;
+  animation: pulse 2s infinite;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.scrollIndicator:hover {
+  opacity: 1;
+}
+
+.scrollDown {
+  margin-top: 2rem;
+}
+
+.scrollUp {
+  margin-bottom: 1rem;
+}
+
+/* Gentle pulse animation for scroll indicator */
+@keyframes pulse {
+  0% {
+    transform: translateY(0);
   }
-  
-  .projectMeta {
-    flex-direction: column;
-    gap: 1.5rem;
+  50% {
+    transform: translateY(4px);
   }
-  
-  .projectTitle {
-    font-size: 2.5rem;
-    max-width: 90%; /* Add constraint for mobile */
+  100% {
+    transform: translateY(0);
   }
-  
-  .projectDescription {
-    max-width: 100%; /* Allow full width on mobile */
+}
+
+/* Make carousel container have proper height to prevent layout shifts */
+.carouselContainer {
+  min-height: 500px; /* Adjust as needed based on your content */
+  position: relative;
+  perspective: 1000px;
+}
+
+/* Project transition animations */
+@keyframes flipIn {
+  from {
+    opacity: 0;
+    transform: perspective(1000px) rotateX(10deg) translateY(40px);
   }
-  
-  .projectNavigation {
-    position: static;
-    margin-top: 1rem;
-    justify-content: center;
-    width: 100%;
+  to {
+    opacity: 1;
+    transform: perspective(1000px) rotateX(0) translateY(0);
   }
-  
-  .headerContainer {
-    flex-direction: column;
-    align-items: flex-start;
+}
+
+@keyframes flipOut {
+  from {
+    opacity: 1;
+    transform: perspective(1000px) rotateX(0) translateY(0);
   }
+  to {
+    opacity: 0;
+    transform: perspective(1000px) rotateX(-10deg) translateY(-40px);
+  }
+}
+
+.project-entering {
+  animation: flipIn 0.6s ease-out forwards;
+}
+
+.project-exiting {
+  animation: flipOut 0.4s ease-in forwards;
 }

@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styles from './feature.module.css';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Github = ({ size = 16 }) => (
   <span style={{ fontSize: size + 'px' }}>📂</span>
@@ -11,14 +10,12 @@ const ExternalLink = ({ size = 16 }) => (
 );
 
 export default function FeatureProjects() {
-  const [currentProject, setCurrentProject] = useState(0);
-
   const projects = [
     {
       id: 1,
       title: "E-Commerce Platform",
       description:
-      "Led the development of a web application for EmpowHERto, a nonprofit empowering young women. The platform supports a 12-week mental health program for teenage girls, featuring user authentication, personalized dashboards, curriculum tracking, and team member profiles. Built using Next.js, React, TypeScript, and Tailwind CSS, I directed a cross-functional team to deliver a responsive, accessible, and scalable solution aligned with the organization’s mission.",
+      "Led the development of a web application for EmpowHERto, a nonprofit empowering young women. The platform supports a 12-week mental health program for teenage girls, featuring user authentication, personalized dashboards, curriculum tracking, and team member profiles. Built using Next.js, React, TypeScript, and Tailwind CSS, I directed a cross-functional team to deliver a responsive, accessible, and scalable solution aligned with the organization's mission.",
       date: "2024",
       services: "FULL-STACK DEVELOPMENT / PAYMENT INTEGRATION / UI/UX DESIGN",
       technologies: ["React", "Typescript", "Express.js", "Next.js", "Neon PostgreSQL"],
@@ -52,39 +49,16 @@ export default function FeatureProjects() {
     },
   ];
 
-  const currentProj = projects[currentProject];
-
-  const handleNextProject = () => {
-    setCurrentProject((prev) => (prev + 1) % projects.length);
-  };
-
-  const handlePrevProject = () => {
-    setCurrentProject((prev) => (prev - 1 + projects.length) % projects.length);
-  };
+  const currentProj = projects[0]; // Just show the first project for now
 
   return (
     <section className={styles.featureProjects}>
-      {/* Replace the standalone p tag with a header container */}
       <div className={styles.headerContainer}>
         <p className={styles.sectionTitle}>FEATURE PROJECTS:</p>
-
-        {/* Project Navigation - moved into the header container */}
-        <div className={styles.projectNavigation}>
-          <button onClick={handlePrevProject} className={styles.navButton}>
-            <ChevronLeft size={16} />
-            Previous
-          </button>
-          <span className={styles.projectCounter}>{currentProject + 1} of {projects.length}</span>
-          <button onClick={handleNextProject} className={styles.navButton}>
-            <ChevronRight size={16} />
-            Next
-          </button>
-        </div>
       </div>
 
-      {/* Featured Project */}
       <section className={styles.projectSection}>
-  
+        <p className={styles.sectionLabel}>PROJECT:</p>
         <h2 className={styles.projectTitle}>{currentProj.title}</h2>
         <p className={styles.projectDescription}>{currentProj.description}</p>
 
@@ -99,7 +73,6 @@ export default function FeatureProjects() {
           </div>
         </div>
 
-        {/* Technologies (Tags) */}
         <div className={styles.technologiesSection}>
           <p className={styles.metaLabel}>TECHNOLOGIES:</p>
           <div className={styles.technologiesContainer}>
@@ -124,11 +97,11 @@ export default function FeatureProjects() {
         </div>
 
         <div className={styles.projectActions}>
-          <a href={currentProj.github} target="_blank" rel="noopener noreferrer" className={styles.actionButton || styles.primaryButton}>
+          <a href={currentProj.github} target="_blank" rel="noopener noreferrer" className={styles.actionButton}>
             <Github size={16} />
             <span>View Code</span>
           </a>
-          <a href={currentProj.live} target="_blank" rel="noopener noreferrer" className={styles.actionButton || styles.secondaryButton}>
+          <a href={currentProj.live} target="_blank" rel="noopener noreferrer" className={styles.actionButton}>
             <ExternalLink size={16} />
             <span>Live Demo</span>
           </a>

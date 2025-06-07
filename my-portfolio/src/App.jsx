@@ -5,6 +5,7 @@ import FeatureProjects from './components/feature-projects/projects.jsx'
 import Experiences from './components/experiences/experiences.jsx'
 import Contact from './components/contact/contacts.jsx'
 import Footer from './components/footer/footer.jsx'
+import Hero from './components/hero/Hero.jsx'
 import './styleslayout.css'
 function App() {
 
@@ -13,6 +14,7 @@ function App() {
       <>
         <Header />
         <main>
+          <Hero />
           <AboutMe />
           <FeatureProjects/>
           <Experiences />

@@ -1,0 +1,123 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;400;700&display=swap');
+
+.heroContainer {
+  display: flex;
+  flex-direction: row;
+  width: 100vw;
+  height: 100vh;
+  background: #fff;
+  box-sizing: border-box;
+  border: 2px solid #e5e5e5;
+  position: relative;
+}
+
+.leftSection {
+  flex: 1.2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 3rem 2.5rem 2rem 3rem;
+  min-width: 350px;
+}
+
+.name {
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 4rem;
+  font-weight: 200;
+  letter-spacing: 0.01em;
+  margin: 0 0 0.5rem 0;
+  color: #111;
+  line-height: 1.1;
+}
+
+.subtitle {
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: #222;
+  margin-bottom: 2.5rem;
+}
+
+.menu {
+  margin-top: 2rem;
+}
+.menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.menu li {
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 1.1rem;
+  letter-spacing: 0.01em;
+}
+.menuDot {
+  font-size: 2rem;
+  font-weight: 400;
+  margin-bottom: 1.5rem;
+  color: #111;
+}
+.menu a {
+  color: #111;
+  text-decoration: none;
+  font-weight: 700;
+  transition: text-decoration 0.2s;
+}
+.menu a:hover {
+  text-decoration: underline;
+}
+
+.rightSection {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 0 3rem 3rem 2rem;
+  min-width: 320px;
+  position: relative;
+}
+
+.bio {
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111;
+  max-width: 260px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+/* Subtle noise/gradient effect on the right */
+.heroContainer::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 40%;
+  pointer-events: none;
+  background: radial-gradient(circle at 80% 50%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.03) 60%, transparent 100%);
+  opacity: 0.7;
+  z-index: 0;
+}
+
+@media (max-width: 900px) {
+  .heroContainer {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+  }
+  .leftSection, .rightSection {
+    min-width: unset;
+    padding: 2rem 1.5rem;
+  }
+  .rightSection {
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding-bottom: 2rem;
+  }
+  .bio {
+    max-width: 100%;
+  }
+} 
