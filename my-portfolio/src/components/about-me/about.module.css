@@ -28,7 +28,7 @@
   font-weight: 200;
   line-height: 1.1;
   margin: 0;
-  margin-bottom: 2rem;
+  margin-bottom: 0; /* Removed gap to skills carousel */
   color: #111827;
   font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   letter-spacing: 0.01em;
@@ -37,13 +37,15 @@
 }
 
 .contentContainer {
-  /* Intentionally left blank to inherit alignment and width */
+  margin-top: 0; /* Remove top margin */
+  padding-top: 0; /* Remove top padding */
 }
 
 .description {
-  font-size: 1.125rem; /* Standardized font size */
+  font-size: 1rem; /* Standardized font size */
   line-height: 1.6;
   color: #4b5563; /* Standardized text color */
+  margin-top: 0; /* Ensure no top margin */
   margin-bottom: 2rem;
   max-width: 80%; /* More balanced width */
 }
@@ -53,7 +55,7 @@
   overflow: hidden;
   position: relative;
   width: 100%;
-  margin: 2rem 0;
+  margin: 1rem 0; /* Removed vertical margin */
   background: linear-gradient(to right, #f9fafb, transparent 20%, transparent 80%, #f9fafb);
 }
 
@@ -62,7 +64,7 @@
   gap: 0.75rem;
   white-space: nowrap; /* prevents wrapping into multiple lines */
   animation: scroll 20s linear infinite;
-  padding: 1rem 0;
+  padding: 0; /* Removed vertical padding */
 }
 
 /* Auto-scrolling keyframes */
