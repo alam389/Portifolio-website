@@ -20,7 +20,7 @@ export default function Hero() {
       <div className={styles.rightSection}>
         <div className={styles.bio}>
           <p>
-          <strong>Born in 1994<br />in Niagara, Canada.</strong><br />
+          <strong>Born in 2004<br />in Niagara, Canada.</strong><br />
 Passionate about backend and database design.<br />
 I believe robust backend systems are the backbone<br />
 of every great application.<br />

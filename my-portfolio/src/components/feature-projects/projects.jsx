@@ -109,17 +109,6 @@ export default function FeatureProjects() {
                     <h2 className={styles.projectTitle}>{currentProj.title}</h2>
                     <p className={styles.projectDescription}>{currentProj.description}</p>
 
-                    <div className={styles.technologiesSection}>
-                      <p className={styles.metaLabel}>TECHNOLOGIES:</p>
-                      <div className={styles.technologiesContainer}>
-                        {currentProj.technologies.map((tech) => (
-                          <span key={tech} className={styles.technology}>
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
                     <div className={styles.projectMeta}>
                       <div className={styles.metaItem}>
                         <p className={styles.metaLabel}>DATE:</p>
@@ -154,6 +143,16 @@ export default function FeatureProjects() {
                           e.target.src = "/placeholder.svg";
                         }}
                       />
+                    </div>
+                    <div className={styles.technologiesSection}>
+                      <p className={styles.metaLabel}>TECHNOLOGIES:</p>
+                      <div className={styles.technologiesContainer}>
+                        {currentProj.technologies.map((tech) => (
+                          <span key={tech} className={styles.technology}>
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>

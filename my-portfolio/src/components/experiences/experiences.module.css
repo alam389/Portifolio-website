@@ -1,16 +1,15 @@
 .experienceSection {
   width: 100%;
-  max-width: 1200px;
+  max-width: clamp(900px, 90vw, 1600px); /* Responsive max-width to control overall content width */
   margin: 0 auto;
-  padding: 4rem 0; /* Remove left/right padding for perfect alignment */
-  background-color: #ffffff;
+  padding: 4rem clamp(1.5rem, 5vw, 3rem); /* Consistent responsive horizontal padding */
 }
 
 /* Standardized heading styles */
 .journeyTitle {
-  font-size: 3.5rem;
+  font-size: clamp(2.5rem, 6vw, 3.75rem); /* Fluid font size for better scaling */
   font-weight: 200;
-  color: #111827;
+  color: #c0b5c9;
   margin-bottom: 2rem;
   margin-top: 0; /* Ensure no extra top margin */
   line-height: 1.1;
@@ -20,13 +19,14 @@
 
 .sectionTitle {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #746c7a;
   font-weight: 500;
   text-transform: uppercase;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.125rem; /* Adjusted to match about.module.css */
   text-align: left;
   align-self: flex-start;
-  width: 100%
+  width: 100%;
+  letter-spacing: 0.1em; /* Added to match about.module.css */
 }
 
 .experienceList {
@@ -36,8 +36,7 @@
 }
 
 .experienceCard {
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
+  background-color: #4c47509f;
   border-radius: 0.5rem;
   padding: 2rem;
   transition: all 0.3s ease;
@@ -58,9 +57,9 @@
 }
 
 .jobTitle {
-  font-size: 1.5rem;
+  font-size: clamp(1.25rem, 3vw, 1.5rem); /* Fluid font size for better scaling */
   font-weight: 600;
-  color: #111827;
+  color: #c0b5c9;
   margin: 0;
 }
 
@@ -71,7 +70,7 @@
 
 .companyName {
   font-size: 1.125rem;
-  color: #4b5563;
+  color: #968c9e;
   margin: 0 0 1rem 0;
   text-align: left;
   width: 100%;
@@ -80,7 +79,7 @@
 }
 
 .jobDescription {
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 2vw, 1rem); /* Fluid font size for better scaling */
   line-height: 1.5;
   color: #4b5563;
   margin: 0;
@@ -96,15 +95,20 @@
 }
 
 .bulletPoint {
-  margin-bottom: 1rem;  /* Increase from 0.5rem to 1rem for more spacing between items */
-  line-height: 1.6;  /* Increase line height for better readability */
-  color: #4b5563;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  color: #d2c6dc7d;
+  font-size: clamp(0.9rem, 2vw, 1rem); /* Fluid font size for better scaling */
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .experienceSection {
+    padding: 2rem 1.5rem; /* Specific horizontal padding for mobile */
+  }
+  
   .journeyTitle {
-    font-size: 2.5rem;
+    font-size: clamp(2rem, 5vw, 2.5rem); /* Adjusted fluid font size for mobile */
   }
   
   .experienceCard {
@@ -112,12 +116,16 @@
   }
   
   .jobTitle {
-    font-size: 1.25rem;
+    font-size: clamp(1.1rem, 2.5vw, 1.25rem); /* Adjusted fluid font size for mobile */
   }
   
   .experienceHeader {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
+  }
+  
+  .jobDescription, .bulletPoint {
+    font-size: clamp(0.85rem, 1.8vw, 1rem); /* Adjusted fluid font size for mobile */
   }
 }

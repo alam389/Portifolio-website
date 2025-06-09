@@ -1,25 +1,24 @@
 /* Feature Projects Styling - standardized with other sections */
 .featureProjects {
   width: 100%;
-  background-color: #ffffff;
   text-align: left;
-  padding: 4rem 0; /* Only top/bottom padding, horizontal spacing managed by children */
+  padding: 4rem 0; /* Only top/bottom padding */
   position: relative;
-  overflow: hidden; /* Hide overflow content during transitions */
-  outline: none; /* Remove focus outline when tabbed to */
+  overflow: hidden;
+  outline: none;
 }
 
 /* New wrapper for main content area to control overall content width and centering */
 .featureSectionContent {
   width: 100%;
-  max-width: 1200px; /* Limit overall content width, similar to about-me */
+  max-width: clamp(900px, 90vw, 1600px); /* Responsive max-width to control overall content width */
   margin: 0 auto; /* Center the content block */
-  padding: 0; /* Removed horizontal padding to align with section title */
+  padding: 0 clamp(1.5rem, 5vw, 3rem); /* Consistent responsive horizontal padding */
 }
 
 @media (min-width: 1200px) {
   .featureSectionContent {
-    padding: 0; /* Remove horizontal padding for very large screens if max-width and margin auto are sufficient */
+    padding: 0 clamp(1.5rem, 5vw, 3rem); /* Consistent responsive horizontal padding for larger screens */
   }
 }
 
@@ -90,33 +89,27 @@
 }
 
 .projectTitle {
-  font-size: 3.5rem;
+  font-size: clamp(2.5rem, 6vw, 3.75rem); /* Fluid font size for better scaling */
   font-weight: 200;
-  color: #111827;
+  color: #c0b5c9;
   margin-bottom: 1.5rem;
-  margin-top: 0; /* Ensure no extra top margin */
+  margin-top: 0.5rem;
   line-height: 1.1;
   font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   letter-spacing: 0.01em;
 }
 
 .projectDescription {
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 2vw, 1rem); /* Fluid font size for better scaling */
   line-height: 1.6;
-  color: #4b5563;
+  color: #d2c6dc7d;
   margin-bottom: 2rem;
-  max-width: 100%; /* Allow text to fill its allocated flex space */
+  max-width: none; /* Removed max-width to allow text to fill its allocated flex space */
   margin-left: 0;
   margin-right: 0;
 }
 
-/* Clean up removed classes */
-/* .sectionTitleWrapper styles removed */
-/* .sectionContentContainer styles effectively moved/merged into .featureSectionContent and .projectDetailsContainer */
 
-/* Keep existing styles for other elements like navButton, projectCounter, technology, imageContainer, projectImage, projectActions, actionButton, scrollIndicator, and animations */
-
-/* Navigation - Updated for better visibility and positioning */
 .projectNavigation {
   display: flex;
   align-items: center;
@@ -176,16 +169,16 @@
 }
 
 .metaLabel {
-  font-size: 0.875rem;
-  color: #6b7280;
+  font-size: clamp(0.8rem, 1.8vw, 0.875rem); /* Fluid font size for better scaling */
+  color: #d2c6dc7d;
   font-weight: 500;
   margin-bottom: 0.25rem;
   text-transform: uppercase;
 }
 
 .metaValue {
-  font-size: 0.875rem;
-  color: #111827;
+  font-size: clamp(0.8rem, 1.8vw, 0.875rem); /* Fluid font size for better scaling */
+  color: #d2c6dc7d;
 }
 
 /* New container for project meta and technologies */
@@ -218,7 +211,7 @@
   padding: 0.375rem 0.75rem;
   background-color: #f3f4f6;
   border-radius: 0.25rem;
-  font-size: 0.875rem;
+  font-size: clamp(0.75rem, 1.7vw, 0.875rem); /* Fluid font size for better scaling */
   color: #4b5563;
 }
 
@@ -407,7 +400,7 @@
 .sectionTitle {
   font-size: 0.875rem;
   letter-spacing: 0.1em;
-  color: #6b7280;
+  color: #746c7a;
   margin-bottom: 0.125rem; /* Matched gap with about me section */
   text-transform: uppercase;
 }

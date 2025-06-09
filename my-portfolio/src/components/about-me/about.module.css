@@ -1,14 +1,14 @@
 .section {
-  padding: 4rem 0; /* Remove left/right padding for perfect alignment */
-  background-color: #f9fafb;
+  padding: 4rem 0; /* Only top/bottom padding */
   display: flex;
   justify-content: flex-start;
 }
 
 .aboutContainer {
   width: 100%;
-  max-width: 1200px; /* Standardized max-width */
+  max-width: clamp(900px, 90vw, 1600px); /* Responsive max-width to control overall content width */
   margin: 0 auto; /* Center the container */
+  padding: 0 clamp(1.5rem, 5vw, 3rem); /* Consistent responsive horizontal padding */
   text-align: left;
   display: flex;
   flex-direction: column;
@@ -18,18 +18,18 @@
 .sectionLabel {
   font-size: 0.875rem;
   letter-spacing: 0.1em;
-  color: #6b7280;
-  margin-bottom: 0.125rem !important; /* super small gap */
+  color: #746c7a;
+  margin-bottom: 0.125rem !important;
   text-transform: uppercase;
 }
 
 .mainTitle {
-  font-size: 3.75rem;
+  font-size: clamp(2.5rem, 6vw, 3.75rem); /* Fluid font size for better scaling */
   font-weight: 200;
   line-height: 1.1;
   margin: 0;
-  margin-bottom: 0; /* Removed gap to skills carousel */
-  color: #111827;
+  margin-bottom: 0;
+  color: #c0b5c9;
   font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   letter-spacing: 0.01em;
   margin-left: 0;
@@ -37,17 +37,17 @@
 }
 
 .contentContainer {
-  margin-top: 0; /* Remove top margin */
-  padding-top: 0; /* Remove top padding */
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .description {
-  font-size: 1rem; /* Standardized font size */
+  font-size: clamp(0.9rem, 2vw, 1rem); /* Fluid font size for better scaling */
   line-height: 1.6;
-  color: #4b5563; /* Standardized text color */
-  margin-top: 0; /* Ensure no top margin */
+  color: #d2c6dc7d;
+  margin-top: 0;
   margin-bottom: 2rem;
-  max-width: 80%; /* More balanced width */
+  max-width: none; /* Removed max-width to allow content to expand */
 }
 
 /* Carousel for Skills */
@@ -55,16 +55,15 @@
   overflow: hidden;
   position: relative;
   width: 100%;
-  margin: 1rem 0; /* Removed vertical margin */
-  background: linear-gradient(to right, #f9fafb, transparent 20%, transparent 80%, #f9fafb);
+  margin: 1rem 0;
 }
 
 .skillsContainer {
   display: inline-flex;
   gap: 0.75rem;
-  white-space: nowrap; /* prevents wrapping into multiple lines */
+  white-space: nowrap;
   animation: scroll 20s linear infinite;
-  padding: 0; /* Removed vertical padding */
+  padding: 0;
 }
 
 /* Auto-scrolling keyframes */
@@ -80,11 +79,10 @@
 
 .skill {
   padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 9999px; /* pill shape (semi-circular corners) */
+  border-radius: 9999px;
   font-size: 0.875rem;
-  background-color: white;
-  color: #374151;
+  background-color: c0b5c9;
+  color: #8c8493;
   transition: all 0.2s ease;
 }
 
@@ -97,14 +95,14 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .mainTitle {
-    font-size: 2.5rem;
+    font-size: clamp(2rem, 5vw, 2.5rem); /* Adjusted fluid font size for mobile */
   }
   
   .description {
-    font-size: 1rem;
+    font-size: clamp(0.85rem, 1.8vw, 1rem); /* Adjusted fluid font size for mobile */
   }
   
   .contentContainer {
-    padding: 0 0.5rem;
+    padding: 0 1.5rem; /* Fixed horizontal padding for mobile */
   }
 }

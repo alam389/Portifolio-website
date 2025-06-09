@@ -1,35 +1,36 @@
 .contactSection {
   width: 100%;
-  padding: 4rem 0; /* Remove left/right padding for perfect alignment */
-  background-color: #f9fafb;
+  padding: 4rem 0; /* Only top/bottom padding */
 }
 
 .contactContainer {
-  max-width: 1200px; /* Already standardized */
+  max-width: clamp(900px, 90vw, 1600px); /* Responsive max-width to control overall content width */
   margin: 0 auto;
-  width: 100%; /* Add this to ensure full width up to max-width */
+  width: 100%;
+  padding: 0 3rem; /* Fixed horizontal padding */
 }
 
 /* Fix the header alignment to match other sections */
 .contactHeader {
-  text-align: left; /* Change from center to left to match other sections */
+  text-align: left;
   margin-bottom: 3rem;
 }
 
 .contactLabel {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #746c7a;
   font-weight: 500;
   text-transform: uppercase;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.125rem;
+  letter-spacing: 0.1em;
 }
 
 .contactHeading {
-  font-size: 3.5rem;
+  font-size: clamp(2.5rem, 6vw, 3.75rem); /* Fluid font size for better scaling */
   font-weight: 200;
-  color: #111827;
-  margin-bottom: 1.5rem;
-  margin-top: 0; /* Ensure no extra top margin */
+  color: #c0b5c9;
+  margin-bottom: 0;
+  margin-top: 0;
   line-height: 1.1;
   font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   letter-spacing: 0.01em;
@@ -39,14 +40,14 @@
   display: flex;
   flex-direction: row;
   gap: 4rem;
-  align-items: flex-start; /* Ensure columns are top-aligned */
+  align-items: flex-start;
   width: 100%;
-  max-width: 900px; /* Match other content sections */
+  max-width: 900px; /* This max-width is for the content layout, not the section container */
 }
 
 .contactLeft {
   flex: 1;
-  max-width: 400px; /* Add a max-width to prevent stretching */
+  max-width: 400px;
 }
 
 .contactRight {
@@ -54,29 +55,34 @@
 }
 
 .contactDescription {
-  font-size: 1.125rem;
-  margin-bottom: 2.5rem;
-  color: #4b5563;
-  line-height: 1.6; /* Change to 1.6 to match other sections */
-  max-width: 80%;
-  margin-left: 0; /* Add this to ensure left alignment */
-  margin-right: 0; /* Add this to ensure left alignment */
-  margin-top: 0; /* Remove any extra top margin */
+  font-size: clamp(0.9rem, 2vw, 1rem); /* Fluid font size for better scaling */
+  margin-bottom: 2rem;
+  color: #d2c6dc7d;
+  line-height: 1.6;
+  max-width: none; /* Removed max-width to allow content to expand */
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 0;
 }
 
 /* Adjust button sizing to match navigation buttons in projects section */
 .submitButton {
   margin-top: 0.5rem;
-  padding: 0.5rem 1rem; /* Changed from 0.875rem 1.5rem to match other buttons */
-  background-color: #111827;
-  color: white;
+  padding: 0.75rem 1.5rem;
   font-size: 0.875rem;
   font-weight: 500;
+  background-color: rgba(192, 181, 201, 0.2);
+  color: #c0b5c9;
   border: none;
-  border-radius: 0.25rem; /* Changed to match other buttons */
+  border-radius: 0.375rem;
   cursor: pointer;
   transition: all 0.2s ease;
   width: fit-content;
+}
+
+.submitButton:hover {
+  background-color: #38353a;
+  transform: translateY(-1px);
 }
 
 .contactButtons {
@@ -90,38 +96,41 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1.5rem;
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
   border-radius: 0.375rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #111827;
+  color: #c0b5c9;
   text-decoration: none;
   transition: all 0.2s ease;
   width: fit-content;
 }
 
 .contactButton:hover {
-  background-color: #f9fafb;
-  border-color: #d1d5db;
+  background-color: #38353a;
   transform: translateY(-1px);
 }
 
-.contactButton:first-child {
-  background-color: #111827;
-  color: white;
-}
 
 .contactButton:first-child:hover {
-  background-color: #1f2937;
+  background-color: #38353a;
 }
 
 .contactForm {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem; /* Increase gap for better spacing */
   width: 100%;
-  margin-top: 0; /* Remove any extra top margin */
+  margin-top: 0;
+  background-color: rgba(76, 71, 80, 0.62); /* Match experience card background */
+  padding: 2rem; /* Add padding for a clean layout */
+  border-radius: 0.5rem; /* Rounded corners for a modern look */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Subtle shadow for depth */
+  transition: all 0.3s ease;
+}
+
+.contactForm:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
 }
 
 .formGroup {
@@ -130,24 +139,26 @@
   width: 100%;
 }
 
+/* Updated styles for the contact form area to match experiences cards */
 .formInput,
 .formTextarea {
   width: 100%;
   padding: 1rem;
   font-size: 1rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.375rem;
-  background-color: #ffffff;
-  color: #111827;
-  transition: all 0.2s ease;
-  max-width: 100%; /* Ensure inputs don't exceed container */
+  border: 1px solid rgba(192, 181, 201, 0.3); /* Softer border color that matches the site's palette */
+  border-radius: 0.5rem;
+  background-color: rgba(76, 71, 80, 0.08); /* Semi-transparent background similar to experience cards */
+  color: #c0b5c9; /* Match the text color with other elements */
+  transition: all 0.3s ease;
+  max-width: 100%;
 }
 
 .formInput:focus,
 .formTextarea:focus {
-  border-color: #6b7280;
+  border-color: #c0b5c9;
   outline: none;
-  box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.1);
+  box-shadow: 0 0 0 3px rgba(192, 181, 201, 0.2);
+  background-color: rgba(76, 71, 80, 0.15); /* Slightly darker when focused */
 }
 
 .formTextarea {
@@ -158,29 +169,34 @@
 /* Responsive adjustments to match other sections */
 @media (max-width: 768px) {
   .contactSection {
-    padding: 2rem 1.5rem; /* Match other sections */
+    padding: 2rem 0; /* Only top/bottom padding for mobile */
+  }
+  
+  .contactContainer {
+    padding: 0 1.5rem; /* Fixed horizontal padding for mobile */
   }
   
   .contactContent {
     flex-direction: column;
     gap: 2rem;
-    max-width: 100%; /* Allow full width on mobile */
+    max-width: 100%;
   }
   
   .contactHeading {
-    font-size: 2.5rem;
+    font-size: clamp(2rem, 5vw, 2.5rem); /* Adjusted fluid font size for mobile */
   }
   
   .contactDescription {
     max-width: 100%; /* Full width on mobile */
+    font-size: clamp(0.85rem, 1.8vw, 1rem); /* Adjusted fluid font size for mobile */
   }
   
   .contactLeft,
   .contactRight {
-    max-width: 100%; /* Full width on mobile */
+    max-width: 100%;
   }
   
   .contactButtons {
-    align-items: flex-start; /* Ensure buttons align left on mobile */
+    align-items: flex-start;
   }
 }

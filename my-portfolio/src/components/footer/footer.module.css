@@ -1,5 +1,4 @@
 .footer {
-  background-color: #ffffff;
   padding: 4rem 2rem; /* Match other sections' padding */
   width: 100%;
 }
@@ -48,8 +47,6 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 1.25rem;
-  background-color: #1f2937;
-  border: 1px solid #374151;
   border-radius: 0.375rem;
   font-size: 0.875rem;
   font-weight: 500;
