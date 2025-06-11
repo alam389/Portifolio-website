@@ -30,27 +30,29 @@ export default function Experiences() {
 
     return (
         <section className={styles.experienceSection} id="experience">
-            <h2 className={styles.sectionTitle}>EXPERIENCE:</h2>
-            <h1 className={styles.journeyTitle}>Professional Journey</h1>
-            
-            <div className={styles.experienceList}>
-                {experiences.map((exp, index) => (
-                    <div key={index} className={styles.experienceCard}>
-                        <div className={styles.experienceHeader}>
-                            <h3 className={styles.jobTitle}>{exp.title}</h3>
-                            <span className={styles.period}>{exp.period}</span>
+            <div className={styles.experienceContainer}>
+                <h2 className={styles.sectionTitle}>EXPERIENCE:</h2>
+                <h1 className={styles.journeyTitle}>Professional Journey</h1>
+                
+                <div className={styles.experienceList}>
+                    {experiences.map((exp, index) => (
+                        <div key={index} className={styles.experienceCard}>
+                            <div className={styles.experienceHeader}>
+                                <h3 className={styles.jobTitle}>{exp.title}</h3>
+                                <span className={styles.period}>{exp.period}</span>
+                            </div>
+                            <p className={styles.companyName}>{exp.company}</p>
+                            <ul className={styles.bulletPoints}>
+                                {Array.isArray(exp.description) ? 
+                                    exp.description.map((bullet, i) => (
+                                        <li key={i} className={styles.bulletPoint}>{bullet}</li>
+                                    )) : 
+                                    <li className={styles.bulletPoint}>{exp.description}</li>
+                                }
+                            </ul>
                         </div>
-                        <p className={styles.companyName}>{exp.company}</p>
-                        <ul className={styles.bulletPoints}>
-                            {Array.isArray(exp.description) ? 
-                                exp.description.map((bullet, i) => (
-                                    <li key={i} className={styles.bulletPoint}>{bullet}</li>
-                                )) : 
-                                <li className={styles.bulletPoint}>{exp.description}</li>
-                            }
-                        </ul>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
         </section>
     );

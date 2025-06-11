@@ -1,45 +1,45 @@
 .footer {
-  padding: 4rem 2rem; /* Match other sections' padding */
+  padding: 4rem 0; /* Consistent vertical padding */
+  display: grid;
+  gap: 2rem; /* Gap between main footer sections */
   width: 100%;
+  max-width: 1600px; /* Consistent max-width for content */
+  margin: 0 auto; /* Center the footer content */
+  padding: 4rem clamp(1.5rem, 5vw, 3rem); /* Consistent responsive horizontal padding */
 }
 
 .footerContent {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  max-width: 1200px; /* Match other container widths */
-  width: 100%;
-  margin: 0 auto;
-  gap: 2rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Explicitly set 4 equal columns for symmetry */
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+  justify-items: center; /* Center content within each grid column */
 }
 
 .footerSection {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  display: grid;
+  gap: 0.25rem;
+  text-align: center; /* Center text within each section */
 }
 
 .footerLabel {
-  font-size: 0.75rem;
-  color: #000000;
-  text-transform: uppercase;
+  font-size: 0.875rem;
+  color: #746c7a;
   font-weight: 500;
-  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 .footerText {
-  font-size: 0.875rem;
-  color: #999a9c;
-  font-weight: 500;
+  font-size: 0.95rem;
+  color: #d2c6dc7d;
 }
 
 .contactActions {
-  max-width: 1200px;
-  width: 100%; /* Set full width */
-  margin: 2.5rem auto 0;
-  display: flex;
-  justify-content: flex-start; /* Left-align like other sections */
-  gap: 1rem;
+  display: flex; /* Keep flex for row of buttons, or convert to grid if desired */
+  justify-content: center; /* Center the buttons */
+  gap: 1.5rem; /* Space between buttons */
+  padding-top: 2rem; /* Add space above buttons */
 }
 
 .contactButton {
@@ -60,15 +60,26 @@
   transform: translateY(-1px);
 }
 
-/* Better responsive behavior to match other sections */
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .footer {
-    padding: 2rem 1.5rem; /* Match other sections' mobile padding */
+    padding: 2rem 1.5rem; /* Adjusted padding for mobile */
   }
   
   .footerContent {
-    flex-direction: column;
-    gap: 1.5rem;
-    max-width: 100%;
+    grid-template-columns: 1fr; /* Stack on mobile */
+    gap: 1rem;
+    padding-bottom: 1rem;
+    justify-items: center; /* Keep centered on mobile */
+  }
+
+  .footerSection {
+    text-align: center; /* Ensure text is centered on mobile */
+  }
+
+  .contactActions {
+    flex-direction: column; /* Stack buttons on mobile */
+    align-items: center;
+    padding-top: 1rem;
   }
 }

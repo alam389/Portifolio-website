@@ -17,8 +17,8 @@ const skills = [
 
 export default function AboutMe() {
   return (
-    <section className={styles.section} id="about">
-      <div className={styles.aboutContainer}>
+    <section className={styles.aboutContainer} id="about">
+      <div className={styles.leftSection}>
         <p className={styles.sectionLabel}>
           ABOUT ME:
         </p>
@@ -57,6 +57,9 @@ export default function AboutMe() {
             geeking out over database indexing tricks, or sketching UI ideas on my iPad. Feel free to poke around my portfolio and GitHub—let's build something great together!
         </p>
         </div>
+      </div>
+      <div className={styles.rightSection}>
+        <img src="./images/image.jpg" alt="Placeholder Image" className={styles.profileImage} />
       </div>
     </section>
   );

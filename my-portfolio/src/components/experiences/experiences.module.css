@@ -1,8 +1,17 @@
 .experienceSection {
   width: 100%;
-  max-width: clamp(900px, 90vw, 1600px); /* Responsive max-width to control overall content width */
-  margin: 0 auto;
-  padding: 4rem clamp(1.5rem, 5vw, 3rem); /* Consistent responsive horizontal padding */
+  padding: 4rem 0; /* Only vertical padding */
+  display: grid;
+  gap: 2rem;
+}
+
+.experienceContainer {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  max-width: 1600px; /* Set max-width for content */
+  margin: 0 auto; /* Center the content */
+  padding: 0 clamp(1.5rem, 5vw, 3rem); /* Add consistent horizontal padding for content */
 }
 
 /* Standardized heading styles */
@@ -30,8 +39,8 @@
 }
 
 .experienceList {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr; /* Stack experience cards vertically */
   gap: 1.5rem;
 }
 
@@ -104,7 +113,11 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .experienceSection {
-    padding: 2rem 1.5rem; /* Specific horizontal padding for mobile */
+    padding: 2rem 0; /* Only vertical padding for mobile */
+  }
+  
+  .experienceContainer {
+    padding: 0 1.5rem; /* Specific horizontal padding for mobile */
   }
   
   .journeyTitle {

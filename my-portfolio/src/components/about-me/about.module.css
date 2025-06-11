@@ -1,18 +1,34 @@
 .section {
-  padding: 4rem 0; /* Only top/bottom padding */
-  display: flex;
-  justify-content: flex-start;
+  padding: 4rem 0;
+  display: grid;
+  width: 100%;
 }
 
 .aboutContainer {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 3rem;
   width: 100%;
-  max-width: clamp(900px, 90vw, 1600px); /* Responsive max-width to control overall content width */
-  margin: 0 auto; /* Center the container */
-  padding: 0 clamp(1.5rem, 5vw, 3rem); /* Consistent responsive horizontal padding */
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 clamp(1.5rem, 5vw, 3rem); /* Standardize horizontal padding to match feature-projects */
+  /* min-height: 100vh; */ /* Removed to allow content to dictate height */
+}
+
+.leftSection {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 1rem;
+  min-width: 350px;
+}
+
+.rightSection {
+  display: grid;
+  place-items: center;
+  min-width: 320px;
+  height: 600px;
+  position: relative;
+  padding-top: 50px;
 }
 
 .sectionLabel {
@@ -46,7 +62,7 @@
   line-height: 1.6;
   color: #d2c6dc7d;
   margin-top: 0;
-  margin-bottom: 2rem;
+  margin-bottom: 0.5rem;
   max-width: none; /* Removed max-width to allow content to expand */
 }
 
@@ -55,7 +71,7 @@
   overflow: hidden;
   position: relative;
   width: 100%;
-  margin: 1rem 0;
+  margin: 0rem 0;
 }
 
 .skillsContainer {
@@ -93,7 +109,25 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
+  .aboutContainer {
+    grid-template-columns: 1fr;
+    height: auto;
+    /* min-height: 100vh; */ /* Removed for mobile as well */
+    padding: 2rem 1.5rem;
+    gap: 2rem;
+  }
+  
+  .leftSection, .rightSection {
+    min-width: unset;
+    width: 100%;
+  }
+  
+  .rightSection {
+    height: 300px; /* Adjusted height for mobile */
+    padding-top: 2rem;
+  }
+  
   .mainTitle {
     font-size: clamp(2rem, 5vw, 2.5rem); /* Adjusted fluid font size for mobile */
   }
@@ -103,6 +137,13 @@
   }
   
   .contentContainer {
-    padding: 0 1.5rem; /* Fixed horizontal padding for mobile */
+    padding: 0;
   }
+}
+
+.profileImage {
+  max-width: 150%; /* Increased size further */
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }

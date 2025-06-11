@@ -73,6 +73,7 @@ export default function FeatureProjects() {
       <div className={styles.featureSectionContent}>
         <div className={styles.headerContainer}>
           <p className={styles.sectionTitle}>FEATURE PROJECTS:</p>
+          <h2 className={styles.projectTitle}>{currentProj.title}</h2>
           <div className={styles.projectNavigation}>
             <button onClick={handlePrev} className={styles.navButton}>
               <ChevronUp size={16} />
@@ -106,10 +107,19 @@ export default function FeatureProjects() {
               <section ref={projectRef} className={styles.projectSection}>
                 <div className={styles.projectDetailsContainer}>
                   <div className={styles.projectTextContent}>
-                    <h2 className={styles.projectTitle}>{currentProj.title}</h2>
                     <p className={styles.projectDescription}>{currentProj.description}</p>
-
+                    <div className={styles.technologiesSection}>
+                      <p className={styles.metaLabel}>TECHNOLOGIES:</p>
+                      <div className={styles.technologiesContainer}>
+                        {currentProj.technologies.map((tech) => (
+                          <span key={tech} className={styles.technology}>
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                     <div className={styles.projectMeta}>
+                    
                       <div className={styles.metaItem}>
                         <p className={styles.metaLabel}>DATE:</p>
                         <p className={styles.metaValue}>{currentProj.date}</p>
@@ -143,16 +153,6 @@ export default function FeatureProjects() {
                           e.target.src = "/placeholder.svg";
                         }}
                       />
-                    </div>
-                    <div className={styles.technologiesSection}>
-                      <p className={styles.metaLabel}>TECHNOLOGIES:</p>
-                      <div className={styles.technologiesContainer}>
-                        {currentProj.technologies.map((tech) => (
-                          <span key={tech} className={styles.technology}>
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
                     </div>
                   </div>
                 </div>
