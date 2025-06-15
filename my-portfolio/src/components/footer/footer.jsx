@@ -24,30 +24,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className={`flex-row items-center ${styles.contactActions}`}>
-        <a href="mailto:lamanthony167@gmail.com" className={styles.contactButton}>
-          <Mail size={16} />
-          <span>Email</span>
-        </a>
-        <a
-          href="www.linkedin.com/in/anthony---lam"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.contactButton}
-        >
-          <Linkedin size={16} />
-          <span>LinkedIn</span>
-        </a>
-        <a
-          href="https://github.com/alam389"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.contactButton}
-        >
-          <Github size={16} />
-          <span>GitHub</span>
-        </a>
-      </div>
+
     </footer>
   );
 }

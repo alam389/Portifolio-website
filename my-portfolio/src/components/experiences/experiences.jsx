@@ -14,7 +14,7 @@ export default function Experiences() {
       location: "Toronto, ON",
       period: "Summer 2025",
       type: "Internship",
-      status: "Upcoming",
+      status: "Current",
       description: "Optimizing large-scale SQL systems and database performance. Working with enterprise-level data architecture and implementing efficient query strategies.",
       achievements: [
         "Database optimization and performance tuning",
@@ -24,42 +24,25 @@ export default function Experiences() {
       technologies: ["SQL", "PostgreSQL", "Database Design", "Performance Optimization"],
       website: "https://mcgregorallsop.com"
     },
-    {
-      id: 2,
-      title: "Team Lead",
-      company: "Tech for Social Impact",
-      location: "Western University",
-      period: "2024 - Present",
-      type: "Leadership",
-      status: "Current",
-      description: "Leading a team of 5 developers building a React Native mental health app for teenagers. Managing sprints in Jira, coordinating with stakeholders, and ensuring feature delivery.",
-      achievements: [
-        "Led development team of 5 engineers",
-        "Managed product roadmap and sprint planning",
-        "Coordinated with nonprofit stakeholders",
-        "Delivered features on time with 95% accuracy"
-      ],
-      technologies: ["React Native", "Jira", "Team Leadership", "Product Management"],
-      website: "#"
-    },
-    {
-      id: 3,
-      title: "Full-Stack Developer",
-      company: "EmpowHERto Project",
-      location: "Remote",
-      period: "2024",
-      type: "Project",
-      status: "Completed",
-      description: "Developed a comprehensive web platform for a nonprofit empowering young women. Built user authentication, dashboards, curriculum tracking, and team profiles.",
-      achievements: [
-        "Built complete authentication system",
-        "Created personalized user dashboards",
-        "Implemented curriculum tracking features",
-        "Designed responsive UI/UX"
-      ],
-      technologies: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Neon PostgreSQL"],
-      website: "#"
-    },
+      {
+          id: 2,
+          title: "Empbrace Backend Team-Lead",
+          company: "Tech for Social Impact",
+          location: "Remote",
+          period: "2024",
+          type: "Project",
+          status: "Completed",
+          description: "Developed a comprehensive web platform for a nonprofit empowering young women. Built user authentication, dashboards, curriculum tracking, and team profiles.",
+          achievements: [
+              "Directed a small team of 3 developers",
+              "Translated business requirements into technical specifications for backend development",
+              "Scheduled weekly sprints and meetings with client to ensure project delivery",
+              "Turnt new devs with no prior experience into capable backend developers "
+          ],
+          technologies: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Neon PostgreSQL"],
+          website: "#"
+      },
+
     {
       id: 4,
       title: "Software Engineering Student",
