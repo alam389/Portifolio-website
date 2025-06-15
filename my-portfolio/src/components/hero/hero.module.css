@@ -89,16 +89,7 @@
   font-weight: 700;
 }
 
-/* Removing the gradient effect */
-/* .heroContainer::after {
-  content: '';
-  position: absolute;
-  top: 0; right: 0; bottom: 0; left: 40%;
-  pointer-events: none;
-  background: radial-gradient(circle at 80% 50%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.03) 60%, transparent 100%);
-  opacity: 0.7;
-  z-index: 0;
-} */
+
 
 @media (max-width: 900px) {
   .heroContainer {

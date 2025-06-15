@@ -1,8 +1,6 @@
 import React from 'react';
 import styles from './feature.module.css';
-import { useState, useRef, useEffect } from 'react';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import ShinyText from '../ui/ShinyText';
 
 const Github = ({ size = 16 }) => (
   <span style={{ fontSize: size + 'px' }}>📂</span>
@@ -18,7 +16,7 @@ export default function FeatureProjects() {
       id: 1,
       title: "E-Commerce Platform",
       description:
-      "Led the development of a web application for EmpowHERto, a nonprofit empowering young women. The platform supports a 12-week mental health program for teenage girls, featuring user authentication, personalized dashboards, curriculum tracking, and team member profiles. Built using Next.js, React, JS, and CSS, I directed a cross-functional team to deliver a responsive, accessible, and scalable solution aligned with the organization's mission.",
+      "Led the development of a web application for EmpowHERto, a nonprofit empowering young women. The platform supports a 12-week mental health program for teenage girls, featuring user authentication, personalized dashboards, curriculum tracking, and team member profiles. Built using Next.js, React, JS, and Tailwind CSS.",
       date: "2024",
       services: "FULL-STACK DEVELOPMENT / PAYMENT INTEGRATION / UI/UX DESIGN",
       technologies: ["React", "Typescript", "Express.js", "Next.js", "Neon PostgreSQL"],
@@ -52,113 +50,65 @@ export default function FeatureProjects() {
     },
   ];
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState('next');
-  const projectRef = useRef(null);
-
-  const handleNext = () => {
-    setDirection('next');
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % projects.length);
-  };
-
-  const handlePrev = () => {
-    setDirection('prev');
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + projects.length) % projects.length);
-  };
-
-  const currentProj = projects[currentIndex];
-
   return (
     <section className={styles.featureProjects} id="projects">
       <div className={styles.featureSectionContent}>
-        <div className={styles.headerContainer}>
-          <p className={styles.sectionTitle}>FEATURE PROJECTS:</p>
-          <h2 className={styles.projectTitle}>{currentProj.title}</h2>
-          <div className={styles.projectNavigation}>
-            <button onClick={handlePrev} className={styles.navButton}>
-              <ChevronUp size={16} />
-              <span>Prev</span>
-            </button>
-            <span className={styles.projectCounter}>
-              {currentIndex + 1} / {projects.length}
-            </span>
-            <button onClick={handleNext} className={styles.navButton}>
-              <span>Next</span>
-              <ChevronDown size={16} />
-            </button>
-          </div>
+        <div className={styles.sectionHeader}>
+          <p className={styles.sectionTitle}>FEATURE PROJECTS</p>
         </div>
 
-        <div className={styles.carouselContainer}>
-          <TransitionGroup
-            className={styles.transitionGroup}
-            childFactory={(child) =>
-              React.cloneElement(child, {
-                classNames: direction === 'next' ? 'project-next' : 'project-prev',
-              })
-            }
-          >
-            <CSSTransition
-              key={currentProj.id}
-              nodeRef={projectRef}
-              timeout={500}
-              classNames={direction === 'next' ? 'project-next' : 'project-prev'}
-            >
-              <section ref={projectRef} className={styles.projectSection}>
-                <div className={styles.projectDetailsContainer}>
-                  <div className={styles.projectTextContent}>
-                    <p className={styles.projectDescription}>{currentProj.description}</p>
-                    <div className={styles.technologiesSection}>
-                      <p className={styles.metaLabel}>TECHNOLOGIES:</p>
-                      <div className={styles.technologiesContainer}>
-                        {currentProj.technologies.map((tech) => (
-                          <span key={tech} className={styles.technology}>
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className={styles.projectMeta}>
-                    
-                      <div className={styles.metaItem}>
-                        <p className={styles.metaLabel}>DATE:</p>
-                        <p className={styles.metaValue}>{currentProj.date}</p>
-                      </div>
-                      <div className={styles.metaItem}>
-                        <p className={styles.metaLabel}>SERVICES:</p>
-                        <p className={styles.metaValue}>{currentProj.services}</p>
-                      </div>
-                    </div>
-
-                    <div className={styles.projectActions}>
-                      <a href={currentProj.github} target="_blank" rel="noopener noreferrer" className={styles.actionButton}>
-                        <Github size={16} />
-                        <span>View Code</span>
-                      </a>
-                      <a href={currentProj.live} target="_blank" rel="noopener noreferrer" className={styles.actionButton}>
-                        <ExternalLink size={16} />
-                        <span>Live Demo</span>
-                      </a>
-                    </div>
+        <div className={styles.projectsGrid}>
+          {projects.map((project) => (
+            <div key={project.id} className={styles.projectCard}>
+              <div className={styles.projectImageContainer}>
+                <img
+                  src={project.image}
+                  alt={project.title}
+                  className={styles.projectImage}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/placeholder.svg";
+                  }}
+                />
+              </div>
+              
+              <div className={styles.projectContent}>
+                <h3 className={styles.projectTitle}>{project.title}</h3>
+                <p className={styles.projectDescription}>{project.description}</p>
+                
+                <div className={styles.projectMeta}>
+                  <div className={styles.metaItem}>
+                    <span className={styles.metaLabel}>DATE:</span>
+                    <span className={styles.metaValue}>{project.date}</span>
                   </div>
-
-                  <div className={styles.rightColumnContent}>
-                    <div className={styles.imageContainer}>
-                      <img
-                        src={currentProj.image}
-                        alt={currentProj.title}
-                        className={styles.projectImage}
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = "/placeholder.svg";
-                        }}
-                      />
-                    </div>
+                  <div className={styles.metaItem}>
+                    <span className={styles.metaLabel}>SERVICES:</span>
+                    <span className={styles.metaValue}>{project.services}</span>
                   </div>
                 </div>
-              </section>
-            </CSSTransition>
-          </TransitionGroup>
+
+                <div className={styles.technologiesSection}>
+                  <p className={styles.metaLabel}>TECHNOLOGIES:</p>
+                  <div className={styles.technologiesContainer}>
+                    {project.technologies.map((tech) => (
+                      <ShinyText key={tech} text={tech} className={styles.technology} />
+                    ))}
+                  </div>
+                </div>
+
+                <div className={styles.projectActions}>
+                  <a href={project.github} target="_blank" rel="noopener noreferrer" className={styles.actionButton}>
+                    <Github size={16} />
+                    <span>View Code</span>
+                  </a>
+                  <a href={project.live} target="_blank" rel="noopener noreferrer" className={styles.actionButton}>
+                    <ExternalLink size={16} />
+                    <span>Live Demo</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>

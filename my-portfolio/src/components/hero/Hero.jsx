@@ -1,10 +1,11 @@
 import React from 'react';
 import styles from './hero.module.css';
+import FadeContent from '../ui/FadeContent';
 
 export default function Hero() {
   return (
     <div className={styles.heroContainer}>
-      <div className={styles.leftSection}>
+      <FadeContent blur={true} duration={1000} easing="ease-out" initialOpacity={0} delay={0} className={styles.leftSection}>
         <h1 className={styles.name}>Anthony Lam</h1>
         <div className={styles.subtitle}>Designer &amp; Developer</div>
         <nav className={styles.menu}>
@@ -16,8 +17,8 @@ export default function Hero() {
             <li><a href="#contact">Contact</a></li>
           </ul>
         </nav>
-      </div>
-      <div className={styles.rightSection}>
+      </FadeContent>
+      <FadeContent blur={true} duration={1000} easing="ease-out" initialOpacity={0} delay={200} className={styles.rightSection}>
         <div className={styles.bio}>
           <p>
           <strong>Born in 2004<br />in Niagara, Canada.</strong><br />
@@ -28,7 +29,7 @@ My mission: build scalable, reliable solutions<br />
 that power growth and never let you down.<br />
           </p>
         </div>
-      </div>
+      </FadeContent>
     </div>
   );
 } 

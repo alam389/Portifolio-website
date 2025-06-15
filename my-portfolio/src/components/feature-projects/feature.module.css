@@ -1,494 +1,458 @@
-/* Feature Projects Styling - standardized with other sections */
-.featureProjects {
-  width: 100%;
-  text-align: left;
-  padding: 4rem 0; /* Only top/bottom padding */
-  position: relative;
-  overflow: hidden;
-  outline: none;
-  display: grid; /* Make it a grid container */
-  gap: 2rem; /* Consistent gap between section elements */
-}
-
-/* New wrapper for main content area to control overall content width and centering */
-.featureSectionContent {
-  width: 100%;
-  max-width: 1600px; /* Consistent max-width for content */
-  margin: 0 auto; /* Center the content block */
-  padding: 0 clamp(1.5rem, 5vw, 3rem); /* Consistent responsive horizontal padding */
-}
-
-@media (min-width: 1200px) {
-  .featureSectionContent {
-    padding: 0 clamp(1.5rem, 5vw, 3rem); /* Consistent responsive horizontal padding for larger screens */
-  }
-}
-
-/* Header Container */
+/* Header Container - Updated for new layout */
 .headerContainer {
-  display: grid; /* Changed from flex to grid */
-  grid-template-columns: 1fr auto; /* One column for titles, one for navigation */
-  grid-template-rows: auto auto; /* Two rows for section title and project title */
-  align-items: center;
-  margin-bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
   width: 100%;
-  position: relative;
+  gap: 2rem;
+}
+
+.titleSection {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .sectionTitle {
-  grid-column: 1; /* Place in the first column */
-  grid-row: 1; /* Place in the first row */
   font-size: 0.875rem;
   letter-spacing: 0.1em;
   color: #746c7a;
-  margin-bottom: 0.125rem !important;
+  margin-bottom: 0.5rem;
   text-transform: uppercase;
 }
 
 .projectTitle {
-  grid-column: 1; /* Place in the first column */
-  grid-row: 2; /* Place in the second row */
-  font-size: clamp(2.5rem, 6vw, 3.75rem);
+  font-size: clamp(2rem, 5vw, 3.75rem);
   font-weight: 200;
   line-height: 1.1;
   margin: 0;
-  margin-bottom: 0; /* Adjust margin if needed */
   color: #c0b5c9;
   font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   letter-spacing: 0.01em;
+  word-wrap: break-word;
+  hyphens: auto;
 }
 
-.projectNavigation {
-  grid-column: 2; /* Place in the second column */
-  grid-row: 1 / span 2; /* Span both rows */
+/* Dot Navigation Styles */
+.dotNavigation {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.dot {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.75rem 1rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-left: auto;
-  position: static;
+  gap: 0.75rem;
+  transition: all 0.3s ease;
+  border-radius: 0.25rem;
+  min-width: 200px;
+  justify-content: flex-end;
 }
 
-/* Project Details Container - for indentation of project details (title, description, image) */
-.projectDetailsContainer {
-  display: grid;
-  grid-template-columns: 1fr 2fr; /* Significantly increased proportion for image column */
-  gap: 3rem;
-  align-items: start;
-  padding: 0;
+.dot:hover {
+  background-color: rgba(192, 181, 201, 0.1);
 }
 
-@media (min-width: 768px) {
-  .projectDetailsContainer {
-    grid-template-columns: 1fr 2fr; /* Keep the new proportion for larger screens */
-    justify-content: unset;
-    align-items: start;
-    padding: 0;
-  }
+.dotInner {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #6b6570;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
 
-  .projectTextContent {
-    /* flex: 1; */ /* Remove flex property */
-  }
+.dotActive .dotInner {
+  background-color: #c0b5c9;
+  width: 12px;
+  height: 12px;
+  box-shadow: 0 0 0 2px rgba(192, 181, 201, 0.3);
+}
 
-  .rightColumnContent {
-    display: grid; /* Change from flex to grid */
-    align-items: end; /* Align contents to the end of the grid cell */
+.projectLabel {
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.875rem;
+  color: #6b6570;
+  font-weight: 400;
+  transition: all 0.3s ease;
+  text-align: right;
+  opacity: 0.7;
+}
+
+.dotActive .projectLabel {
+  color: #c0b5c9;
+  font-weight: 500;
+  opacity: 1;
+}
+
+.dot:hover .projectLabel {
+  color: #c0b5c9;
+  opacity: 1;
+}
+
+/* Remove old navigation styles */
+.projectNavigation,
+.navButton,
+.projectCounter {
+  display: none;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .headerContainer {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
     gap: 1.5rem;
   }
 
-  .imageContainer {
-    width: 100%;
-    height: auto;
-    margin-bottom: 0;
-    border-radius: 0.375rem;
-    overflow: hidden;
-    position: relative;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    max-height: 1000px; /* Further increased max-height for larger image */
+  .titleSection {
+    align-items: center;
   }
 
-  .projectImage {
+  .dotNavigation {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
     width: 100%;
-    height: auto;
-    max-width: 100%;
-    max-height: 1000px; /* Further increased max-height for larger image */
-    object-fit: contain;
-    object-position: center top;
-    display: block;
-    margin-bottom: 0;
+  }
+
+  .dot {
+    min-width: auto;
+    padding: 0.5rem;
+    justify-content: center;
+  }
+
+  .projectLabel {
+    display: none; /* Hide labels on mobile, show only dots */
+  }
+
+  .dotInner {
+    width: 10px;
+    height: 10px;
+  }
+
+  .dotActive .dotInner {
+    width: 14px;
+    height: 14px;
   }
 }
 
-@media (min-width: 1200px) {
-  .projectDetailsContainer {
-    padding: 0;
+@media (max-width: 480px) {
+  .dotNavigation {
+    gap: 0.75rem;
+  }
+
+  .dot {
+    padding: 0.375rem;
   }
 }
 
-/* Remaining styles for project elements */
-.projectContent, 
-.projectSection {
+/* Rest of your existing styles remain the same... */
+/* Feature Projects Grid Layout - Overflow Prevention */
+.featureProjects {
   width: 100%;
-  margin: 0;
-  padding-left: 0; /* Explicitly ensure no left padding here */
-  text-align: left;
+  padding: clamp(2rem, 5vw, 4rem) 0; /* 1. Fluid section padding */
+  position: relative;
+  overflow-x: hidden; /* Prevent horizontal scroll at section level */
 }
 
-.projectTextContent {
+.featureSectionContent {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 3vw, 3rem); /* 2. More conservative horizontal padding */
+  box-sizing: border-box; /* Ensure padding is included in width calculations */
+}
+
+.sectionHeader {
+  margin-bottom: clamp(2rem, 4vw, 3rem); /* 1. Fluid margin */
+  text-align: center;
+}
+
+.sectionTitle {
+  font-size: clamp(0.75rem, 1.5vw, 0.875rem); /* 1. Fluid typography */
+  letter-spacing: 0.1em;
+  color: #746c7a;
+  text-transform: uppercase;
   margin: 0;
+}
+
+/* Projects Grid - Responsive Grid System */
+.projectsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(2rem, 5vw, 4rem); /* 1. Fluid gap spacing */
+  width: 100%;
+}
+
+/* Project Card - Flexible Two-Column System */
+.projectCard {
+  display: grid;
+  /* 1. Use minmax() to prevent overflow while maintaining proportions */
+  grid-template-columns: minmax(300px, 1fr) minmax(300px, 1.2fr);
+  gap: clamp(1.5rem, 4vw, 3rem); /* 1. Fluid gap between columns */
+  align-items: start;
   padding: 0;
-  display: grid; /* Use grid to manage internal layout */
-  gap: 1.5rem; /* Gap between elements within the text content */
+  width: 100%; /* Ensure full width usage */
+  box-sizing: border-box;
+  overflow: hidden; /* Prevent content overflow */
+}
+
+/* 3. Responsive breakpoint for narrower screens (like 14" laptops) */
+@media (max-width: 1200px) {
+  .projectCard {
+    /* Adjust proportions for medium screens */
+    grid-template-columns: minmax(250px, 0.8fr) minmax(280px, 1fr);
+    gap: clamp(1rem, 3vw, 2rem);
+  }
+}
+
+/* 3. Stack layout for tablets and smaller */
+@media (max-width: 900px) {
+  .projectCard {
+    grid-template-columns: 1fr; /* Single column stacked layout */
+    gap: clamp(1rem, 3vw, 1.5rem);
+  }
+  
+  /* Reset alternating order for stacked layout */
+  .projectCard:nth-child(even) .projectImageContainer {
+    order: 1;
+  }
+  .projectCard:nth-child(even) .projectContent {
+    order: 2;
+  }
+}
+
+/* Alternating layout for visual interest */
+.projectCard:nth-child(even) {
+  grid-template-columns: minmax(300px, 1.2fr) minmax(300px, 1fr);
+}
+
+.projectCard:nth-child(even) .projectImageContainer {
+  order: 2;
+}
+
+.projectCard:nth-child(even) .projectContent {
+  order: 1;
+}
+
+/* Image Container - Responsive and Contained */
+.projectImageContainer {
+  width: 100%;
+  max-width: 100%; /* 4. Prevent image container from exceeding bounds */
+  border-radius: 0.375rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  aspect-ratio: 16/10; /* Maintain consistent aspect ratio */
+}
+
+.projectImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 4. Ensure images fit container without distortion */
+  display: block;
+}
+
+/* Content Container - Flexible and Contained */
+.projectContent {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2vw, 1.5rem); /* 1. Fluid spacing between content elements */
+  min-width: 0; /* 4. Allow content to shrink and prevent overflow */
+  width: 100%;
+  overflow-wrap: break-word; /* 4. Break long words to prevent horizontal overflow */
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Typography - Fully Fluid and Responsive */
+.projectTitle {
+  font-size: clamp(1.25rem, 3vw, 2.5rem); /* 1. More conservative fluid scaling */
+  font-weight: 200;
+  line-height: 1.1;
+  margin: 0;
+  color: #c0b5c9;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  letter-spacing: 0.01em;
+  word-break: break-word; /* 4. Prevent long titles from overflowing */
 }
 
 .projectDescription {
-  font-size: clamp(0.9rem, 2vw, 1rem);
+  font-size: clamp(0.875rem, 1.5vw, 1rem); /* 1. Fluid description text */
   line-height: 1.6;
   color: #d2c6dc7d;
-  margin-top: 0; /* Ensure no extra top margin */
-  margin-bottom: 2rem; /* Re-add standard margin */
-  max-width: 550px;
-  margin-left: 0;
-  margin-right: 0;
+  margin: 0;
+  overflow-wrap: break-word; /* 4. Handle long words gracefully */
 }
 
-.navButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.25rem;
-  color: #111827;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 100px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.navButton:hover {
-  background-color: #f9fafb;
-  border-color: #d1d5db;
-}
-
-.projectCounter {
-  color: #6b7280;
-  font-size: 0.875rem;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Project Meta Info */
+/* Meta Information - Responsive Layout */
 .projectMeta {
   display: flex;
-  justify-content: flex-start;
-  gap: 8rem;
-  /* margin-bottom: 2rem; - Removed, now managed by .projectInfoRow */
+  flex-direction: column;
+  gap: clamp(0.5rem, 1vw, 1rem); /* 1. Fluid gaps */
+}
+
+@media (min-width: 600px) {
+  .projectMeta {
+    flex-direction: row;
+    gap: clamp(1rem, 3vw, 2rem);
+  }
 }
 
 .metaItem {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  gap: 0.25rem;
+  min-width: 0; /* 4. Allow shrinking */
 }
 
 .metaLabel {
-  font-size: clamp(0.8rem, 1.8vw, 0.875rem);
+  font-size: clamp(0.75rem, 1.2vw, 0.875rem); /* 1. Fluid meta labels */
   color: #d2c6dc7d;
   font-weight: 500;
-  margin-bottom: 0.25rem; /* Re-add standard margin */
   text-transform: uppercase;
 }
 
 .metaValue {
-  font-size: clamp(0.8rem, 1.8vw, 0.875rem); /* Fluid font size for better scaling */
+  font-size: clamp(0.75rem, 1.2vw, 0.875rem); /* 1. Fluid meta values */
   color: #d2c6dc7d;
+  word-break: break-word; /* 4. Break long service descriptions */
 }
 
-/* New container for project meta and technologies */
-.projectInfoRow {
-  display: flex;
-  justify-content: space-between; /* Pushes meta to left, technologies to right */
-  align-items: center; /* Vertically centers the items */
-  width: 100%; /* Ensures it spans the full width of its parent */
-  margin-bottom: 2rem; /* Adds space below this entire row */
-}
-
-/* Technologies */
+/* Technologies Section - Responsive Wrapping */
 .technologiesSection {
-  margin-top: 1.5rem; /* Re-add standard margin */
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.5rem, 1vw, 0.75rem); /* 1. Fluid spacing */
 }
 
 .technologiesContainer {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-start; /* Align technology tags to the left within its own container */
-  gap: 0.5rem;
-  margin: 0;
+  gap: clamp(0.25rem, 0.8vw, 0.5rem); /* 1. Fluid technology tag spacing */
 }
 
 .technology {
-  padding: 0.375rem 0.75rem;
+  padding: clamp(0.25rem, 0.8vw, 0.375rem) clamp(0.5rem, 1.2vw, 0.75rem); /* 1. Fluid padding */
   background-color: #f3f4f6;
   border-radius: 0.25rem;
-  font-size: clamp(0.75rem, 1.7vw, 0.875rem); /* Fluid font size for better scaling */
+  font-size: clamp(0.75rem, 1.1vw, 0.875rem); /* 1. Fluid font size */
   color: #4b5563;
+  white-space: nowrap; /* Prevent technology names from breaking */
 }
 
-/* Project Image - Fixed size container - Modified for better display */
-.imageContainer {
-  width: 100%;
-  height: auto;
-  margin-bottom: 0;
-  border-radius: 0.375rem;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-height: 1200px;
-  padding-top: 50px; /* Add padding to shift the image down */
-}
-
-.projectImage {
-  width: 100%;
-  height: auto;
-  max-width: 100%;
-  max-height: 500px;
-  object-fit: contain;
-  object-position: center top;
-  display: block;
-  margin-bottom: 0; /* Removed margin; gap is handled by rightColumnContent */
-}
-
-/* Action Buttons */
+/* Action Buttons - Responsive Layout */
 .projectActions {
   display: flex;
-  justify-content: flex-start;
-  gap: 1rem;
+  gap: clamp(0.75rem, 2vw, 1rem); /* 1. Fluid button spacing */
+  margin-top: clamp(0.5rem, 1.5vw, 1rem); /* 1. Fluid top margin */
+  flex-wrap: wrap; /* Allow buttons to wrap on very small screens */
 }
 
 .actionButton {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  background-color: #111827;
-  color: white;
+  padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 2vw, 1.25rem); /* 1. Fluid button padding */
+  background-color: #3a373da1;
+  color: #8e8496;
   border-radius: 0.375rem;
-  font-size: 0.875rem;
+  font-size: clamp(0.75rem, 1.2vw, 0.875rem); /* 1. Fluid button text */
   font-weight: 500;
   text-decoration: none;
+  transition: background-color 0.2s ease;
+  white-space: nowrap; /* Prevent button text from breaking */
 }
 
 .actionButton:hover {
-  background-color: #1f2937;
+  background-color: #29262b6c;
 }
 
-/* Scroll indicators */
-.scrollIndicator {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  color: #6b7280;
-  font-size: 0.875rem;
-  padding: 0.5rem;
-  margin: 1rem 0;
-  animation: pulse 2s infinite;
-  opacity: 0.8;
-  transition: opacity 0.3s ease;
-}
-
-.scrollIndicator:hover {
-  opacity: 1;
-}
-
-.scrollDown {
-  margin-top: 2rem;
-}
-
-.scrollUp {
-  margin-bottom: 1rem;
-}
-
-/* Gentle pulse animation for scroll indicator */
-@keyframes pulse {
-  0% {
-    transform: translateY(0);
+/* 3. Medium screens (laptops like 14") - Optimize for space */
+@media (max-width: 1400px) and (min-width: 901px) {
+  .featureSectionContent {
+    padding: 0 clamp(1rem, 2.5vw, 2rem); /* Reduce horizontal padding */
   }
-  50% {
-    transform: translateY(4px);
+  
+  .projectCard {
+    gap: clamp(1.5rem, 3vw, 2.5rem); /* Reduce gap between columns */
   }
-  100% {
-    transform: translateY(0);
+  
+  .projectCard:nth-child(even) {
+    grid-template-columns: minmax(250px, 1fr) minmax(280px, 0.9fr);
   }
 }
 
-/* Carousel Container */
-.carouselContainer {
-  position: relative;
-  width: 100%;
-  margin-top: 0; /* Remove top margin from carousel container */
-}
-
-.transitionGroup {
-  position: relative;
-  height: 100%;
-}
-
-/* Next project transitions */
-.project-next-enter {
-  opacity: 0;
-  transform: translateY(100%);
-}
-
-.project-next-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 500ms ease-in-out, transform 500ms ease-in-out;
-}
-
-.project-next-exit {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.project-next-exit-active {
-  opacity: 0;
-  transform: translateY(-100%);
-  transition: opacity 500ms ease-in-out, transform 500ms ease-in-out;
-  position: absolute;
-  top: 0;
-  width: 100%;
-}
-
-/* Previous project transitions */
-.project-prev-enter {
-  opacity: 0;
-  transform: translateY(-100%);
-}
-
-.project-prev-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 500ms ease-in-out, transform 500ms ease-in-out;
-}
-
-.project-prev-exit {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.project-prev-exit-active {
-  opacity: 0;
-  transform: translateY(100%);
-  transition: opacity 500ms ease-in-out, transform 500ms ease-in-out;
-  position: absolute;
-  top: 0;
-  width: 100%;
-}
-
-/* Project transition animations */
-@keyframes flipIn {
-  from {
-    opacity: 0;
-    transform: perspective(1000px) rotateX(10deg) translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: perspective(1000px) rotateX(0) translateY(0);
-  }
-}
-
-@keyframes flipOut {
-  from {
-    opacity: 1;
-    transform: perspective(1000px) rotateX(0) translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: perspective(1000px) rotateX(-10deg) translateY(-40px);
-  }
-}
-
-.project-entering {
-  animation: flipIn 0.6s ease-out forwards;
-}
-
-.project-exiting {
-  animation: flipOut 0.4s ease-in forwards;
-}
-
-.projectTextContent {
-  margin-top: 0;
-  padding-top: 0;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
+/* 3. Tablet responsive adjustments */
+@media (max-width: 900px) {
   .featureProjects {
-    padding: 2rem 0; /* Only top/bottom padding for mobile */
+    padding: clamp(1.5rem, 4vw, 2rem) 0;
   }
 
   .featureSectionContent {
-    padding: 0 1.5rem; /* Consistent horizontal padding for mobile */
+    padding: 0 clamp(1rem, 2vw, 1.5rem);
   }
 
-  .projectDetailsContainer {
-    grid-template-columns: 1fr;
-    gap: 2rem;
+  .projectsGrid {
+    gap: clamp(1.5rem, 4vw, 2rem);
   }
 
-  .projectTextContent {
-    max-width: 100%;
-    gap: 1rem; /* Adjust gap for mobile */
+  .projectImageContainer {
+    aspect-ratio: 16/9; /* Slightly different ratio for mobile */
+  }
+}
+
+/* 3. Mobile responsive adjustments */
+@media (max-width: 480px) {
+  .featureSectionContent {
+    padding: 0 clamp(0.75rem, 3vw, 1rem); /* Minimal padding for small screens */
   }
 
-  .rightColumnContent {
-    align-items: start; /* Adjust alignment for stacked layout */
+  .projectsGrid {
+    gap: clamp(1rem, 4vw, 1.5rem);
   }
 
-  .imageContainer {
-    justify-self: start; /* Adjust image alignment for stacked layout */
+  .projectCard {
+    gap: clamp(0.75rem, 3vw, 1rem);
   }
 
-  .technologiesSection {
-    margin-top: 1rem; /* Adjust margin for mobile */
+  .projectActions {
+    flex-direction: column; /* Stack buttons vertically on very small screens */
+    align-items: stretch;
   }
 
-  .projectDescription {
-    max-width: 100%; /* Full width on mobile */
+  .actionButton {
+    justify-content: center;
   }
+}
 
-  .headerContainer {
-    grid-template-columns: 1fr; /* Stack columns on mobile */
-    grid-template-rows: auto auto auto; /* Stack all elements vertically */
-    gap: 1rem; /* Adjust gap for mobile */
-  }
+/* 4. Additional overflow prevention */
+* {
+  box-sizing: border-box;
+}
 
-  .sectionTitle {
-    grid-column: 1;
-    grid-row: 1;
-    text-align: center; /* Center align on mobile */
-  }
-  
-  .projectTitle {
-    grid-column: 1;
-    grid-row: 2;
-    text-align: center; /* Center align on mobile */
-  }
+.featureProjects *,
+.featureProjects *:before,
+.featureProjects *:after {
+  box-sizing: border-box;
+}
 
-  .projectNavigation {
-    grid-column: 1;
-    grid-row: 3;
-    justify-content: center; /* Center navigation buttons on mobile */
-  }
+/* Ensure no element can cause horizontal scroll */
+.projectCard,
+.projectContent,
+.projectImageContainer,
+.technologiesContainer,
+.projectActions {
+  max-width: 100%;
+  overflow: hidden;
 }
