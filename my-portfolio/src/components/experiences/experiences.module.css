@@ -1,144 +1,495 @@
-.experienceSection {
+.experiencesSection {
   width: 100%;
-  padding: 4rem 0; /* Only vertical padding */
-  display: grid;
-  gap: 2rem;
+  padding: clamp(3rem, 6vw, 5rem) 0;
+  background: linear-gradient(135deg, 
+    rgba(192, 181, 201, 0.02) 0%, 
+    rgba(123, 116, 129, 0.02) 100%);
 }
 
-.experienceContainer {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-  max-width: 1600px; /* Set max-width for content */
-  margin: 0 auto; /* Center the content */
-  padding: 0 clamp(1.5rem, 5vw, 3rem); /* Add consistent horizontal padding for content */
+.sectionContent {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 3vw, 3rem);
+  box-sizing: border-box;
 }
 
-/* Standardized heading styles */
-.journeyTitle {
-  font-size: clamp(2.5rem, 6vw, 3.75rem); /* Fluid font size for better scaling */
+.sectionHeader {
+  text-align: center;
+  margin-bottom: clamp(3rem, 6vw, 4rem);
+}
+
+.sectionLabel {
+  font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+  letter-spacing: 0.1em;
+  color: #746c7a; /* Matches your existing section labels */
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.sectionTitle {
+  font-size: clamp(2rem, 5vw, 3.75rem);
   font-weight: 200;
-  color: #c0b5c9;
-  margin-bottom: 2rem;
-  margin-top: 0; /* Ensure no extra top margin */
   line-height: 1.1;
+  margin: 0;
+  color: #c0b5c9; /* Matches your main titles */
   font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   letter-spacing: 0.01em;
 }
 
-.sectionTitle {
-  font-size: 0.875rem;
-  color: #746c7a;
-  font-weight: 500;
-  text-transform: uppercase;
-  margin-bottom: 0.125rem; /* Adjusted to match about.module.css */
-  text-align: left;
-  align-self: flex-start;
-  width: 100%;
-  letter-spacing: 0.1em; /* Added to match about.module.css */
+.experienceLayout {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
 }
 
-.experienceList {
-  display: grid;
-  grid-template-columns: 1fr; /* Stack experience cards vertically */
-  gap: 1.5rem;
+/* Timeline Navigation */
+.timelineNav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: sticky;
+  top: 2rem;
+}
+
+.timelineItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: none;
+  background: rgba(192, 181, 201, 0.05);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.timelineItem::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: transparent;
+  transition: background 0.3s ease;
+}
+
+.timelineItem:hover,
+.timelineItem.active {
+  background: rgba(192, 181, 201, 0.12);
+  transform: translateX(4px);
+}
+
+.timelineItem.active::before {
+  background: linear-gradient(to bottom, #c0b5c9, #8c8493);
+}
+
+.timelineDot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(192, 181, 201, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8c8493; /* Matches your skill text color */
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.timelineItem:hover .timelineDot,
+.timelineItem.active .timelineDot {
+  background: rgba(192, 181, 201, 0.25);
+  color: #c0b5c9;
+  transform: scale(1.1);
+}
+
+.timelineInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.timelineTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #c0b5c9; /* Matches your main text color */
+  line-height: 1.2;
+}
+
+.timelineCompany {
+  font-size: 0.75rem;
+  color: #8c8493; /* Matches your skill color */
+  font-weight: 500;
+}
+
+.timelinePeriod {
+  font-size: 0.75rem;
+  color: #746c7a; /* Matches your section label color */
+}
+
+.statusBadge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.statusBadge.upcoming {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+
+.statusBadge.current {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.statusBadge.completed {
+  background: rgba(168, 85, 247, 0.15);
+  color: #a855f7;
+}
+
+/* Experience Details */
+.experienceDetails {
+  min-height: 600px;
 }
 
 .experienceCard {
-  background-color: #4c47509f;
-  border-radius: 0.5rem;
-  padding: 2rem;
-  transition: all 0.3s ease;
-  padding-bottom: 2rem;  /* Add more padding at the bottom of each card */
-  margin-bottom: 2rem;  /* Add margin between experience cards */
+  background: rgba(192, 181, 201, 0.05);
+  border: 1px solid rgba(192, 181, 201, 0.1);
+  border-radius: 1rem;
+  padding: clamp(1.5rem, 4vw, 2rem);
+  backdrop-filter: blur(10px);
 }
 
-.experienceCard:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  transform: translateY(-2px);
-}
-
-.experienceHeader {
+.cardHeader {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.titleSection {
+  flex: 1;
 }
 
 .jobTitle {
-  font-size: clamp(1.25rem, 3vw, 1.5rem); /* Fluid font size for better scaling */
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
   font-weight: 600;
-  color: #c0b5c9;
-  margin: 0;
+  color: #c0b5c9; /* Matches your main titles */
+  margin: 0 0 0.5rem 0;
+  line-height: 1.2;
 }
 
-.period {
-  font-size: 0.875rem;
-  color: #6b7280;
+.companyInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .companyName {
-  font-size: 1.125rem;
-  color: #968c9e;
-  margin: 0 0 1rem 0;
-  text-align: left;
-  width: 100%;
-  display: block;
-  margin-bottom: 1.25rem;  /* Increase from default */
+  font-size: 1rem;
+  font-weight: 500;
+  color: #8c8493; /* Matches your skill text color */
 }
 
-.jobDescription {
-  font-size: clamp(0.9rem, 2vw, 1rem); /* Fluid font size for better scaling */
-  line-height: 1.5;
-  color: #4b5563;
-  margin: 0;
+.metaInfo {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-/* Add or update these styles for better bullet point spacing */
-
-.bulletPoints {
-  list-style-type: disc;
-  padding-left: 1.5rem;
-  margin-top: 1rem;  /* Increase top margin */
-  margin-bottom: 0.5rem;  /* Add some bottom margin */
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: #746c7a; /* Matches your section label color */
 }
 
-.bulletPoint {
-  margin-bottom: 1rem;
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.typeBadge {
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.typeBadge.internship {
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+}
+
+.typeBadge.leadership {
+  background: rgba(139, 92, 246, 0.15);
+  color: #8b5cf6;
+}
+
+.typeBadge.project {
+  background: rgba(6, 182, 212, 0.15);
+  color: #06b6d4;
+}
+
+.typeBadge.education {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.websiteLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(192, 181, 201, 0.1);
+  color: #8c8493; /* Matches your skill text color */
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.websiteLink:hover {
+  background: rgba(192, 181, 201, 0.2);
+  color: #c0b5c9;
+  transform: scale(1.1);
+}
+
+.description {
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
   line-height: 1.6;
-  color: #d2c6dc7d;
-  font-size: clamp(0.9rem, 2vw, 1rem); /* Fluid font size for better scaling */
+  color: #d2c6dc7d; /* Matches your description text color exactly */
+  margin-bottom: 2rem;
 }
 
-/* Responsive adjustments */
+.achievementsSection {
+  margin-bottom: 2rem;
+}
+
+.achievementsTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #c0b5c9; /* Matches your main titles */
+  margin: 0 0 1rem 0;
+}
+
+.achievementsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.achievementItem {
+  position: relative;
+  padding-left: 1.5rem;
+  font-size: 0.875rem;
+  color: #d2c6dc7d; /* Matches your description text color exactly */
+  line-height: 1.5;
+}
+
+.achievementItem::before {
+  content: '✦';
+  position: absolute;
+  left: 0;
+  color: #c0b5c9; /* Matches your main text color */
+  font-size: 0.75rem;
+}
+
+.technologiesSection {
+  border-top: 1px solid rgba(192, 181, 201, 0.1);
+  padding-top: 1.5rem;
+}
+
+.techTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #746c7a; /* Matches your meta labels */
+  margin: 0 0 1rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.techList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.techTag {
+  padding: 0.375rem 0.75rem;
+  background: rgba(192, 181, 201, 0.1); /* Matches your skill background */
+  border: 1px solid rgba(192, 181, 201, 0.15);
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  color: #8c8493; /* Matches your skill text color */
+  transition: all 0.2s ease;
+}
+
+.techTag:hover {
+  background: rgba(192, 181, 201, 0.15);
+  transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .experienceLayout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .timelineNav {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+}
+
 @media (max-width: 768px) {
-  .experienceSection {
-    padding: 2rem 0; /* Only vertical padding for mobile */
+  .timelineNav {
+    grid-template-columns: 1fr;
   }
   
-  .experienceContainer {
-    padding: 0 1.5rem; /* Specific horizontal padding for mobile */
+  .timelineItem {
+    padding: 0.75rem;
   }
   
-  .journeyTitle {
-    font-size: clamp(2rem, 5vw, 2.5rem); /* Adjusted fluid font size for mobile */
-  }
-  
-  .experienceCard {
-    padding: 1.5rem;
-  }
-  
-  .jobTitle {
-    font-size: clamp(1.1rem, 2.5vw, 1.25rem); /* Adjusted fluid font size for mobile */
-  }
-  
-  .experienceHeader {
+  .cardHeader {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: 1rem;
   }
   
-  .jobDescription, .bulletPoint {
-    font-size: clamp(0.85rem, 1.8vw, 1rem); /* Adjusted fluid font size for mobile */
+  .cardActions {
+    align-self: flex-start;
   }
+  
+  .metaInfo {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .experienceCard {
+    padding: 1rem;
+  }
+  
+  .achievementItem {
+    font-size: 0.8rem;
+  }
+  
+  .techList {
+    gap: 0.375rem;
+  }
+  
+  .techTag {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+.description {
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
+  line-height: 1.6;
+  color: #d2c6dc7d;
+  margin-bottom: 2rem;
+}
+
+.achievementsSection {
+  margin-bottom: 2rem;
+}
+
+.achievementsTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #c0b5c9;
+  margin: 0 0 1rem 0;
+}
+
+.achievementsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.achievementItem {
+  position: relative;
+  padding-left: 1.5rem;
+  font-size: 0.875rem;
+  color: #d2c6dc7d;
+  line-height: 1.5;
+}
+
+.achievementItem::before {
+  content: '✦';
+  position: absolute;
+  left: 0;
+  color: #c0b5c9;
+  font-size: 0.75rem;
+}
+
+.technologiesSection {
+  border-top: 1px solid rgba(192, 181, 201, 0.1);
+  padding-top: 1.5rem;
+}
+
+.techTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #746c7a;
+  margin: 0 0 1rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.techList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.techTag {
+  padding: 0.375rem 0.75rem;
+  background: rgba(192, 181, 201, 0.1);
+  border: 1px solid rgba(192, 181, 201, 0.15);
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  color: #8c8493;
+  transition: all 0.2s ease;
+}
+
+.techTag:hover {
+  background: rgba(192, 181, 201, 0.15);
+  transform: translateY(-1px);
 }

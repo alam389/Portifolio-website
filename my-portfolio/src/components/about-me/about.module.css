@@ -4,15 +4,17 @@
   width: 100%;
 }
 
+/* 1. Main container with overflow prevention */
 .aboutContainer {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 3rem;
+  grid-template-columns: 1.2fr 0.8fr; /* 2. Balanced proportions for desktop */
+  gap: clamp(2rem, 4vw, 4rem); /* 1. Fluid gap spacing */
   width: 100%;
   max-width: 1600px;
   margin: 0 auto;
-  padding: 0 clamp(1.5rem, 5vw, 3rem); /* Standardize horizontal padding to match feature-projects */
-  /* min-height: 100vh; */ /* Removed to allow content to dictate height */
+  padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 3vw, 3rem); /* 1. Fluid container padding */
+  box-sizing: border-box; /* 1. Include padding in width calculations */
+  overflow: hidden; /* 1. Prevent any content from overflowing */
 }
 
 .leftSection {
@@ -31,47 +33,49 @@
   padding-top: 50px;
 }
 
+/* Typography and content styling */
 .sectionLabel {
-  font-size: 0.875rem;
+  font-size: clamp(0.75rem, 1.5vw, 0.875rem); /* 4. Fluid typography */
   letter-spacing: 0.1em;
   color: #746c7a;
-  margin-bottom: 0.125rem !important;
+  margin: 0;
   text-transform: uppercase;
 }
 
 .mainTitle {
-  font-size: clamp(2.5rem, 6vw, 3.75rem); /* Fluid font size for better scaling */
+  font-size: clamp(2rem, 5vw, 3.75rem); /* 4. Fluid scaling */
   font-weight: 200;
   line-height: 1.1;
   margin: 0;
-  margin-bottom: 0;
   color: #c0b5c9;
   font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   letter-spacing: 0.01em;
-  margin-left: 0;
-  padding-left: 0;
+  word-break: break-word; /* 1. Prevent title overflow */
 }
 
 .contentContainer {
-  margin-top: 0;
-  padding-top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.75rem, 1.5vw, 1rem); /* 4. Fluid spacing */
 }
 
 .description {
-  font-size: clamp(0.9rem, 2vw, 1rem); /* Fluid font size for better scaling */
+  font-size: clamp(0.875rem, 1.8vw, 1rem); /* 4. Fluid text sizing */
   line-height: 1.6;
   color: #d2c6dc7d;
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-  max-width: none; /* Removed max-width to allow content to expand */
+  margin: 0;
+  overflow-wrap: break-word; /* 1. Handle long words */
+  word-wrap: break-word;
+  hyphens: auto;
 }
 
-/* Carousel for Skills */
+/* Skills carousel with overflow containment */
 .skillsCarousel {
-  overflow: hidden;
+  overflow: hidden; /* 1. Contain scrolling animation */
   position: relative;
   width: 100%;
-  margin: 0rem 0;
+  margin: clamp(0.5rem, 1vw, 1rem) 0;
+  mask: linear-gradient(90deg, transparent, white 10%, white 90%, transparent); /* Fade edges */
 }
 
 .skillsContainer {
@@ -84,66 +88,185 @@
 
 /* Auto-scrolling keyframes */
 @keyframes scroll {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    /* Adjust -50% as needed based on your content width */
-    transform: translateX(-50%);
-  }
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
+/* Add these styles to your existing CSS */
+
 .skill {
-  padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Space between icon and text */
+  padding: clamp(0.375rem, 1vw, 0.5rem) clamp(0.5rem, 1.2vw, 0.75rem);
   border-radius: 9999px;
-  font-size: 0.875rem;
-  background-color: c0b5c9;
+  font-size: clamp(0.75rem, 1.2vw, 0.875rem);
+  background-color: rgba(192, 181, 201, 0.1);
   color: #8c8493;
   transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.skillIcon {
+  font-size: 1em; /* Same size as text */
+  flex-shrink: 0; /* Prevent icon from shrinking */
+  transition: transform 0.2s ease;
 }
 
 .skill:hover {
-  background-color: #f3f4f6;
+  background-color: rgba(192, 181, 201, 0.2);
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* Responsive adjustments */
-@media (max-width: 900px) {
+.skill:hover .skillIcon {
+  transform: scale(1.1); /* Slight scale effect on hover */
+}
+
+/* Rest of your existing CSS remains the same... */
+.skillLogo {
+  font-size: clamp(0.875rem, 1.3vw, 1rem);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.skillName {
+  font-weight: 500;
+}
+
+.skill:hover {
+  background-color: rgba(192, 181, 201, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.skill:hover .skillLogo {
+  transform: scale(1.1);
+}
+
+/* 3. Tablet breakpoint (900px) - Adjust proportions */
+@media (max-width: 1100px) {
   .aboutContainer {
-    grid-template-columns: 1fr;
-    height: auto;
-    /* min-height: 100vh; */ /* Removed for mobile as well */
-    padding: 2rem 1.5rem;
-    gap: 2rem;
+    grid-template-columns: 1fr 0.6fr; /* Reduce image space on medium screens */
+    gap: clamp(1.5rem, 3vw, 2.5rem);
   }
   
-  .leftSection, .rightSection {
-    min-width: unset;
-    width: 100%;
-  }
-  
-  .rightSection {
-    height: 300px; /* Adjusted height for mobile */
-    padding-top: 2rem;
-  }
-  
-  .mainTitle {
-    font-size: clamp(2rem, 5vw, 2.5rem); /* Adjusted fluid font size for mobile */
-  }
-  
-  .description {
-    font-size: clamp(0.85rem, 1.8vw, 1rem); /* Adjusted fluid font size for mobile */
-  }
-  
-  .contentContainer {
-    padding: 0;
+  .imageContainer {
+    max-width: clamp(200px, 25vw, 300px); /* 4. Smaller max-width for tablets */
   }
 }
 
+/* 3. Stack layout for tablets and mobile */
+@media (max-width: 900px) {
+  .aboutContainer {
+    grid-template-columns: 1fr; /* 3. Single column stacked layout */
+    gap: clamp(2rem, 4vw, 3rem);
+    text-align: center; /* 3. Center content on mobile */
+  }
+  
+  /* 3. Image positioning for stacked layout */
+  .imageSection {
+    order: -1; /* 3. Photo on top */
+    justify-content: center;
+    padding-top: 0;
+  }
+  
+  .textSection {
+    order: 1; /* 3. Text underneath */
+    text-align: left; /* Keep text left-aligned for readability */
+  }
+  
+  .imageContainer {
+    max-width: clamp(200px, 40vw, 280px); /* 4. Mobile-optimized sizing */
+    margin: 0 auto;
+  }
+  
+  .mainTitle {
+    font-size: clamp(1.75rem, 4vw, 2.5rem); /* Slightly smaller on mobile */
+  }
+  
+  .description {
+    font-size: clamp(0.8rem, 1.6vw, 0.95rem); /* Optimized mobile reading size */
+  }
+}
+
+/* 3. Mobile refinements */
+@media (max-width: 480px) {
+  .aboutContainer {
+    padding: clamp(1.5rem, 4vw, 2rem) clamp(0.75rem, 3vw, 1rem); /* 5. Tighter mobile padding */
+    gap: clamp(1.5rem, 4vw, 2rem);
+  }
+  
+  .imageContainer {
+    max-width: clamp(180px, 50vw, 240px); /* 4. Smaller mobile sizing */
+  }
+  
+  .skillsCarousel {
+    margin: clamp(0.5rem, 2vw, 1rem) 0;
+  }
+  
+  .skill {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.5rem;
+    gap: 0.375rem;
+  }
+  
+  .skillLogo {
+    font-size: 0.875rem;
+  }
+}
+
+/* 1. Additional overflow prevention */
+.aboutContainer *,
+.aboutContainer *:before,
+.aboutContainer *:after {
+  box-sizing: border-box;
+}
+
+/* 2. Text section - flexible content area */
+.textSection {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2vw, 1.5rem); /* 1. Fluid spacing between elements */
+  min-width: 0; /* 1. Allow content to shrink properly */
+  overflow-wrap: break-word; /* 1. Handle long words gracefully */
+}
+
+/* 1. Image section - bounded container */
+.imageSection {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: clamp(1rem, 3vw, 2rem); /* 2. Vertical alignment with text */
+  min-width: 0; /* 1. Allow section to shrink */
+}
+
+/* 1. Image container with strict bounds */
+.imageContainer {
+  width: 100%;
+  max-width: clamp(250px, 30vw, 400px); /* 4. Fluid scaling with strict limits */
+  aspect-ratio: 3/4; /* 1. Maintain consistent proportions */
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+/* 1 & 4. Profile image with contained scaling */
 .profileImage {
-  max-width: 150%; /* Increased size further */
-  height: auto;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 1. Prevent distortion while filling container */
+  object-position: center top; /* Position focus on face area */
+  display: block;
+}
+
+/* 1. Ensure no child elements can overflow */
+.textSection,
+.imageSection,
+.imageContainer,
+.contentContainer {
+  max-width: 100%;
+  overflow: hidden;
 }

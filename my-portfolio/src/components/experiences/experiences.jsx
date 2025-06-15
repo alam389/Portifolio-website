@@ -1,59 +1,203 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './experiences.module.css';
+import FadeContent from '../ui/FadeContent';
+import { Briefcase, Calendar, MapPin, ExternalLink, Award } from 'lucide-react';
 
 export default function Experiences() {
-    // Sample experiences data
-    const experiences = [
-        {
-            title: "Database Developer",
-            company: "McGregor Allsop",
-            period: "May 2025 - August 2025",
-            description: [
-                "Worked with Microsoft SSMS to optimize workflow to support engineering and financial operations.",
-                "Filtered, extracted, and organized large data sets using machine learning libraries for use by engineering and project management teams.",
-                "Built and hosted database-driven applications using Java Springboot on their servers to streamline data entry for their engineers and added functionalities to their pre-existing system.",
-                "Created customized financial reports and project tracking tools using SQL queries and programming scripts (Java, Python)."        
-            ]
-        },
-        {
-            title: "Project Manager",
-            company: "Tech for Social Impact",
-            period: "May 2024 - Present",
-            description: [
-                "Delivered a web traffic tracker solution for Boys and Girls Club London as measured by a 40% increase in visibility by leading a student team by seamless integration with Google Analytics.",
-                "Managing a cross-functional team of 4 developers to design and develop a React Native-powered mental health app for EmpowerHERto, providing personalized wellness resources for minority girls.",
-                "Led Agile project execution, fostering transparent stakeholder communication and ensuring iterative improvements aligned with user needs.",
-                "Optimized sprint planning and backlog prioritization, reducing development roadblocks and increasing team efficiency through structured workflows in Jira."
-            ]
-        },
-    ];
+  const [activeExperience, setActiveExperience] = useState(0);
 
-    return (
-        <section className={styles.experienceSection} id="experience">
-            <div className={styles.experienceContainer}>
-                <h2 className={styles.sectionTitle}>EXPERIENCE:</h2>
-                <h1 className={styles.journeyTitle}>Professional Journey</h1>
-                
-                <div className={styles.experienceList}>
-                    {experiences.map((exp, index) => (
-                        <div key={index} className={styles.experienceCard}>
-                            <div className={styles.experienceHeader}>
-                                <h3 className={styles.jobTitle}>{exp.title}</h3>
-                                <span className={styles.period}>{exp.period}</span>
-                            </div>
-                            <p className={styles.companyName}>{exp.company}</p>
-                            <ul className={styles.bulletPoints}>
-                                {Array.isArray(exp.description) ? 
-                                    exp.description.map((bullet, i) => (
-                                        <li key={i} className={styles.bulletPoint}>{bullet}</li>
-                                    )) : 
-                                    <li className={styles.bulletPoint}>{exp.description}</li>
-                                }
-                            </ul>
-                        </div>
-                    ))}
+  const experiences = [
+    {
+      id: 1,
+      title: "Database Developer Intern",
+      company: "McGregor Allsop",
+      location: "Toronto, ON",
+      period: "Summer 2025",
+      type: "Internship",
+      status: "Upcoming",
+      description: "Optimizing large-scale SQL systems and database performance. Working with enterprise-level data architecture and implementing efficient query strategies.",
+      achievements: [
+        "Database optimization and performance tuning",
+        "SQL query development and analysis",
+        "Enterprise data system management"
+      ],
+      technologies: ["SQL", "PostgreSQL", "Database Design", "Performance Optimization"],
+      website: "https://mcgregorallsop.com"
+    },
+    {
+      id: 2,
+      title: "Team Lead",
+      company: "Tech for Social Impact",
+      location: "Western University",
+      period: "2024 - Present",
+      type: "Leadership",
+      status: "Current",
+      description: "Leading a team of 5 developers building a React Native mental health app for teenagers. Managing sprints in Jira, coordinating with stakeholders, and ensuring feature delivery.",
+      achievements: [
+        "Led development team of 5 engineers",
+        "Managed product roadmap and sprint planning",
+        "Coordinated with nonprofit stakeholders",
+        "Delivered features on time with 95% accuracy"
+      ],
+      technologies: ["React Native", "Jira", "Team Leadership", "Product Management"],
+      website: "#"
+    },
+    {
+      id: 3,
+      title: "Full-Stack Developer",
+      company: "EmpowHERto Project",
+      location: "Remote",
+      period: "2024",
+      type: "Project",
+      status: "Completed",
+      description: "Developed a comprehensive web platform for a nonprofit empowering young women. Built user authentication, dashboards, curriculum tracking, and team profiles.",
+      achievements: [
+        "Built complete authentication system",
+        "Created personalized user dashboards",
+        "Implemented curriculum tracking features",
+        "Designed responsive UI/UX"
+      ],
+      technologies: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Neon PostgreSQL"],
+      website: "#"
+    },
+    {
+      id: 4,
+      title: "Software Engineering Student",
+      company: "Western University",
+      location: "London, ON",
+      period: "2022 - 2026",
+      type: "Education",
+      status: "In Progress",
+      description: "Fourth-year Software Engineering student with focus on backend systems, database design, and full-stack development. Dean's List recipient.",
+      achievements: [
+        "Dean's List recipient",
+        "Focus on backend and database systems",
+        "Full-stack development expertise",
+        "Expected graduation: 2026"
+      ],
+      technologies: ["Java", "Python", "C++", "Software Architecture", "Database Design"],
+      website: "https://uwo.ca"
+    }
+  ];
+
+  return (
+    <section className={styles.experiencesSection} id="experience">
+      <div className={styles.sectionContent}>
+        <div className={styles.sectionHeader}>
+          <FadeContent blur={false} duration={800} easing="ease-out" initialOpacity={0} delay={0}>
+            <p className={styles.sectionLabel}>CAREER JOURNEY</p>
+          </FadeContent>
+          <FadeContent blur={true} duration={1000} easing="ease-out" initialOpacity={0} delay={100}>
+            <h2 className={styles.sectionTitle}>Experience & Education</h2>
+          </FadeContent>
+        </div>
+
+        <div className={styles.experienceLayout}>
+          {/* Timeline Navigation */}
+          <div className={styles.timelineNav}>
+            {experiences.map((exp, index) => (
+              <FadeContent 
+                key={exp.id} 
+                blur={false} 
+                duration={600} 
+                delay={index * 100}
+              >
+                <button
+                  className={`${styles.timelineItem} ${activeExperience === index ? styles.active : ''}`}
+                  onClick={() => setActiveExperience(index)}
+                >
+                  <div className={styles.timelineDot}>
+                    <Briefcase size={16} />
+                  </div>
+                  <div className={styles.timelineInfo}>
+                    <span className={styles.timelineTitle}>{exp.title}</span>
+                    <span className={styles.timelineCompany}>{exp.company}</span>
+                    <span className={styles.timelinePeriod}>{exp.period}</span>
+                  </div>
+                  <div className={`${styles.statusBadge} ${styles[exp.status.toLowerCase()]}`}>
+                    {exp.status}
+                  </div>
+                </button>
+              </FadeContent>
+            ))}
+          </div>
+
+          {/* Experience Details */}
+          <div className={styles.experienceDetails}>
+            <FadeContent 
+              blur={true} 
+              duration={800} 
+              delay={0}
+              key={activeExperience} // This ensures re-animation when switching
+            >
+              <div className={styles.experienceCard}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.titleSection}>
+                    <h3 className={styles.jobTitle}>{experiences[activeExperience].title}</h3>
+                    <div className={styles.companyInfo}>
+                      <span className={styles.companyName}>{experiences[activeExperience].company}</span>
+                      <div className={styles.metaInfo}>
+                        <span className={styles.metaItem}>
+                          <Calendar size={14} />
+                          {experiences[activeExperience].period}
+                        </span>
+                        <span className={styles.metaItem}>
+                          <MapPin size={14} />
+                          {experiences[activeExperience].location}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={styles.cardActions}>
+                    <span className={`${styles.typeBadge} ${styles[experiences[activeExperience].type.toLowerCase()]}`}>
+                      {experiences[activeExperience].type}
+                    </span>
+                    {experiences[activeExperience].website !== "#" && (
+                      <a 
+                        href={experiences[activeExperience].website} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className={styles.websiteLink}
+                      >
+                        <ExternalLink size={16} />
+                      </a>
+                    )}
+                  </div>
                 </div>
-            </div>
-        </section>
-    );
+
+                <p className={styles.description}>
+                  {experiences[activeExperience].description}
+                </p>
+
+                <div className={styles.achievementsSection}>
+                  <h4 className={styles.achievementsTitle}>
+                    <Award size={16} />
+                    Key Achievements
+                  </h4>
+                  <ul className={styles.achievementsList}>
+                    {experiences[activeExperience].achievements.map((achievement, index) => (
+                      <li key={index} className={styles.achievementItem}>
+                        {achievement}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className={styles.technologiesSection}>
+                  <h4 className={styles.techTitle}>Technologies & Skills</h4>
+                  <div className={styles.techList}>
+                    {experiences[activeExperience].technologies.map((tech, index) => (
+                      <span key={index} className={styles.techTag}>
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </FadeContent>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }

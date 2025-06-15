@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './feature.module.css';
 import ShinyText from '../ui/ShinyText';
+import FadeContent from '../ui/FadeContent';
 
 const Github = ({ size = 16 }) => (
   <span style={{ fontSize: size + 'px' }}>📂</span>
@@ -54,12 +55,15 @@ export default function FeatureProjects() {
     <section className={styles.featureProjects} id="projects">
       <div className={styles.featureSectionContent}>
         <div className={styles.sectionHeader}>
-          <p className={styles.sectionTitle}>FEATURE PROJECTS</p>
+          <FadeContent blur={false} duration={800} easing="ease-out" initialOpacity={0} delay={0}>
+            <p className={styles.sectionTitle}>FEATURE PROJECTS</p>
+          </FadeContent>
         </div>
 
         <div className={styles.projectsGrid}>
-          {projects.map((project) => (
+          {projects.map((project, index) => (
             <div key={project.id} className={styles.projectCard}>
+              {/* Keep images without FadeContent */}
               <div className={styles.projectImageContainer}>
                 <img
                   src={project.image}
@@ -73,39 +77,49 @@ export default function FeatureProjects() {
               </div>
               
               <div className={styles.projectContent}>
-                <h3 className={styles.projectTitle}>{project.title}</h3>
-                <p className={styles.projectDescription}>{project.description}</p>
+                <FadeContent blur={true} duration={1000} easing="ease-out" initialOpacity={0} delay={index * 100}>
+                  <h3 className={styles.projectTitle}>{project.title}</h3>
+                </FadeContent>
+                <FadeContent blur={false} duration={1000} easing="ease-out" initialOpacity={0} delay={index * 100 + 100}>
+                  <p className={styles.projectDescription}>{project.description}</p>
+                </FadeContent>
                 
-                <div className={styles.projectMeta}>
-                  <div className={styles.metaItem}>
-                    <span className={styles.metaLabel}>DATE:</span>
-                    <span className={styles.metaValue}>{project.date}</span>
+                <FadeContent blur={false} duration={800} easing="ease-out" initialOpacity={0} delay={index * 100 + 200}>
+                  <div className={styles.projectMeta}>
+                    <div className={styles.metaItem}>
+                      <span className={styles.metaLabel}>DATE:</span>
+                      <span className={styles.metaValue}>{project.date}</span>
+                    </div>
+                    <div className={styles.metaItem}>
+                      <span className={styles.metaLabel}>SERVICES:</span>
+                      <span className={styles.metaValue}>{project.services}</span>
+                    </div>
                   </div>
-                  <div className={styles.metaItem}>
-                    <span className={styles.metaLabel}>SERVICES:</span>
-                    <span className={styles.metaValue}>{project.services}</span>
-                  </div>
-                </div>
+                </FadeContent>
 
-                <div className={styles.technologiesSection}>
-                  <p className={styles.metaLabel}>TECHNOLOGIES:</p>
-                  <div className={styles.technologiesContainer}>
-                    {project.technologies.map((tech) => (
-                      <ShinyText key={tech} text={tech} className={styles.technology} />
-                    ))}
+                <FadeContent blur={false} duration={800} easing="ease-out" initialOpacity={0} delay={index * 100 + 300}>
+                  <div className={styles.technologiesSection}>
+                    <p className={styles.metaLabel}>TECHNOLOGIES:</p>
+                    <div className={styles.technologiesContainer}>
+                      {project.technologies.map((tech) => (
+                        <ShinyText key={tech} text={tech} className={styles.technology} />
+                      ))}
+                    </div>
                   </div>
-                </div>
+                </FadeContent>
 
-                <div className={styles.projectActions}>
-                  <a href={project.github} target="_blank" rel="noopener noreferrer" className={styles.actionButton}>
-                    <Github size={16} />
-                    <span>View Code</span>
-                  </a>
-                  <a href={project.live} target="_blank" rel="noopener noreferrer" className={styles.actionButton}>
-                    <ExternalLink size={16} />
-                    <span>Live Demo</span>
-                  </a>
-                </div>
+                <FadeContent blur={false} duration={800} easing="ease-out" initialOpacity={0} delay={index * 100 + 400}>
+                  <div className={styles.projectActions}>
+                    <a href={project.github} target="_blank" rel="noopener noreferrer" className={styles.actionButton}>
+                      <Github size={16} />
+                      <span>View Code</span>
+                    </a>
+                    <a href={project.live} target="_blank" rel="noopener noreferrer" className={styles.actionButton}>
+                      <ExternalLink size={16} />
+                      <span>Live Demo</span>
+                    </a>
+                  </div>
+                </FadeContent>
               </div>
             </div>
           ))}
