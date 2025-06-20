@@ -29,7 +29,7 @@ export default function Experiences() {
           title: "Empbrace Backend Team-Lead",
           company: "Tech for Social Impact",
           location: "Remote",
-          period: "2024",
+          period: "Spring 2025 - Current",
           type: "Project",
           status: "Completed",
           description: "Developed a comprehensive web platform for a nonprofit empowering young women. Built user authentication, dashboards, curriculum tracking, and team profiles.",
@@ -53,7 +53,6 @@ export default function Experiences() {
       status: "In Progress",
       description: "Fourth-year Software Engineering student with focus on backend systems, database design, and full-stack development. Dean's List recipient.",
       achievements: [
-        "Dean's List recipient",
         "Focus on backend and database systems",
         "Full-stack development expertise",
         "Expected graduation: 2026"

@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import { Mail, Linkedin, Github } from 'lucide-react';
 import styles from './contact.module.css';
+import emailjs from '@emailjs/browser';
+
 import FadeContent from '../ui/FadeContent';
 
 export default function Contact() {
+    const [isLoading , setIsLoading] = useState(false);
+    const [status, setStatus] = useState(null);
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -11,11 +16,40 @@ export default function Contact() {
         message: ''
     });
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log('Form submitted:', formData);
-        // You would typically send this data to a backend service
-    };
+    const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setStatus(null);
+
+    try {
+        // Initialize EmailJS with your User ID
+        emailjs.init('user_yLYI6joHYuHnt6mlb'); // Replace with your actual User ID
+
+        // Option 1: Use emailjs.send() with template parameters
+        const result = await emailjs.send(
+            'service_ggb3jlh',    // Service ID
+            'template_b3y318w',   // Template ID
+            {
+                from_name: formData.name,
+                from_email: formData.email,
+                subject: formData.subject,
+                message: formData.message,
+                to_email: 'lamanthony167@gmail.com'
+            },
+            'user_yLYI6joHYuHnt6mlb'  // User ID as 4th parameter
+        );
+
+
+        console.log('Email sent successfully:', result);
+        setStatus('success');
+        setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (error) {
+        console.error('Email sending failed:', error);
+        setStatus('error');
+    } finally {
+        setIsLoading(false);
+    }
+};
 
     const handleChange = (e) => {
         setFormData({

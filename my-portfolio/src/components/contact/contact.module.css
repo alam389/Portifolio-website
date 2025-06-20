@@ -1,6 +1,6 @@
 .contactSection {
   width: 100%;
-  padding: 4rem 0; /* Only vertical padding */
+  padding: 2rem 0; /* Only vertical padding */
   display: grid;
   gap: 2rem;
 }

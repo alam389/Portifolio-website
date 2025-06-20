@@ -15,7 +15,7 @@ export default function FeatureProjects() {
   const projects = [
     {
       id: 1,
-      title: "E-Commerce Platform",
+      title: "EmbraceHer Mental Wellness App",
       description:
       "Led the development of a web application for EmpowHERto, a nonprofit empowering young women. The platform supports a 12-week mental health program for teenage girls, featuring user authentication, personalized dashboards, curriculum tracking, and team member profiles. Built using Next.js, React, JS, and Tailwind CSS.",
       date: "2024",
@@ -27,27 +27,25 @@ export default function FeatureProjects() {
     },
     {
       id: 2,
-      title: "Task Management App",
+      title: "Mcgregor Allsop PM App",
       description:
-        "A collaborative task management application with real-time updates, drag-and-drop functionality, and team collaboration features. Built with React and Socket.io for seamless real-time communication.",
+        "A web app built for McGregor Allsop Engineers to reduce data wrangling efforts by a intiutive and easy to use design. A improvement over their old system. Built with React and Springboot for industry level performance. Features document generation and project info autofilling.",
       date: "2024",
       services: "FRONTEND DEVELOPMENT / REAL-TIME FEATURES / API INTEGRATION",
-      technologies: ["React", "Socket.io", "Node.js", "MongoDB", "CSS"],
-      image: "https://via.placeholder.com/1200x600/f3f4f6/6b7280?text=Task+Management+App",
-      github: "https://github.com",
-      live: "https://example.com",
+      technologies: ["React", "SpringBoot", "SSMS", "Azure"],
+      image: "/images/sc1.png",
     },
     {
       id: 3,
-      title: "Weather Dashboard",
+      title: "Password management app",
       description:
-        "A responsive weather dashboard that provides detailed weather information and forecasts. Features location-based weather data, interactive charts, and a clean, intuitive interface.",
-      date: "2023",
-      services: "API INTEGRATION / DATA VISUALIZATION / RESPONSIVE DESIGN",
-      technologies: ["Vue.js", "Chart.js", "OpenWeather API", "CSS3"],
-      image: "https://via.placeholder.com/1200x600/f3f4f6/6b7280?text=Weather+Dashboard",
-      github: "https://github.com",
-      live: "https://example.com",
+        "My first personal project, taught me the basics of web development. Built with Angular and Express.js. Features storage of passwords using SHA-256 encryption, and a password generator for easy secure password creation.",
+      date: "Winter 2024",
+      services: "Password management app",
+      technologies: ["Angular", "node.js", "Express.js"],
+      image: "./images/let-me-pass.png",
+      github: "https://github.com/alam389/let-me-pass-client.git",
+      live: "https://let-me-pass-client.vercel.app/",
     },
   ];
 
