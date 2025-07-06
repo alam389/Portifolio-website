@@ -19,7 +19,7 @@
 .sectionLabel {
   font-size: clamp(0.75rem, 1.5vw, 0.875rem);
   letter-spacing: 0.1em;
-  color: #746c7a;
+  color: #827a87;
   text-transform: uppercase;
   margin-bottom: 0.5rem;
   text-align: left; /* Ensure left alignment */
