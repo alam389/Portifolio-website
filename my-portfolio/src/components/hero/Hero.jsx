@@ -7,7 +7,7 @@ export default function Hero() {
     <div className={styles.heroContainer}>
       <FadeContent blur={true} duration={1000} easing="ease-out" initialOpacity={0} delay={0} className={styles.leftSection}>
         <h1 className={styles.name}>Anthony Lam</h1>
-        <div className={styles.subtitle}>Designer &amp; Developer</div>
+        <div className={styles.subtitle}> Aspiring Software Engineer</div>
         <nav className={styles.menu}>
           <ul>
             <li className={styles.menuDot}>•</li>
@@ -21,9 +21,9 @@ export default function Hero() {
       <FadeContent blur={true} duration={1000} easing="ease-out" initialOpacity={0} delay={200} className={styles.rightSection}>
         <div className={styles.bio}>
           <p>
-          <strong>Born in 2004<br />in Niagara, Canada.</strong><br />
-Passionate about backend and database design.<br />
-I believe robust backend systems are the backbone<br />
+          <strong>Born in 2004<br />Niagara, Canada.</strong><br />
+Passionate about Backend and Cloud Computing.<br />
+I believe robust Backend systems are the backbone<br />
 of every great application.<br />
 My mission: build scalable, reliable solutions<br />
 that power growth and never let you down.<br />

@@ -144,32 +144,80 @@
   width: 100%;
 }
 
-/* Updated styles for the contact form area to match experiences cards */
+/* Ensure consistent font inheritance for all form elements */
 .formInput,
 .formTextarea {
-  width: 100%;
-  padding: 1rem;
-  font-size: 1rem;
-  border: 1px solid rgba(192, 181, 201, 0.3);
-  border-radius: 0.5rem;
-  background-color: rgba(76, 71, 80, 0.08);
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
   color: #c0b5c9;
+  background-color: rgba(192, 181, 201, 0.05);
+  border: 1px solid rgba(192, 181, 201, 0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
   transition: all 0.3s ease;
-  max-width: 100%; /* Ensure it does not overflow */
-  box-sizing: border-box; /* Crucial for correct width calculation */
+  width: 100%;
+  box-sizing: border-box;
 }
 
+/* Specific styling for textarea to match inputs exactly */
+.formTextarea {
+  resize: vertical;
+  min-height: 120px;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; /* Explicitly set font */
+  font-size: 16px; /* Match input font size */
+  font-weight: 400; /* Match input font weight */
+  line-height: 1.5; /* Match input line height */
+  letter-spacing: 0.01em; /* Match input letter spacing */
+}
+
+/* Placeholder styling to match across all fields */
+.formInput::placeholder,
+.formTextarea::placeholder {
+  color: #8c8493;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: 0.01em;
+  opacity: 0.7;
+}
+
+/* Focus states */
 .formInput:focus,
 .formTextarea:focus {
-  border-color: #c0b5c9;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(192, 181, 201, 0.2);
-  background-color: rgba(76, 71, 80, 0.15); /* Slightly darker when focused */
+  border-color: #c0b5c9;
+  box-shadow: 0 0 0 3px rgba(192, 181, 201, 0.1);
+  background-color: rgba(192, 181, 201, 0.08);
 }
+
+/* Updated styles for the contact form area to match experiences cards */
+/* Crucial for correct width calculation */
 
 .formTextarea {
   min-height: 150px;
   resize: vertical;
+}
+
+/* Add these styles to your existing contact.module.css */
+
+.submitButton.loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.formInput:disabled,
+.formTextarea:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.submitButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 /* Responsive adjustments */

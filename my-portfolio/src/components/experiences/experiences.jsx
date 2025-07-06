@@ -39,9 +39,28 @@ export default function Experiences() {
               "Scheduled weekly sprints and meetings with client to ensure project delivery",
               "Turnt new devs with no prior experience into capable backend developers "
           ],
-          technologies: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Neon PostgreSQL"],
+          technologies: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Supabase PostgreSQL", "Led cross-functional team", "Communication"],
           website: "#"
       },
+    {
+      id: 3,
+      title: "Boy and Girl Club of London",
+      company: "Tech for Social Impact",
+      location: "Remote",
+      period: "September 2024 - December 2024",
+      type: "Project",
+      status: "Completed",
+      description: "Acted as a tech consultant for BGC London to find a way to track user traffic from various sources of media.",
+      achievements: [
+        "Tracked over 1000 unique visitors per month perviously not known",
+        "Integerted with Google Analytics and QR codes to track user traffic from specific sources of media or in-person events",
+
+      ],
+      technologies: ["Google Analytics", "Led cross-functional team", "Translating Business to Technical Requirements"],
+
+    },
+
+
 
     {
       id: 4,

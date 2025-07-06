@@ -22,8 +22,9 @@ export default function FeatureProjects() {
       services: "FULL-STACK DEVELOPMENT / PAYMENT INTEGRATION / UI/UX DESIGN",
       technologies: ["React", "Typescript", "Express.js", "Next.js", "Neon PostgreSQL"],
       image: "/images/empBracedash.png",
-      github: "https://github.com",
-      live: "https://example.com",
+      // Remove or comment out github and live links for private projects
+      // github: "https://github.com",
+      // live: "https://example.com",
     },
     {
       id: 2,
@@ -34,6 +35,7 @@ export default function FeatureProjects() {
       services: "FRONTEND DEVELOPMENT / REAL-TIME FEATURES / API INTEGRATION",
       technologies: ["React", "SpringBoot", "SSMS", "Azure"],
       image: "/images/sc1.png",
+      // No links provided for this project
     },
     {
       id: 3,
@@ -106,18 +108,25 @@ export default function FeatureProjects() {
                   </div>
                 </FadeContent>
 
-                <FadeContent blur={false} duration={800} easing="ease-out" initialOpacity={0} delay={index * 100 + 400}>
-                  <div className={styles.projectActions}>
-                    <a href={project.github} target="_blank" rel="noopener noreferrer" className={styles.actionButton}>
-                      <Github size={16} />
-                      <span>View Code</span>
-                    </a>
-                    <a href={project.live} target="_blank" rel="noopener noreferrer" className={styles.actionButton}>
-                      <ExternalLink size={16} />
-                      <span>Live Demo</span>
-                    </a>
-                  </div>
-                </FadeContent>
+                {/* Conditionally render action buttons only if links are provided */}
+                {(project.github || project.live) && (
+                  <FadeContent blur={false} duration={800} easing="ease-out" initialOpacity={0} delay={index * 100 + 400}>
+                    <div className={styles.projectActions}>
+                      {project.github && (
+                        <a href={project.github} target="_blank" rel="noopener noreferrer" className={styles.actionButton}>
+                          <Github size={16} />
+                          <span>View Code</span>
+                        </a>
+                      )}
+                      {project.live && (
+                        <a href={project.live} target="_blank" rel="noopener noreferrer" className={styles.actionButton}>
+                          <ExternalLink size={16} />
+                          <span>Live Demo</span>
+                        </a>
+                      )}
+                    </div>
+                  </FadeContent>
+                )}
               </div>
             </div>
           ))}
