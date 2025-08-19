@@ -9,6 +9,21 @@ export default function Experiences() {
   const experiences = [
     {
       id: 1,
+      title: "IT Mangager",
+      company: "Fashion & Lifestyle Society",
+      location: "London, ON",
+      period: "Fall-Win 2025",
+      type: "Volunteer",
+      status: "Current",
+      description: "Leading the development of a new website for F&LS. Built with React and Next.js. Features a focus on user experience, it displays their previous fall/winter shows, news articles and magazine issues. The website is currently in development.",
+      achievements: [
+        "Project management",
+      ],
+      technologies: ["React", "Vite", "Typescript"],
+    },
+
+    {
+      id: 2,
       title: "Database Developer Intern",
       company: "McGregor Allsop",
       location: "Toronto, ON",
@@ -25,7 +40,7 @@ export default function Experiences() {
       website: "https://mcgregorallsop.com"
     },
       {
-          id: 2,
+          id: 3,
           title: "Empbrace Backend Team-Lead",
           company: "Tech for Social Impact",
           location: "Remote",
@@ -43,7 +58,7 @@ export default function Experiences() {
           website: "#"
       },
     {
-      id: 3,
+      id: 4,
       title: "Boy and Girl Club of London",
       company: "Tech for Social Impact",
       location: "Remote",
