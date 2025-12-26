@@ -22,9 +22,9 @@ export default function Hero() {
         <div className={styles.bio}>
           <p>
           <strong>Born in 2004<br />Niagara, Canada.</strong><br />
-Passionate about Backend and Cloud Computing.<br />
-I like to explore and new things and build great applications.<br />
-My mission: become the very definition of a software engineer.
+Passionate about all things related to software engineering.<br />
+I like to explore and tinker with new technologies to apply them to real-world problems.<br />
+My mission: Become the very definition of a software engineer.
           </p>
         </div>
       </FadeContent>

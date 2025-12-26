@@ -246,8 +246,8 @@
 .imageContainer {
   width: 100%;
   max-width: clamp(250px, 30vw, 400px); /* 4. Fluid scaling with strict limits */
-  aspect-ratio: 3/4; /* 1. Maintain consistent proportions */
-  border-radius: 0.5rem;
+  aspect-ratio: 1/1; /* 1. Square for circle */
+  border-radius: 50%; /* Circular frame */
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   position: relative;

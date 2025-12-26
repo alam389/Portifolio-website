@@ -1,5 +1,4 @@
 import styles from './about.module.css';
-import ProfileCard from '../ui/ProfileCard/ProfileCard.jsx';
 import FadeContent from '../ui/FadeContent';
 import { 
   SiJavascript, 
@@ -67,7 +66,7 @@ export default function AboutMe() {
         <div className={styles.contentContainer}>
           <FadeContent blur={false} duration={1000} easing="ease-out" initialOpacity={0} delay={200}>
             <p className={styles.description}>
-              I'm Anthony Lam, a fourth-year Software Engineering student at Western University. I am passionate about anything designed and building applications that are challenging and a great learning opportunity. I don't like to stick to a specific technology stack, I am always looking to learn new things and improve my skills.
+              I'm Anthony Lam, a fourth-year Software Engineering student at Western University. I love everything about software engineering, from designing and building applications to learning new technologies and improving my skills. I don't like to stick to a specific technology stack, I am always looking to learn new things and improve my skills.
             </p>
           </FadeContent>
           <FadeContent blur={false} duration={1000} easing="ease-out" initialOpacity={0} delay={300}>
@@ -85,17 +84,13 @@ export default function AboutMe() {
       </div>
       
       <div className={styles.imageSection}>
-        {/* Keep ProfileCard without FadeContent since it's an image/interactive element */}
-        <ProfileCard
-          avatarUrl="./images/image.jpg"
-          name="Anthony Lam"
-          title="Software Engineer"
-          handle="anthonylam"
-          status="Available for hire"
-          contactText="Let's Connect"
-          showUserInfo={true}
-          enableTilt={true}
-        />
+        <div className={styles.imageContainer}>
+          <img 
+            src="/images/TSI-headshot.jpeg" 
+            alt="Anthony Lam" 
+            className={styles.profileImage}
+          />
+        </div>
       </div>
     </section>
   );

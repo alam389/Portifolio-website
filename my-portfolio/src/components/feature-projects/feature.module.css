@@ -208,7 +208,7 @@
   transition: all 0.3s ease;
   backdrop-filter: blur(20px);
   overflow: hidden;
-}
+  }
 
 .projectCard:hover {
   background: rgba(192, 181, 201, 0.08);
@@ -366,7 +366,7 @@
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: clamp(1.25rem, 2.5vw, 2rem);
   }
-
+  
   .featureSectionContent {
     padding: 0 clamp(1rem, 2.5vw, 2rem);
   }
