@@ -187,79 +187,47 @@
   margin: 0;
 }
 
-/* Projects Grid - Responsive Grid System */
+/* Projects Grid - Responsive Multi-Column Grid System */
 .projectsGrid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: clamp(2rem, 5vw, 4rem); /* 1. Fluid gap spacing */
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: clamp(1.5rem, 3vw, 2.5rem);
   width: 100%;
 }
 
-/* Project Card - Flexible Two-Column System */
+/* Project Card - Similar to Experience Cards */
 .projectCard {
-  display: grid;
-  /* 1. Use minmax() to prevent overflow while maintaining proportions */
-  grid-template-columns: minmax(300px, 1fr) minmax(300px, 1.2fr);
-  gap: clamp(1.5rem, 4vw, 3rem); /* 1. Fluid gap between columns */
-  align-items: start;
-  padding: 0;
-  width: 100%; /* Ensure full width usage */
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: rgba(192, 181, 201, 0.05);
+  border: 1px solid rgba(192, 181, 201, 0.1);
+  border-radius: 1rem;
   box-sizing: border-box;
-  overflow: hidden; /* Prevent content overflow */
+  transition: all 0.3s ease;
+  backdrop-filter: blur(20px);
+  overflow: hidden;
 }
 
-/* 3. Responsive breakpoint for narrower screens (like 14" laptops) */
-@media (max-width: 1200px) {
-  .projectCard {
-    /* Adjust proportions for medium screens */
-    grid-template-columns: minmax(250px, 0.8fr) minmax(280px, 1fr);
-    gap: clamp(1rem, 3vw, 2rem);
-  }
+.projectCard:hover {
+  background: rgba(192, 181, 201, 0.08);
+  border-color: rgba(192, 181, 201, 0.15);
+  transform: translateY(-4px);
 }
 
-/* 3. Stack layout for tablets and smaller */
-@media (max-width: 900px) {
-  .projectCard {
-    grid-template-columns: 1fr; /* Single column stacked layout */
-    gap: clamp(1rem, 3vw, 1.5rem);
-  }
-  
-  /* Reset alternating order for stacked layout */
-  .projectCard:nth-child(even) .projectImageContainer {
-    order: 1;
-  }
-  .projectCard:nth-child(even) .projectContent {
-    order: 2;
-  }
-}
-
-/* Alternating layout for visual interest */
-.projectCard:nth-child(even) {
-  grid-template-columns: minmax(300px, 1.2fr) minmax(300px, 1fr);
-}
-
-.projectCard:nth-child(even) .projectImageContainer {
-  order: 2;
-}
-
-.projectCard:nth-child(even) .projectContent {
-  order: 1;
-}
-
-/* Image Container - Responsive and Contained */
+/* Image Container - At top of card */
 .projectImageContainer {
   width: 100%;
-  max-width: 100%; /* 4. Prevent image container from exceeding bounds */
-  border-radius: 0.375rem;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  aspect-ratio: 16/10; /* Maintain consistent aspect ratio */
+  border-radius: 1rem 1rem 0 0;
+  aspect-ratio: 16/10;
 }
 
 .projectImage {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* 4. Ensure images fit container without distortion */
+  object-fit: cover;
   display: block;
 }
 
@@ -267,17 +235,27 @@
 .projectContent {
   display: flex;
   flex-direction: column;
-  gap: clamp(1rem, 2vw, 1.5rem); /* 1. Fluid spacing between content elements */
-  min-width: 0; /* 4. Allow content to shrink and prevent overflow */
+  flex-grow: 1;
+  gap: clamp(0.75rem, 1.5vw, 1.25rem);
+  padding: clamp(1.5rem, 4vw, 2rem);
+  min-width: 0;
   width: 100%;
-  overflow-wrap: break-word; /* 4. Break long words to prevent horizontal overflow */
+  overflow-wrap: break-word;
   word-wrap: break-word;
   hyphens: auto;
 }
 
+/* Bottom Section - Always at bottom of card */
+.projectBottomSection {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.5rem, 1vw, 0.75rem);
+}
+
 /* Typography - Fully Fluid and Responsive */
 .projectTitle {
-  font-size: clamp(1.25rem, 3vw, 2.5rem); /* 1. More conservative fluid scaling */
+  font-size: clamp(1rem, 2vw, 1.5rem); /* Smaller title size */
   font-weight: 200;
   line-height: 1.1;
   margin: 0;
@@ -333,13 +311,13 @@
 .technologiesSection {
   display: flex;
   flex-direction: column;
-  gap: clamp(0.5rem, 1vw, 0.75rem); /* 1. Fluid spacing */
+  gap: 0; /* No gap between label and technology tags */
 }
 
 .technologiesContainer {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(0.25rem, 0.8vw, 0.5rem); /* 1. Fluid technology tag spacing */
+  gap: 0
 }
 
 .technology {
@@ -355,7 +333,7 @@
 .projectActions {
   display: flex;
   gap: clamp(0.75rem, 2vw, 1rem); /* 1. Fluid button spacing */
-  margin-top: clamp(0.5rem, 1.5vw, 1rem); /* 1. Fluid top margin */
+  margin-top: 0; /* Removed top margin since gap is handled by parent */
   flex-wrap: wrap; /* Allow buttons to wrap on very small screens */
 }
 
@@ -378,23 +356,24 @@
   background-color: #29262b6c;
 }
 
-/* 3. Medium screens (laptops like 14") - Optimize for space */
-@media (max-width: 1400px) and (min-width: 901px) {
+/* Responsive Breakpoints for Grid Card Layout */
+
+/* Desktop - 3 cards per row (1200px+) - Default handled by auto-fit */
+
+/* Tablet - 2 cards per row */
+@media (max-width: 1199px) and (min-width: 768px) {
+  .projectsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: clamp(1.25rem, 2.5vw, 2rem);
+  }
+
   .featureSectionContent {
-    padding: 0 clamp(1rem, 2.5vw, 2rem); /* Reduce horizontal padding */
-  }
-  
-  .projectCard {
-    gap: clamp(1.5rem, 3vw, 2.5rem); /* Reduce gap between columns */
-  }
-  
-  .projectCard:nth-child(even) {
-    grid-template-columns: minmax(250px, 1fr) minmax(280px, 0.9fr);
+    padding: 0 clamp(1rem, 2.5vw, 2rem);
   }
 }
 
-/* 3. Tablet responsive adjustments */
-@media (max-width: 900px) {
+/* Mobile - 1 card per row */
+@media (max-width: 767px) {
   .featureProjects {
     padding: clamp(1.5rem, 4vw, 2rem) 0;
   }
@@ -404,30 +383,13 @@
   }
 
   .projectsGrid {
-    gap: clamp(1.5rem, 4vw, 2rem);
+    grid-template-columns: 1fr;
+    gap: clamp(1rem, 3vw, 1.5rem);
   }
 
-  .projectImageContainer {
-    aspect-ratio: 16/9; /* Slightly different ratio for mobile */
-  }
-}
-
-/* 3. Mobile responsive adjustments */
-@media (max-width: 480px) {
-  .featureSectionContent {
-    padding: 0 clamp(0.75rem, 3vw, 1rem); /* Minimal padding for small screens */
-  }
-
-  .projectsGrid {
-    gap: clamp(1rem, 4vw, 1.5rem);
-  }
-
-  .projectCard {
-    gap: clamp(0.75rem, 3vw, 1rem);
-  }
 
   .projectActions {
-    flex-direction: column; /* Stack buttons vertically on very small screens */
+    flex-direction: column;
     align-items: stretch;
   }
 
@@ -455,4 +417,31 @@
 .projectActions {
   max-width: 100%;
   overflow: hidden;
+}
+
+/* Toggle Button Container */
+.toggleContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: clamp(2rem, 4vw, 3rem);
+  width: 100%;
+}
+
+.toggleButton {
+  padding: clamp(0.75rem, 2vw, 1rem) clamp(1.5rem, 4vw, 2rem);
+  background: rgba(192, 181, 201, 0.1);
+  border: 1px solid rgba(192, 181, 201, 0.2);
+  border-radius: 0.5rem;
+  color: #c0b5c9;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.toggleButton:hover {
+  background: rgba(192, 181, 201, 0.15);
+  border-color: rgba(192, 181, 201, 0.3);
+  transform: translateY(-2px);
 }

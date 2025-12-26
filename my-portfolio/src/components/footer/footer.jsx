@@ -20,7 +20,7 @@ export default function Footer() {
         </div>
         <div className={styles.footerSection}>
           <span className={styles.footerLabel}>LAST UPDATED:</span>
-          <span className={styles.footerText}>2024-01-15T10:30:00Z</span>
+          <span className={styles.footerText}>2025-12-26T10:30:00Z</span>
         </div>
       </div>
 

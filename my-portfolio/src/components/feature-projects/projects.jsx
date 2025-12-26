@@ -1,44 +1,75 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './feature.module.css';
-import ShinyText from '../ui/ShinyText';
 import FadeContent from '../ui/FadeContent';
-
-const Github = ({ size = 16 }) => (
-  <span style={{ fontSize: size + 'px' }}>📂</span>
-);
-
-const ExternalLink = ({ size = 16 }) => (
-  <span style={{ fontSize: size + 'px' }}>🔗</span>
-);
+import ProjectCard from './ProjectCard';
 
 export default function FeatureProjects() {
+  const [showAll, setShowAll] = useState(false);
   const projects = [
+
     {
       id: 1,
-      title: "EmbraceHer Mental Wellness App",
+      title: "Plan Catalyst DataAnalytics Dashboard",
+      description:
+      "In charge of designing and implementing cloud infrastructure to house data fetching and ML processing. It makes use of serverless services such as API Gateway, ECS Fargate and Lambda functions.",
+      services: "CLOUD INFRASTRUCTURE DESIGN / DATA FETCHING / MACHINE LEARNING",
+      technologies: [ "AWS", "Python"],
+      image: "/images/AWS-arch.png",
+      // Remove or comment out github and live links for private projects
+      github: " https://github.com/LlamzonAmazon/PC-Data-Dash",
+      // live: "https://example.com",
+    }, 
+
+    {
+      id: 2,
+      title: "Fashion & Lifestyle Society Website",
+      description:
+      "A web app built for Fashion & Lifestyle Society to display their previous fall/winter shows, news articles and magazine issues. Built with React and Next.js.",
+      services: "FRONTEND DEVELOPMENT / UI/UX DESIGN",
+      technologies: ["React", "Next.js", "Tailwind CSS", "Figma"],
+      image: "/images/FLS.png",
+      // No links provided for this project
+      github: "https://github.com/alam389/Fashion-and-Lifestyle-Society-Website",
+      live: "https://fashion-lifestyle-society.vercel.app/",
+    },
+    {
+      id: 4,
+      title: "Hack Western: WoWie",
+      description:
+      "For HackWestern 12 our solution, WoWie, is a web extension that nudges women to start their investing journey through mindful messages at the point of purchase of their favourite online products.",
+      services: "CHROME EXTENSION DEVELOPMENT / UI/UX DESIGN",
+      technologies: [ "Next.js", "Tailwind CSS", "Chrome Extension API"],
+      image: "/images/Wowie.jpg",
+      // Remove or comment out github and live links for private projects
+      github: "https://github.com/sarahchiang0529/Hack-Western-XII.git",
+      // live: "https://example.com",
+    },
+    {
+      id: 5,
+      title: "Hack The Valley: InternCompass",
+      description:
+      "For HackTheValley 12 our solution, Intern Compass was created to solve that: an intelligent assistant that understands natural language, provides accurate, cited answers from company documents, and makes onboarding efficient and stress-free.",
+      services: "FRONTEND DEVELOPMENT / API INTEGRATION / UI/UX DESIGN",
+      technologies: [ "React", "Next.js", "Tailwind CSS", "Gemini API"],
+      image: "/images/InternCompass.png",
+      // Remove or comment out github and live links for private projects
+      github: "https://github.com/DanielChahine0/Intern-Compass",
+      live: "https://devpost.com/software/intern-compass",
+    },
+    {
+      id: 6,
+      title: "Mental Wellness App",
       description:
       "Led the development of a web application for EmpowHERto, a nonprofit empowering young women. The platform supports a 12-week mental health program for teenage girls, featuring user authentication, personalized dashboards, curriculum tracking, and team member profiles. Built using Next.js, React, JS, and Tailwind CSS.",
-      date: "2024",
       services: "FULL-STACK DEVELOPMENT / PAYMENT INTEGRATION / UI/UX DESIGN",
-      technologies: ["React", "Typescript", "Express.js", "Next.js", "Neon PostgreSQL"],
+      technologies: [ "Express.js", "Next.js", "Neon PostgreSQL"],
       image: "/images/empBracedash.png",
       // Remove or comment out github and live links for private projects
       // github: "https://github.com",
       // live: "https://example.com",
     },
     {
-      id: 2,
-      title: "Mcgregor Allsop PM App",
-      description:
-        "A web app built for McGregor Allsop Engineers to reduce data wrangling efforts by a intiutive and easy to use design. A improvement over their old system. Built with React and Springboot for industry level performance. Features document generation and project info autofilling.",
-      date: "2024",
-      services: "FRONTEND DEVELOPMENT / REAL-TIME FEATURES / API INTEGRATION",
-      technologies: ["React", "SpringBoot", "SSMS", "Azure"],
-      image: "/images/sc1.png",
-      // No links provided for this project
-    },
-    {
-      id: 3,
+      id: 7,
       title: "Password management app",
       description:
         "My first personal project, taught me the basics of web development. Built with Angular and Express.js. Features storage of passwords using SHA-256 encryption, and a password generator for easy secure password creation.",
@@ -61,76 +92,24 @@ export default function FeatureProjects() {
         </div>
 
         <div className={styles.projectsGrid}>
-          {projects.map((project, index) => (
-            <div key={project.id} className={styles.projectCard}>
-              {/* Keep images without FadeContent */}
-              <div className={styles.projectImageContainer}>
-                <img
-                  src={project.image}
-                  alt={project.title}
-                  className={styles.projectImage}
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = "/placeholder.svg";
-                  }}
-                />
-              </div>
-              
-              <div className={styles.projectContent}>
-                <FadeContent blur={true} duration={1000} easing="ease-out" initialOpacity={0} delay={index * 100}>
-                  <h3 className={styles.projectTitle}>{project.title}</h3>
-                </FadeContent>
-                <FadeContent blur={false} duration={1000} easing="ease-out" initialOpacity={0} delay={index * 100 + 100}>
-                  <p className={styles.projectDescription}>{project.description}</p>
-                </FadeContent>
-                
-                <FadeContent blur={false} duration={800} easing="ease-out" initialOpacity={0} delay={index * 100 + 200}>
-                  <div className={styles.projectMeta}>
-                    <div className={styles.metaItem}>
-                      <span className={styles.metaLabel}>DATE:</span>
-                      <span className={styles.metaValue}>{project.date}</span>
-                    </div>
-                    <div className={styles.metaItem}>
-                      <span className={styles.metaLabel}>SERVICES:</span>
-                      <span className={styles.metaValue}>{project.services}</span>
-                    </div>
-                  </div>
-                </FadeContent>
-
-                <FadeContent blur={false} duration={800} easing="ease-out" initialOpacity={0} delay={index * 100 + 300}>
-                  <div className={styles.technologiesSection}>
-                    <p className={styles.metaLabel}>TECHNOLOGIES:</p>
-                    <div className={styles.technologiesContainer}>
-                      {project.technologies.map((tech) => (
-                        <ShinyText key={tech} text={tech} className={styles.technology} />
-                      ))}
-                    </div>
-                  </div>
-                </FadeContent>
-
-                {/* Conditionally render action buttons only if links are provided */}
-                {(project.github || project.live) && (
-                  <FadeContent blur={false} duration={800} easing="ease-out" initialOpacity={0} delay={index * 100 + 400}>
-                    <div className={styles.projectActions}>
-                      {project.github && (
-                        <a href={project.github} target="_blank" rel="noopener noreferrer" className={styles.actionButton}>
-                          <Github size={16} />
-                          <span>View Code</span>
-                        </a>
-                      )}
-                      {project.live && (
-                        <a href={project.live} target="_blank" rel="noopener noreferrer" className={styles.actionButton}>
-                          <ExternalLink size={16} />
-                          <span>Live Demo</span>
-                        </a>
-                      )}
-                    </div>
-                  </FadeContent>
-                )}
-              </div>
-            </div>
+          {projects.slice(0, 3).map((project, index) => (
+            <ProjectCard key={project.id} project={project} index={index} />
+          ))}
+          {showAll && projects.slice(3).map((project, index) => (
+            <ProjectCard key={project.id} project={project} index={index + 3} />
           ))}
         </div>
+        
+        {projects.length > 3 && (
+          <div className={styles.toggleContainer}>
+            <button 
+              className={styles.toggleButton}
+              onClick={() => setShowAll(!showAll)}
+            >
+              {showAll ? 'Show Less' : `Show ${projects.length - 3} More Projects`}
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

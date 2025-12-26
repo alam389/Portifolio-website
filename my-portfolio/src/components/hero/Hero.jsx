@@ -23,10 +23,8 @@ export default function Hero() {
           <p>
           <strong>Born in 2004<br />Niagara, Canada.</strong><br />
 Passionate about Backend and Cloud Computing.<br />
-I believe robust Backend systems are the backbone<br />
-of every great application.<br />
-My mission: build scalable, reliable solutions<br />
-that power growth and never let you down.<br />
+I like to explore and new things and build great applications.<br />
+My mission: become the very definition of a software engineer.
           </p>
         </div>
       </FadeContent>

@@ -67,24 +67,18 @@ export default function AboutMe() {
         <div className={styles.contentContainer}>
           <FadeContent blur={false} duration={1000} easing="ease-out" initialOpacity={0} delay={200}>
             <p className={styles.description}>
-              I'm Anthony Lam, a fourth-year Software Engineering student at Western University who's absolutely hooked on turning
-              complex problems into clean, user-friendly solutions. Whether I'm sketching out database schemas in SQL or prototyping
-              UI flows in React, I love the puzzle of stitching together code, data, and design to build something that actually helps people.
+              I'm Anthony Lam, a fourth-year Software Engineering student at Western University. I am passionate about anything designed and building applications that are challenging and a great learning opportunity. I don't like to stick to a specific technology stack, I am always looking to learn new things and improve my skills.
             </p>
           </FadeContent>
           <FadeContent blur={false} duration={1000} easing="ease-out" initialOpacity={0} delay={300}>
             <p className={styles.description}>
-              Right now, I'm gearing up to join McGregor Allsop as a Database Developer Intern, where I'll dive into optimizing large-scale SQL systems.
-              On the side, I lead a small team at Tech for Social Impact to build a React Native mental-health app—managing sprints in Jira,
-              coordinating with stakeholders, and making sure our features land smoother than butter. Past projects include "Rate My School,"
-              a full-stack platform powered by Spring Boot, PostgreSQL, and NeonDB, where I focused on ER-model design, API security, and real-time data updates.
+              Right now, I will be completing my fourth year of university and I will be working part-time as a Software Developer at McGregor Allsop.
+              On the side, I am working on taking the AWS Developer Associate certification, and working on a few personal projects to improve my skills.
             </p>
           </FadeContent>
           <FadeContent blur={false} duration={1000} easing="ease-out" initialOpacity={0} delay={400}>
             <p className={styles.description}>
-              Looking ahead, I'm on the hunt for more opportunities to bridge back-end robustness with front-end polish—think scalable cloud apps,
-              data-driven dashboards, or anything that turns raw numbers into insights. When I'm not coding, you'll find me tinkering with new JS frameworks,
-              geeking out over database indexing tricks, or sketching UI ideas on my iPad. Feel free to poke around my portfolio and GitHub—let's build something great together!
+              Looking ahead, I'm on the hunt for more opportunities to learn new and emerging technologies to stay relevant in the industry. Possibly look into the Cloud development path to work with AWS or Azure and continue my work at Tech for Social Impact and build more projects to improve my skills.
             </p>
           </FadeContent>
         </div>
