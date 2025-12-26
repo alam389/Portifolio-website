@@ -15,9 +15,9 @@ export default function Experiences() {
       period: "December 2025 - Current",
       type: "Part-Time",
       status: "Current",
-      description: "Pick up where I left off as a intern, I will be responsible for developing and maintaining internal tools for the company, as well as querying finanical and project data for the accounting team and CEO.",
+      description: "Picked up where I left off as an intern, I will be responsible for developing and maintaining internal tools for the company, as well as querying finanical and project data for the accounting team and CEO.",
       achievements: [
-        "Project management",
+        "Time management to juggle part-time work and university",
       ],
       technologies: ["React", "Vite", "Typescript", "SQL", "PostgreSQL"],
       website: "https://mcgregor-allsop.com/"
@@ -28,12 +28,12 @@ export default function Experiences() {
       company: "Fashion & Lifestyle Society",
       location: "London, ON",
       period: "Fall-Win 2025",
-      type: "Volunteer",
+      type: "Volunteering",
       status: "Current",
       description: "Leading the development of a new website for F&LS. Built with React and Next.js. Features a focus on user experience, it displays their previous fall/winter shows, news articles and magazine issues. The website is currently in development.",
       achievements: [
         "Developed communcation channels for 100+ members to communicate and collaborate on the fashion shows",
-        "User experience design",
+        "Made more progress on the website than pervious attempts from past IT Managers",
       ],
       technologies: ["React", "Vite", "Typescript"],
     },
@@ -56,8 +56,8 @@ export default function Experiences() {
     },
     {
       id: 4,
-      title: "Empbrace Backend Team-Lead",
-      company: "Tech for Social Impact",
+      title: "Backend Team Lead",
+      company: "EmpbraceHERto",
       location: "Remote",
       period: "Spring 2025",
       type: "Project",

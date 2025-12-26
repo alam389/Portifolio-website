@@ -118,7 +118,7 @@ export default function Contact() {
 
                                 <FadeContent blur={false} duration={800} easing="ease-out" initialOpacity={0} delay={0}>
                                     <a
-                                        href="https://github.com/yourusername"
+                                        href="https://github.com/alam389"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className={styles.contactButton}
