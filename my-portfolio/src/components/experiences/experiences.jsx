@@ -77,7 +77,7 @@ export default function Experiences() {
       title: "Team Lead",
       company: "Boy and Girl Club of London",
       location: "Remote",
-      period: "September 2024 - December 2024",
+      period: "Fall 2024 - Winter 2025",
       type: "Project",
       status: "Completed",
       description: "Acted as a tech consultant for BGC London to find a way to track user traffic from various sources of media.",
@@ -94,14 +94,14 @@ export default function Experiences() {
       title: "Software Engineering Student",
       company: "Western University",
       location: "London, ON",
-      period: "2022 - 2026",
+      period: "2022 - 2027",
       type: "Education",
       status: "In Progress",
       description: "Fourth-year Software Engineering student with focus on backend systems, database design, and full-stack development. Dean's List recipient.",
       achievements: [
         "Focus on backend and database systems",
         "Full-stack development expertise",
-        "Expected graduation: 2026"
+        "Expected graduation: 2027"
       ],
       technologies: ["Java", "Python", "C++", "Software Architecture", "Database Design"],
       website: "https://uwo.ca"

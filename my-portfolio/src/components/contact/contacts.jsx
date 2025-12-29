@@ -20,13 +20,13 @@ export default function Contact() {
     });
 
     const showSuccessToast = () => {
-        setToastMessage('🎉 Message sent successfully! I\'ll get back to you soon.');
+        setToastMessage('Message sent successfully! I\'ll get back to you soon.');
         setToastType('success');
         setShowToast(true);
     };
 
     const showErrorToast = () => {
-        setToastMessage('❌ Failed to send message. Please try again or contact me directly.');
+        setToastMessage('Failed to send message. Please try again or contact me directly.');
         setToastType('error');
         setShowToast(true);
     };

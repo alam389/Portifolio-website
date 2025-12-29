@@ -48,7 +48,7 @@ export default function FeatureProjects() {
       id: 5,
       title: "Hack The Valley: InternCompass",
       description:
-      "For HackTheValley 12 our solution, Intern Compass was created to solve that: an intelligent assistant that understands natural language, provides accurate, cited answers from company documents, and makes onboarding efficient and stress-free.",
+      "For HackTheValley 12 our solution, Intern Compass is an intelligent assistant that understands natural language, provides accurate, cited answers from company documents, and makes onboarding efficient and stress-free.",
       services: "FRONTEND DEVELOPMENT / API INTEGRATION / UI/UX DESIGN",
       technologies: [ "React", "Next.js", "Tailwind CSS", "Gemini API"],
       image: "/images/InternCompass.png",
