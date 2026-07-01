@@ -1,12 +1,30 @@
-# React + Vite
+# my-portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Personal portfolio of Anthony Lam. Fresh scaffold on **Next.js 15 (App Router) + TypeScript + Tailwind CSS v4**.
 
-Currently, two official plugins are available:
+## Getting started
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+npm install
+npm run dev
+```
 
-## Expanding the ESLint configuration
+Open [http://localhost:3000](http://localhost:3000).
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Structure
+
+- `src/app/` — App Router entry (`layout.tsx`, `page.tsx`, `globals.css`).
+- `src/data/` — Preserved portfolio content, typed:
+  - `experiences.ts`, `projects.ts`, `skills.ts`, `profile.ts`
+  - Import from `@/data` (e.g. `import { experiences, projects, profile } from "@/data";`).
+- `public/images/` — Original image assets (headshot, project screenshots, logos).
+
+The previous Vite/React design was cleared; the content above was carried over so the
+UI can be rebuilt on Next.js. Recover the old design any time via git (`git log`).
+
+## Scripts
+
+- `npm run dev` — dev server
+- `npm run build` — production build
+- `npm run start` — serve production build
+- `npm run lint` — lint
