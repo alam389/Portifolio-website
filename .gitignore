@@ -34,3 +34,17 @@ pnpm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local tooling state
+.playwright-mcp/
+.claude/settings.local.json
+.claude/agent-memory/
+.idea/
+
+# AI tooling (local only)
+.claude/
+.mcp.json
+.impeccable.md
+portfolio-claude-code-prompt.md
+CLAUDE.md
+DESIGN.md

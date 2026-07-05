@@ -1,26 +1,276 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* Class-driven theming (DESIGN.md §2.4): next-themes toggles .dark on <html>.
+   Palette: warm Gruvbox family (.impeccable.md) — charcoal + cream base with
+   amber/orange/aqua/green syntax accents. No pure black/white, no stock blue. */
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #27282e;
+  --sidebar: #f7f8fa;
+  --tabbar: #f7f8fa;
+  --tab-inactive: #f7f8fa;
+  --border: #ebecf0;
+  --accent: #3574f0;
+  --muted: #6c707e;
+  --code-bg: #f7f8fa;
+  --hover: rgba(0, 0, 0, 0.05);
+  --statusbar: #f7f8fa;
+  --selection: #d4e2ff;
+  --syn-yellow: #9e6a03;
+  --syn-orange: #b3591c;
+  --syn-aqua: #00627a;
+  --syn-green: #067d17;
+  --icon-md: #3574f0;
+  --icon-folder: #6c707e;
+  --activitybar: #f7f8fa;
+}
+
+.dark {
+  --background: #1e1f22;
+  --foreground: #dfe1e5;
+  --sidebar: #2b2d30;
+  --tabbar: #2b2d30;
+  --tab-inactive: #2b2d30;
+  --border: #393b40;
+  --accent: #548af7;
+  --muted: #868a91;
+  --code-bg: #26282e;
+  --hover: rgba(255, 255, 255, 0.06);
+  --statusbar: #2b2d30;
+  --selection: #2e436e;
+  --syn-yellow: #ffc66d;
+  --syn-orange: #cf8e6d;
+  --syn-aqua: #56a8f5;
+  --syn-green: #6aab73;
+  --icon-md: #56a8f5;
+  --icon-folder: #7a7e85;
+  --activitybar: #2b2d30;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-sidebar: var(--sidebar);
+  --color-tabbar: var(--tabbar);
+  --color-tab-inactive: var(--tab-inactive);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-muted: var(--muted);
+  --color-code-bg: var(--code-bg);
+  --color-hover: var(--hover);
+  --color-statusbar: var(--statusbar);
+  --color-activitybar: var(--activitybar);
+  --color-selection: var(--selection);
+  --color-syn-yellow: var(--syn-yellow);
+  --color-syn-orange: var(--syn-orange);
+  --color-syn-aqua: var(--syn-aqua);
+  --color-syn-green: var(--syn-green);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* ---- Choreographed load (.impeccable.md principle 4) ----
+   BootScreen gates it: html.booting hides staggered elements behind the boot
+   overlay; html.booted releases the cascade. No-JS never gets .booting. */
+html.booting .stagger {
+  opacity: 0;
+}
+
+html.booted .stagger {
+  opacity: 0;
+  animation: stagger-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--stagger-delay, 0ms);
+}
+
+@keyframes stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Content pane rises on each navigation (route remount). */
+.content-enter {
+  animation: content-rise 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes content-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- Prose: syntax-token headings + palette (.impeccable.md) ---- */
+.prose {
+  color: var(--foreground);
+}
+
+.prose :is(h1, h2, h3, h4) {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  letter-spacing: -0.01em;
+}
+
+.prose h1 {
+  color: var(--syn-yellow);
+}
+
+.prose h2 {
+  color: var(--syn-aqua);
+}
+
+.prose :is(h3, h4) {
+  color: var(--syn-orange);
+}
+
+.prose :is(h1, h2, h3)::before {
+  color: var(--muted);
+  opacity: 0.55;
+  font-weight: 400;
+}
+
+.prose h1::before {
+  content: "# ";
+}
+
+.prose h2::before {
+  content: "## ";
+}
+
+.prose h3::before {
+  content: "### ";
+}
+
+.prose a {
+  color: var(--accent);
+}
+
+.prose strong {
+  color: var(--foreground);
+}
+
+.prose code:not(pre code) {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+
+.prose th {
+  color: var(--syn-aqua);
+  font-family: var(--font-mono), monospace;
+}
+
+.prose blockquote {
+  border-left-color: var(--syn-green);
+  color: var(--muted);
+}
+
+.prose li::marker {
+  color: var(--syn-orange);
+}
+
+/* ---- Gutter line numbers (block-level, editor illusion; ≥ md) ---- */
+@media (min-width: 768px) {
+  .gutter article {
+    counter-reset: mdline;
+  }
+
+  .gutter article > * {
+    position: relative;
+  }
+
+  .gutter article > *::after {
+    counter-increment: mdline;
+    content: counter(mdline);
+    position: absolute;
+    top: 0.2em;
+    left: -3.25rem;
+    width: 2.25rem;
+    text-align: right;
+    font-family: var(--font-mono), monospace;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--muted);
+    opacity: 0.45;
+    pointer-events: none;
+  }
+}
+
+/* ---- Shiki dual-theme switching (DESIGN.md §2.3/§2.4) ----
+   rehype-pretty-code emits both palettes as CSS vars; .dark flips them.
+   Note: matching [data-theme] (not [data-theme*=" "]) because Next's cssnano
+   crashes on attribute selectors containing a quoted space — and every block
+   here is dual-theme anyway. */
+code[data-theme],
+code[data-theme] span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+}
+
+.dark code[data-theme],
+.dark code[data-theme] span {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
+}
+
+/* Code block chrome (keepBackground: false → we own the surface) */
+[data-rehype-pretty-code-figure] pre {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+  padding: 0.9rem 1.1rem;
+}
+
+[data-rehype-pretty-code-figure] code {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.85em;
+  background: transparent;
+  padding: 0;
+}
+
+/* Per-line numbers for full-file source views (fence meta: showLineNumbers) */
+code[data-line-numbers] {
+  counter-reset: line;
+}
+
+code[data-line-numbers] > [data-line]::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 2rem;
+  margin-right: 1.25rem;
+  text-align: right;
+  color: var(--muted);
+  opacity: 0.4;
+}
+
+/* Reduced motion (DESIGN.md §2.7): everything appears instantly. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+  }
 }

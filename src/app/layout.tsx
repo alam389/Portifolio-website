@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { profile } from "@/data";
+import { Providers } from "@/components/Providers";
+import { Shell } from "@/components/Shell";
+import { BootScreen } from "@/components/BootScreen";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +17,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: `${profile.name} — ${profile.role}`,
+  title: {
+    default: `${profile.name} — ${profile.role}`,
+    template: `%s — ${profile.name}`,
+  },
   description: profile.about[0],
 };
 
@@ -24,9 +30,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    // suppressHydrationWarning: next-themes sets the theme class pre-paint.
+    <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {children}
+        <Providers>
+          <BootScreen />
+          <Shell>{children}</Shell>
+        </Providers>
       </body>
     </html>
   );

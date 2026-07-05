@@ -1,0 +1,33 @@
+{
+  "name": "anthony-lam",
+  "version": "4.0.0",
+  "description": "Software engineer — 4th year @ Western University",
+  "author": "Anthony Lam <lamanthony167@gmail.com>",
+  "license": "MIT",
+  "repository": "github:alam389",
+  "scripts": {
+    "dev": "learn --forever",
+    "build": "ship --real-things",
+    "test": "curiosity --watch",
+    "hire": "open mailto:lamanthony167@gmail.com"
+  },
+  "dependencies": {
+    "typescript": "^5.x",
+    "javascript": "^ES2024",
+    "java": "^21.x",
+    "sql": "^ansi",
+    "react": "^19.x",
+    "next": "^15.x",
+    "node": "^22.x",
+    "express": "^4.x",
+    "spring-boot": "^3.x",
+    "postgresql": "^16.x (neon)",
+    "aws": "^2025.x"
+  },
+  "peerDependencies": {
+    "coffee": "*"
+  },
+  "engines": {
+    "curiosity": ">=100%"
+  }
+}

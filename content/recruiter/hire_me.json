@@ -1,0 +1,17 @@
+{
+  "status": "open_to_work",
+  "name": "Anthony Lam",
+  "role": "Software Engineer",
+  "education": "BESc Software Engineering, Western University (2022–2027)",
+  "location": "London, ON, Canada",
+  "email": "lamanthony167@gmail.com",
+  "github": "https://github.com/alam389",
+  "linkedin": "https://www.linkedin.com/in/anthony---lam/",
+  "currently": "Software Developer @ McGregor Allsop (part-time) — agentic RAG, local LLM infra, automation",
+  "interests": [
+    "cloud development (AWS / Azure)",
+    "AI applications",
+    "full-stack development"
+  ],
+  "next_step": "npm run hire"
+}

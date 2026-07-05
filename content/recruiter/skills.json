@@ -1,0 +1,13 @@
+{
+  "languages": ["JavaScript", "TypeScript", "Java", "SQL"],
+  "frameworks_runtime": [
+    "React",
+    "Next.js",
+    "Node.js",
+    "Express.js",
+    "Spring Boot",
+    "Vite"
+  ],
+  "data_cloud": ["Neon PostgreSQL", "AWS"],
+  "current_focus": ["LangGraph", "Qdrant", "vLLM / Ollama", "RAGAS evaluation"]
+}
