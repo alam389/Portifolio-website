@@ -48,3 +48,11 @@ next-env.d.ts
 portfolio-claude-code-prompt.md
 CLAUDE.md
 DESIGN.md
+
+# AI tooling (local only)
+.claude/
+.mcp.json
+.impeccable.md
+portfolio-claude-code-prompt.md
+CLAUDE.md
+DESIGN.md

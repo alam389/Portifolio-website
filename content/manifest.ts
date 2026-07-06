@@ -28,11 +28,31 @@ export interface FolderNode {
 export type TreeNode = FileNode | FolderNode;
 
 export const tree: TreeNode[] = [
-  { type: "file", kind: "md", label: "about.md", slug: "/", file: "about.md" },
+  { type: "file", kind: "md", label: "about.md", slug: "/about", file: "about.md" },
   {
     type: "folder",
     label: "src",
     children: [
+      {
+        type: "folder",
+        label: "pages",
+        children: [
+          {
+            // The digital-twin chat — a real React route (src/app/page.tsx),
+            // not a rendered content file. No file/source: the catch-all
+            // never handles "/".
+            type: "file",
+            kind: "tsx",
+            label: "digital-twin.tsx",
+            slug: "/",
+            meta: {
+              title: "Digital Twin",
+              description:
+                "Chat with Anthony Lam's pregenerated digital twin — skills, projects, experience, contact.",
+            },
+          },
+        ],
+      },
       {
         type: "folder",
         label: "components",

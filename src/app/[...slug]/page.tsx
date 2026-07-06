@@ -5,8 +5,8 @@ import { getMeta, getPage } from "@/lib/content";
 import { MarkdownPane } from "@/components/MarkdownPane";
 import { Minimap } from "@/components/Minimap";
 
-// Optional catch-all: every manifest file becomes a static route (DESIGN.md §2.2).
-// "/" resolves to about.md; unknown slugs 404.
+// Catch-all: every manifest content file becomes a static route (DESIGN.md
+// §2.2). "/" is the digital-twin chat (src/app/page.tsx); unknown slugs 404.
 
 interface Props {
   params: Promise<{ slug?: string[] }>;
@@ -17,9 +17,9 @@ const toSlug = (parts?: string[]) => "/" + (parts?.join("/") ?? "");
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return allFiles().map((f) => ({
-    slug: f.slug === "/" ? [] : f.slug.slice(1).split("/"),
-  }));
+  return allFiles()
+    .filter((f) => f.slug !== "/")
+    .map((f) => ({ slug: f.slug.slice(1).split("/") }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
