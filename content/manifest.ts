@@ -53,36 +53,6 @@ export const tree: TreeNode[] = [
           },
         ],
       },
-      {
-        type: "folder",
-        label: "components",
-        children: [
-          {
-            type: "file",
-            kind: "tsx",
-            label: "FileTree.tsx",
-            slug: "/src/components/file-tree",
-            source: "src/components/FileTree.tsx",
-            meta: {
-              title: "FileTree.tsx",
-              description:
-                "The actual source of this site's file tree component — the portfolio contains itself.",
-            },
-          },
-          {
-            type: "file",
-            kind: "tsx",
-            label: "BootScreen.tsx",
-            slug: "/src/components/boot-screen",
-            source: "src/components/BootScreen.tsx",
-            meta: {
-              title: "BootScreen.tsx",
-              description:
-                "The actual source of the git-clone boot animation you saw on load.",
-            },
-          },
-        ],
-      },
     ],
   },
   {

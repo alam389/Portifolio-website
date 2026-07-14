@@ -3,8 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { profile } from "@/data";
 import { Providers } from "@/components/Providers";
-import { Shell } from "@/components/Shell";
-import { BootScreen } from "@/components/BootScreen";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,8 +32,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
-          <BootScreen />
-          <Shell>{children}</Shell>
+          <div className="h-dvh overflow-y-auto bg-background text-foreground">
+            {children}
+          </div>
         </Providers>
       </body>
     </html>
