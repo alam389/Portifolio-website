@@ -1,19 +1,18 @@
-import { allFiles } from "../../content/manifest";
-import { getMeta } from "@/lib/content";
-import { Chat } from "@/components/Chat";
+import { Twin } from "@/components/Twin";
+import PixelSky from "@/components/PixelSky";
 
-// "/" — the digital-twin chat (tree node: src/pages/digital-twin.tsx).
-// Project cards are pregenerated here from the IDE pages' real frontmatter.
+// "/" — the chat-first digital twin over an 8-bit night sky (twinkling pixel
+// stars, drifting blocky clouds, the occasional shooting star).
 
-export default async function Home() {
-  const readmes = allFiles().filter(
-    (f) => f.slug.startsWith("/projects/") && f.label === "README.md",
+export default function Home() {
+  return (
+    <>
+      <div className="pointer-events-none fixed inset-0" aria-hidden="true">
+        <PixelSky />
+      </div>
+      <div className="relative h-dvh">
+        <Twin />
+      </div>
+    </>
   );
-  const projects = await Promise.all(
-    readmes.map(async (f) => {
-      const meta = await getMeta(f);
-      return { slug: f.slug, title: meta.title, description: meta.description };
-    }),
-  );
-  return <Chat projects={projects} />;
 }
