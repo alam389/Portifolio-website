@@ -5,6 +5,8 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { profile } from "@/data";
 import { ENTRIES, matchEntry, type AgentEntry } from "@/data/agent";
 import { AnswerBlock } from "./AnswerCards";
+import { ThemeToggle } from "./ThemeToggle";
+import { pixelPoof } from "@/lib/poof";
 
 // Chat-first digital twin — the whole site is the conversation (DESIGN.md B).
 // Empty state: one centered group with the composer as the focal point.
@@ -66,12 +68,12 @@ export function Twin() {
         onChange={(e) => setInput(e.target.value)}
         placeholder="Ask me anything"
         aria-label="Ask the digital twin"
-        className="glass px-shadow h-[52px] w-full border-2 border-border pl-5 pr-14 text-sm outline-none placeholder:text-muted focus-visible:ring-2 focus-visible:ring-fg/40"
+        className="glass px-shadow h-[52px] w-full border-2 border-border pl-5 pr-14 text-sm outline-none placeholder:text-muted focus-visible:ring-2 focus-visible:ring-fg/70"
       />
       <button
         type="submit"
         aria-label="Send"
-        className="mc-btn absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center bg-ok text-bg transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/40"
+        className="mc-btn absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center bg-ok text-[#0a1a05] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
       >
         <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden="true">
           <path
@@ -104,7 +106,7 @@ export function Twin() {
             priority
             className="reveal pixelated px-shadow h-[80px] w-[80px] border-2 border-fg/25 object-cover"
           />
-          <h1 className="reveal mt-6 text-3xl font-semibold tracking-tight md:text-4xl">
+          <h1 className="reveal mt-6 text-balance px-2 text-[clamp(1.4rem,6.5vw,2.25rem)] font-semibold leading-tight tracking-tight">
             I&apos;m {firstName}&apos;s digital twin
           </h1>
           <p className="reveal mt-3 text-muted">
@@ -120,8 +122,11 @@ export function Twin() {
               <button
                 key={e.id}
                 type="button"
-                onClick={() => ask(e, e.question)}
-                className="glass mc-btn border border-border px-4 py-2 text-[13px] text-fg/85 transition-colors hover:border-fg/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/40"
+                onClick={(ev) => {
+                  pixelPoof(ev.currentTarget);
+                  ask(e, e.question);
+                }}
+                className="glass mc-btn border border-border px-4 py-2 text-[13px] text-fg/85 transition-colors hover:border-fg/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
               >
                 {e.question}
               </button>
@@ -155,8 +160,11 @@ export function Twin() {
                 <button
                   key={e.id}
                   type="button"
-                  onClick={() => ask(e, e.question)}
-                  className="mc-btn border border-border px-3 py-1 text-[12px] text-muted transition-colors hover:border-fg/40 hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/40"
+                  onClick={(ev) => {
+                    pixelPoof(ev.currentTarget);
+                    ask(e, e.question);
+                  }}
+                  className="mc-btn border border-border px-3 py-1 text-[12px] text-muted transition-colors hover:border-fg/40 hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
                 >
                   {e.label}
                 </button>
@@ -186,10 +194,13 @@ function Header() {
           <p className="text-[11px] text-muted">{profile.role}</p>
         </div>
       </div>
-      <span className="flex items-center gap-1.5 font-mono text-[11px] text-muted">
-        <span className="h-1.5 w-1.5 rounded-full bg-muted" aria-hidden="true" />
-        pregenerated
-      </span>
+      <div className="flex items-center gap-1.5">
+        <span className="flex items-center gap-1.5 font-mono text-[11px] text-muted">
+          <span className="h-1.5 w-1.5 bg-muted" aria-hidden="true" />
+          pregenerated
+        </span>
+        <ThemeToggle />
+      </div>
     </header>
   );
 }
@@ -198,15 +209,17 @@ function TwinMessage({ entry }: { entry: AgentEntry }) {
   const { shown, done } = useTyped(entry.text);
   return (
     <div className="max-w-[92%] text-sm">
-      <p className="leading-7">
+      {/* Visible typing is aria-hidden so SR isn't spammed per character; the
+          full answer is announced once via the sr-only region below. */}
+      <p className="leading-7" aria-hidden="true">
         {shown}
         {!done && (
           <span
             className="ml-0.5 inline-block h-4 w-[6px] translate-y-0.5 animate-pulse bg-fg/70"
-            aria-hidden="true"
           />
         )}
       </p>
+      {done && <span className="sr-only">{entry.text}</span>}
       {done && entry.block && <AnswerBlock block={entry.block} />}
     </div>
   );

@@ -82,11 +82,24 @@ body {
    Tokens the Twin components consume (bg-bg, text-fg, bg-surface, bg-ok)
    plus the glass materials. Apple signature = blur + saturate + hairline
    border + top-edge light catch. */
+/* Light (day) at :root; .dark = night. next-themes toggles the class.
+   The --border/--muted lines re-tune the shared tokens for the light sky. */
 :root {
+  --twin-bg: #e8f2fc;
+  --twin-fg: #1a2432;
+  --twin-surface: rgba(15, 30, 50, 0.08);
+  --twin-ok: #3fa11f; /* grass green, darkened for light-bg contrast */
+  --border: #a9bcd0;
+  --muted: #4e5d6e;
+}
+
+.dark {
   --twin-bg: #0b0d12;
   --twin-fg: #eceef2;
   --twin-surface: rgba(255, 255, 255, 0.07);
   --twin-ok: #5ebb2b; /* minecraft grass green */
+  --border: #3d4148;
+  --muted: #9aa1ac; /* bumped from #8b9099 → ~6.3:1 on the night sky (WCAG AA) */
 }
 
 @theme inline {
@@ -96,11 +109,15 @@ body {
   --color-ok: var(--twin-ok);
 }
 
-/* Frosted element material (chips, input) */
+/* Frosted element material (chips, input) — theme-aware */
 .glass {
-  background: rgba(255, 255, 255, 0.055);
+  background: rgba(255, 255, 255, 0.55);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   backdrop-filter: blur(20px) saturate(160%);
+}
+
+.dark .glass {
+  background: rgba(255, 255, 255, 0.055);
 }
 
 /* The floating window material (chat card) */
@@ -132,23 +149,67 @@ body {
 }
 
 .px-shadow {
+  box-shadow: 4px 4px 0 rgba(30, 45, 70, 0.28);
+}
+
+.dark .px-shadow {
   box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.55);
 }
 
 /* Block button: light top/side edges, dark chunky bottom — the MC look */
 .mc-btn {
+  border: 2px solid rgba(30, 45, 70, 0.3) !important;
+  border-bottom: 4px solid rgba(30, 45, 70, 0.55) !important;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.55);
+}
+
+.dark .mc-btn {
   border: 2px solid rgba(255, 255, 255, 0.22) !important;
   border-bottom: 4px solid rgba(0, 0, 0, 0.65) !important;
   box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.08);
 }
 
+/* Press: button sinks, its bottom edge compresses, its cast shadow shrinks */
 .mc-btn:active {
-  transform: translateY(2px);
+  transform: translate(1px, 3px);
   border-bottom-width: 2px !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+}
+
+.mc-btn.px-shadow:active,
+button.px-shadow:active {
+  box-shadow: 1px 1px 0 rgba(30, 45, 70, 0.28) !important;
+}
+
+.dark .mc-btn.px-shadow:active,
+.dark button.px-shadow:active {
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.55) !important;
 }
 
 .pixelated {
   image-rendering: pixelated;
+}
+
+/* ---- Pixel cursor: minecraft crosshair (public/cursors/*.svg) ----
+   Hotspot at the crosshair center (9 9 of 18x18). White cross by default,
+   grass-green over interactive elements. Fallback keywords keep native
+   cursors where SVG cursors are unsupported; text fields keep the I-beam. */
+html,
+body {
+  cursor: url("/cursors/pixel-arrow.svg") 9 9, auto;
+}
+
+a,
+button,
+[role="button"],
+summary,
+label {
+  cursor: url("/cursors/pixel-pointer.svg") 9 9, pointer;
+}
+
+input:not([type="button"]):not([type="submit"]),
+textarea {
+  cursor: auto;
 }
 
 /* ---- Choreographed load (.impeccable.md principle 4) ----
