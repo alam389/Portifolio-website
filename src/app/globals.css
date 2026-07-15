@@ -78,6 +78,79 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
+/* ---- Twin / Apple-glass theme (chat-first landing) ----
+   Tokens the Twin components consume (bg-bg, text-fg, bg-surface, bg-ok)
+   plus the glass materials. Apple signature = blur + saturate + hairline
+   border + top-edge light catch. */
+:root {
+  --twin-bg: #0b0d12;
+  --twin-fg: #eceef2;
+  --twin-surface: rgba(255, 255, 255, 0.07);
+  --twin-ok: #5ebb2b; /* minecraft grass green */
+}
+
+@theme inline {
+  --color-bg: var(--twin-bg);
+  --color-fg: var(--twin-fg);
+  --color-surface: var(--twin-surface);
+  --color-ok: var(--twin-ok);
+}
+
+/* Frosted element material (chips, input) */
+.glass {
+  background: rgba(255, 255, 255, 0.055);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+}
+
+/* The floating window material (chat card) */
+.glass-card {
+  background: rgba(16, 18, 24, 0.52);
+  -webkit-backdrop-filter: blur(44px) saturate(180%);
+  backdrop-filter: blur(44px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 32px 90px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Gentle rise-in used by the intro elements */
+.reveal {
+  animation: content-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ---- Pixel / minecrafty mode (Geist Pixel Square) ----
+   Scope class on the Twin root: pixel type, hard corners everywhere,
+   chunky offset shadows, and minecraft-style block buttons. */
+.pixel-ui {
+  font-family: var(--font-pixel), var(--font-geist-mono), monospace;
+  letter-spacing: 0.02em;
+}
+
+.pixel-ui * {
+  border-radius: 0 !important;
+}
+
+.px-shadow {
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.55);
+}
+
+/* Block button: light top/side edges, dark chunky bottom — the MC look */
+.mc-btn {
+  border: 2px solid rgba(255, 255, 255, 0.22) !important;
+  border-bottom: 4px solid rgba(0, 0, 0, 0.65) !important;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.08);
+}
+
+.mc-btn:active {
+  transform: translateY(2px);
+  border-bottom-width: 2px !important;
+}
+
+.pixelated {
+  image-rendering: pixelated;
+}
+
 /* ---- Choreographed load (.impeccable.md principle 4) ----
    BootScreen gates it: html.booting hides staggered elements behind the boot
    overlay; html.booted releases the cascade. No-JS never gets .booting. */

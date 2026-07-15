@@ -29,6 +29,8 @@ export interface Skill {
   /** Icon slug (e.g. from simple-icons / react-icons) to wire up in the UI. */
   icon: string;
   color: string;
+  /** Grouping for the twin's skills answer. */
+  category?: "language" | "framework" | "tool";
 }
 
 export interface Social {
