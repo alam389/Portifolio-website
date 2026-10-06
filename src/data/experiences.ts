@@ -49,3 +49,17 @@ export const experiences: Experience[] = [
     ],
   },
 ];
+
+export const volunteering: Experience[] = [
+  {
+    id: "fls",
+    title: "IT Manager",
+    company: "Fashion & Lifestyle Society",
+    location: "London, ON",
+    period: "Fall – Winter 2025",
+    highlights: [
+      "Led development of a new website for F&LS focused on user experience, showcasing past fall/winter shows, news articles and magazine issues (React, Vite, TypeScript).",
+      "Set up communication channels for 100+ members to collaborate on the fashion shows.",
+    ],
+  },
+];

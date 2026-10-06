@@ -5,10 +5,10 @@ export const profile: Profile = {
   role: "Software Engineer",
   location: "London, ON",
   email: "lamanthony167@gmail.com",
-  // TODO: rewrite in your own voice; this is drafted from the resume.
   summary: [
-    "I'm a software engineering student at Western University building AI products: retrieval pipelines, RAG assistants and the apps around them.",
-    "Recently that's meant a beauty-recommendation assistant on Shopify at Kiyoko Beauty, a Graph-RAG ingestion pipeline at McGregor-Allsop, and Mneme, my own document-to-memory service.",
+    "I'm a software engineering student at Western University with a focus on applied AI development. I bring a new perspective on how we can solve problems with new emerging technology and I thrive in fast-paced iterative environments.",
+    "Right now I'm a software engineering intern at Kiyoko Beauty, an online store for Asian beauty products, from September to April. I work on the AI side: I helped launch a beauty assistant on Kiyoko's Shopify store that recommends products based on a shopper's skin concerns, and I build the retrieval pipelines behind it with Vertex AI Vector Search and Gemini embeddings. I'm also building a mobile app with React Native and Supabase that helps people put together a skincare routine from any products, including ones Kiyoko doesn't sell.",
+    "Before that, I built a Graph-RAG ingestion pipeline at McGregor-Allsop, and on the side I'm building Mneme, my own document-to-memory service.",
   ],
   education: {
     school: "University of Western Ontario",
@@ -19,6 +19,8 @@ export const profile: Profile = {
       "Multi-Agent Architecture",
       "Data Structures and Algorithms",
       "Cloud Computing",
+      "Intro to Machine Learning",
+      "Data Engineering",
       "Applications of AI & Software",
     ],
   },
@@ -35,11 +37,27 @@ export const skills: SkillGroup[] = [
     items: ["Java", "Python", "TypeScript", "JavaScript", "SQL", "Go"],
   },
   {
-    label: "AI & Automation",
-    items: ["Neo4j", "Pinecone", "LangChain", "LangGraph", "Hugging Face", "Docker"],
+    label: "Frameworks",
+    items: ["React", "React Native", "Next.js", "Node.js", "Express", "FastAPI", "Spring Boot"],
   },
   {
-    label: "Developer Tools",
-    items: ["Google AI Studio", "IntelliJ", "VS Code", "Claude Code"],
+    label: "AI & Data",
+    items: [
+      "LangChain",
+      "LangGraph",
+      "Hugging Face",
+      "PyTorch",
+      "Gemini",
+      "Claude API",
+      "Pinecone",
+      "Chroma",
+      "Neo4j",
+      "PostgreSQL",
+      "Supabase",
+    ],
+  },
+  {
+    label: "Systems",
+    items: ["Docker", "AWS", "Google Cloud (Vertex AI)", "Azure Blob Storage", "GitHub Actions"],
   },
 ];

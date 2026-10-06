@@ -1,4 +1,11 @@
-import type { Project } from "./types";
+import type { Project, ProjectStatus } from "./types";
+
+export const projectStatusLabel: Record<ProjectStatus, string> = {
+  shipped: "Shipped",
+  "in-progress": "In progress",
+  early: "Early stage",
+  school: "School project",
+};
 
 export const projects: Project[] = [
   {

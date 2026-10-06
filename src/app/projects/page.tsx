@@ -1,14 +1,7 @@
 import type { Metadata } from "next";
-import { projects, type ProjectStatus } from "@/data";
+import { projects, projectStatusLabel } from "@/data";
 
 export const metadata: Metadata = { title: "Projects | Anthony Lam" };
-
-const statusLabel: Record<ProjectStatus, string> = {
-  shipped: "Shipped",
-  "in-progress": "In progress",
-  early: "Early stage",
-  school: "School project",
-};
 
 export default function Projects() {
   return (
@@ -23,7 +16,7 @@ export default function Projects() {
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <h2 className="text-lg font-semibold">{p.title}</h2>
               <span className="font-mono text-xs text-foreground/50">
-                {statusLabel[p.status]}
+                {projectStatusLabel[p.status]}
                 {p.period ? ` · ${p.period}` : ""}
               </span>
             </div>
