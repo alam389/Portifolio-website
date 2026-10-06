@@ -8,6 +8,7 @@ const links = [
   { href: "/", label: "About" },
   { href: "/experience", label: "Experience" },
   { href: "/projects", label: "Projects" },
+  { href: "/journey", label: "Journey" },
 ];
 
 export default function Sidebar() {
@@ -22,7 +23,7 @@ export default function Sidebar() {
             key={href}
             href={href}
             aria-current={active ? "page" : undefined}
-            className={`rounded-md px-3 py-2 text-sm transition-colors ${
+            className={`origin-left rounded-md px-2.5 py-2 md:px-3 text-sm transition-[transform,color,background-color] duration-200 ease-out hover:scale-[1.06] focus-visible:scale-[1.06] motion-reduce:transition-colors motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100 ${
               active
                 ? "bg-foreground/10 font-medium text-foreground"
                 : "text-foreground/60 hover:bg-foreground/5 hover:text-foreground"
@@ -37,11 +38,9 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile: top bar with inline links */}
-      <header className="flex items-center justify-between gap-4 border-b border-foreground/10 px-4 py-3 md:hidden">
-        <Link href="/" className="text-sm font-semibold">
-          {profile.name}
-        </Link>
+      {/* Mobile: top bar with inline links. The name is dropped so all four
+          links fit at 375px; the About page already introduces Anthony. */}
+      <header className="relative z-20 border-b border-foreground/10 bg-background/80 px-4 py-3 backdrop-blur-md md:hidden">
         {nav}
       </header>
 

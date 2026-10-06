@@ -13,7 +13,7 @@ export const profile: Profile = {
   education: {
     school: "University of Western Ontario",
     degree: "BASc Software Engineering",
-    period: "Sept 2022 – Present",
+    period: "Sept 2022 – 2027",
     gpa: "3.7",
     coursework: [
       "Multi-Agent Architecture",

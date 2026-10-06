@@ -1,0 +1,64 @@
+{
+  "regions": [
+    {
+      "id": "niagara-on",
+      "west": -89.53333333333333,
+      "south": 37,
+      "east": -70.83333333333333,
+      "north": 49.8,
+      "stops": [
+        "born",
+        "western",
+        "bgc",
+        "mcgregor",
+        "plan-catalyst",
+        "hack-the-valley",
+        "kiyoko",
+        "now"
+      ]
+    },
+    {
+      "id": "vancouver-bc",
+      "west": -132.33333333333334,
+      "south": 43.266666666666666,
+      "east": -113.91666666666667,
+      "north": 55.28333333333333,
+      "stops": [
+        "trip-vancouver"
+      ]
+    },
+    {
+      "id": "tokyo-japan",
+      "west": 132.25,
+      "south": 29.666666666666668,
+      "east": 147.05,
+      "north": 41.68333333333333,
+      "stops": [
+        "trip-tokyo"
+      ]
+    },
+    {
+      "id": "lisbon-portugal",
+      "west": -16.833333333333332,
+      "south": 32.71666666666667,
+      "east": -1.4333333333333333,
+      "north": 44.733333333333334,
+      "stops": [
+        "trip-lisbon"
+      ]
+    }
+  ],
+  "stopElevation": {
+    "born": 176,
+    "western": 251,
+    "trip-vancouver": 25,
+    "bgc": 251,
+    "trip-tokyo": 25,
+    "mcgregor": 176,
+    "trip-lisbon": 75,
+    "plan-catalyst": 176,
+    "hack-the-valley": 125,
+    "kiyoko": 251,
+    "now": 251
+  }
+}

@@ -46,3 +46,23 @@ export interface SkillGroup {
   label: string;
   items: string[];
 }
+
+export type JourneyKind = "life" | "education" | "work" | "project" | "travel";
+
+export interface JourneyStop {
+  id: string;
+  /** Display date, e.g. "Sept 2022". Stops are listed in chronological order. */
+  date: string;
+  place: string;
+  lat: number;
+  lng: number;
+  kind: JourneyKind;
+  title: string;
+  description?: string;
+  /** Remote role: pinned where Anthony was, not where the company is. */
+  remote?: boolean;
+  /** The current stop; the journey ends here. */
+  now?: boolean;
+  /** Set on mocked or unverified stops. Shown as a "Draft" badge with this note. */
+  draft?: string;
+}
