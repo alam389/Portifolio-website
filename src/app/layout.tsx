@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Sidebar from "@/components/Sidebar";
+import Dock from "@/components/Dock";
 import SmoothScroll from "@/components/SmoothScroll";
 import { profile } from "@/data";
 import "./globals.css";
@@ -31,8 +31,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SmoothScroll />
-        <Sidebar />
-        <main className="mx-auto max-w-3xl px-6 py-10 md:ml-64 md:px-12 md:py-16">
+        <Dock />
+        <main className="mx-auto box-content max-w-3xl px-6 pt-10 pb-28 md:px-24 md:py-16">
           {children}
         </main>
       </body>

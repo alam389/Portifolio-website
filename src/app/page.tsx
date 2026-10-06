@@ -6,8 +6,25 @@ export default function About() {
   return (
     <div className="flex flex-col gap-12">
       <section>
-        <h1 className="text-3xl font-semibold tracking-tight">About</h1>
-        <div className="mt-4 flex flex-col gap-4 text-foreground/80">
+        <h1 className="text-3xl font-semibold tracking-tight">{profile.name}</h1>
+        <p className="mt-1 text-foreground/60">
+          {profile.role} · {profile.location}
+        </p>
+        <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          {profile.socials.map(({ label, href }) => (
+            <li key={label}>
+              <a
+                href={href}
+                target={href.startsWith("http") ? "_blank" : undefined}
+                rel="noopener noreferrer"
+                className="text-foreground/60 transition-colors hover:text-foreground"
+              >
+                {label} ↗
+              </a>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-6 flex flex-col gap-4 text-foreground/80">
           {profile.summary.map((p) => (
             <p key={p}>{p}</p>
           ))}
