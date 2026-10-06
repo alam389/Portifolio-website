@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pixel Valley — layered SVG parallax</title>
+<style>
+  /* ---------- palette: every color lives here ---------- */
+  :root {
+    /* sky: stepped fake-gradient, top -> horizon */
+    --sky-1: #93C5E8;
+    --sky-2: #9DCBEA;
+    --sky-3: #A8D1EC;
+    --sky-4: #B3D8EE;
+    --sky-5: #BDDEF0;
+    --sky-6: #C8E4F2;
+    --sun-core: #FFD966;
+    --sun-glow: #FFE9AC;
+    --cloud: #FFFFFF;
+    --cloud-shade: #DDEBF3;
+    --star: transparent;            /* stars only appear at dusk */
+    /* far mountains */
+    --rock-far: #707A85;
+    --rock: #5C6670;
+    --snow: #EEF4F6;
+    --snow-shade: #D6E2E8;
+    /* near hills */
+    --hill: #4A7C4E;
+    --hill-light: #578E57;
+    --hill-shade: #3D6A42;
+    /* foreground */
+    --fg: #2E5233;
+    --fg-light: #6B9E4F;
+    --fg-dark: #26452B;
+    --trunk: #4F3A28;
+    /* page chrome */
+    --ink: #1F2A33;
+    --panel: rgba(255, 255, 255, 0.55);
+  }
+  /* ---------- dusk / night override ---------- */
+  [data-theme="dark"] {
+    --sky-1: #0E1430;
+    --sky-2: #131A3D;
+    --sky-3: #1A234C;
+    --sky-4: #232E5E;
+    --sky-5: #2D3A6F;
+    --sky-6: #3A4A80;
+    --sun-core: #EDEDE0;            /* the sun becomes a moon */
+    --sun-glow: #2A3560;
+    --cloud: #39446B;
+    --cloud-shade: #2E3857;
+    --star: #E8EEF8;
+    --rock-far: #3A4358;
+    --rock: #303849;
+    --snow: #B9C6DB;
+    --snow-shade: #9DACC6;
+    --hill: #274B3E;
+    --hill-light: #31594A;
+    --hill-shade: #1D3A30;
+    --fg: #1B3325;
+    --fg-light: #3C5F41;
+    --fg-dark: #12241A;
+    --trunk: #2A2019;
+    --ink: #E8EEF8;
+    --panel: rgba(10, 14, 32, 0.55);
+  }
+
+  * { margin: 0; box-sizing: border-box; }
+  html { height: 100%; }
+  body {
+    /* tall page so there is something to scroll; bg matches the horizon so
+       the sky layer's slow drift never reveals a hole */
+    min-height: 320vh;
+    background: var(--sky-6);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--ink);
+  }
+
+  /* ---------- stacking container + absolutely positioned layers ---------- */
+  .parallax {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: -1;
+    background: var(--sky-6);
+  }
+  .parallax-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    will-change: transform;
+  }
+
+  /* ---------- page chrome ---------- */
+  main { position: relative; }
+  .card {
+    width: fit-content;
+    margin: 0 auto;
+    padding: 20px 28px;
+    background: var(--panel);
+    border: 4px solid var(--ink);
+    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.25);
+    text-align: center;
+    backdrop-filter: blur(2px);
+  }
+  .card h1 { font-size: 28px; letter-spacing: 4px; text-transform: uppercase; }
+  .card p { margin-top: 8px; font-size: 13px; letter-spacing: 1px; }
+  .hero { padding-top: 12vh; }
+  .mid { padding-top: 170vh; }
+  #themeToggle {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 10;
+    padding: 10px 14px;
+    font: inherit;
+    color: var(--ink);
+    background: var(--panel);
+    border: 4px solid var(--ink);
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+  }
+  #themeToggle:active { translate: 2px 2px; box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25); }
+</style>
+</head>
+<body>
+
+  <div class="parallax" aria-hidden="true">
+    <!-- layer: sky (speed 0.1) -->
+    <svg class="parallax-layer" data-speed="0.1" viewBox="0 0 1920 1080"
+         preserveAspectRatio="xMidYMax slice" shape-rendering="crispEdges"
+         xmlns="http://www.w3.org/2000/svg" role="presentation" focusable="false">
+      <rect x="0" y="0" width="1920" height="176" fill="var(--sky-1)"/>
+      <rect x="0" y="176" width="1920" height="176" fill="var(--sky-2)"/>
+      <rect x="0" y="352" width="1920" height="176" fill="var(--sky-3)"/>
+      <rect x="0" y="528" width="1920" height="176" fill="var(--sky-4)"/>
+      <rect x="0" y="704" width="1920" height="176" fill="var(--sky-5)"/>
+      <rect x="0" y="880" width="1920" height="200" fill="var(--sky-6)"/>
+      <rect x="1760" y="384" width="16" height="16" fill="var(--star)"/>
+      <rect x="112" y="384" width="16" height="16" fill="var(--star)"/>
+      <rect x="1728" y="192" width="16" height="16" fill="var(--star)"/>
+      <rect x="768" y="208" width="16" height="16" fill="var(--star)"/>
+      <rect x="544" y="208" width="16" height="16" fill="var(--star)"/>
+      <rect x="1312" y="32" width="16" height="16" fill="var(--star)"/>
+      <rect x="1296" y="176" width="16" height="16" fill="var(--star)"/>
+      <rect x="720" y="0" width="16" height="16" fill="var(--star)"/>
+      <rect x="176" y="112" width="16" height="16" fill="var(--star)"/>
+      <rect x="384" y="320" width="16" height="16" fill="var(--star)"/>
+      <rect x="960" y="384" width="16" height="16" fill="var(--star)"/>
+      <rect x="1056" y="448" width="16" height="16" fill="var(--star)"/>
+      <rect x="752" y="352" width="16" height="16" fill="var(--star)"/>
+      <rect x="1248" y="160" width="16" height="16" fill="var(--star)"/>
+      <rect x="672" y="304" width="16" height="16" fill="var(--star)"/>
+      <rect x="1200" y="32" width="16" height="16" fill="var(--star)"/>
+      <rect x="656" y="176" width="16" height="16" fill="var(--star)"/>
+      <rect x="96" y="368" width="16" height="16" fill="var(--star)"/>
+      <rect x="208" y="224" width="16" height="16" fill="var(--star)"/>
+      <rect x="1280" y="224" width="16" height="16" fill="var(--star)"/>
+      <rect x="784" y="384" width="16" height="16" fill="var(--star)"/>
+      <rect x="928" y="384" width="16" height="16" fill="var(--star)"/>
+      <rect x="1392" y="432" width="16" height="16" fill="var(--star)"/>
+      <rect x="832" y="160" width="16" height="16" fill="var(--star)"/>
+      <rect x="1472" y="224" width="16" height="16" fill="var(--star)"/>
+      <rect x="1168" y="176" width="16" height="16" fill="var(--star)"/>
+      <rect x="1296" y="304" width="16" height="16" fill="var(--star)"/>
+      <rect x="608" y="352" width="16" height="16" fill="var(--star)"/>
+      <rect x="784" y="368" width="16" height="16" fill="var(--star)"/>
+      <rect x="656" y="400" width="16" height="16" fill="var(--star)"/>
+      <rect x="784" y="176" width="16" height="16" fill="var(--star)"/>
+      <rect x="1312" y="0" width="16" height="16" fill="var(--star)"/>
+      <rect x="1696" y="176" width="16" height="16" fill="var(--star)"/>
+      <rect x="1408" y="208" width="16" height="16" fill="var(--star)"/>
+      <rect x="704" y="416" width="16" height="16" fill="var(--star)"/>
+      <rect x="1008" y="336" width="16" height="16" fill="var(--star)"/>
+      <rect x="560" y="64" width="16" height="16" fill="var(--star)"/>
+      <rect x="160" y="16" width="16" height="16" fill="var(--star)"/>
+      <rect x="1184" y="272" width="16" height="16" fill="var(--star)"/>
+      <rect x="544" y="160" width="16" height="16" fill="var(--star)"/>
+      <rect x="880" y="416" width="16" height="16" fill="var(--star)"/>
+      <rect x="1136" y="336" width="16" height="16" fill="var(--star)"/>
+      <rect x="1568" y="256" width="16" height="16" fill="var(--star)"/>
+      <rect x="1712" y="160" width="16" height="16" fill="var(--star)"/>
+      <rect x="688" y="160" width="16" height="16" fill="var(--star)"/>
+      <rect x="624" y="208" width="16" height="16" fill="var(--star)"/>
+      <rect x="128" y="160" width="16" height="16" fill="var(--star)"/>
+      <rect x="1504" y="80" width="16" height="16" fill="var(--star)"/>
+      <rect x="1856" y="448" width="16" height="16" fill="var(--star)"/>
+      <rect x="656" y="80" width="16" height="16" fill="var(--star)"/>
+      <rect x="704" y="448" width="16" height="16" fill="var(--star)"/>
+      <rect x="304" y="320" width="16" height="16" fill="var(--star)"/>
+      <rect x="768" y="208" width="16" height="16" fill="var(--star)"/>
+      <rect x="1824" y="176" width="16" height="16" fill="var(--star)"/>
+      <rect x="1488" y="240" width="16" height="16" fill="var(--star)"/>
+      <rect x="1392" y="176" width="16" height="16" fill="var(--star)"/>
+      <rect x="128" y="16" width="16" height="16" fill="var(--star)"/>
+      <rect x="848" y="400" width="16" height="16" fill="var(--star)"/>
+      <rect x="352" y="128" width="64" height="16" fill="var(--sun-glow)"/>
+      <rect x="320" y="144" width="128" height="16" fill="var(--sun-glow)"/>
+      <rect x="320" y="160" width="128" height="16" fill="var(--sun-glow)"/>
+      <rect x="304" y="176" width="160" height="16" fill="var(--sun-glow)"/>
+      <rect x="304" y="192" width="160" height="16" fill="var(--sun-glow)"/>
+      <rect x="304" y="208" width="160" height="16" fill="var(--sun-glow)"/>
+      <rect x="304" y="224" width="160" height="16" fill="var(--sun-glow)"/>
+      <rect x="320" y="240" width="128" height="16" fill="var(--sun-glow)"/>
+      <rect x="320" y="256" width="128" height="16" fill="var(--sun-glow)"/>
+      <rect x="352" y="272" width="64" height="16" fill="var(--sun-glow)"/>
+      <rect x="352" y="160" width="64" height="16" fill="var(--sun-core)"/>
+      <rect x="336" y="176" width="96" height="16" fill="var(--sun-core)"/>
+      <rect x="336" y="192" width="96" height="16" fill="var(--sun-core)"/>
+      <rect x="336" y="208" width="96" height="16" fill="var(--sun-core)"/>
+      <rect x="336" y="224" width="96" height="16" fill="var(--sun-core)"/>
+      <rect x="352" y="240" width="64" height="16" fill="var(--sun-core)"/>
+      <rect x="656" y="144" width="96" height="16" fill="var(--cloud)"/>
+      <rect x="624" y="160" width="160" height="16" fill="var(--cloud)"/>
+      <rect x="608" y="176" width="192" height="16" fill="var(--cloud)"/>
+      <rect x="624" y="192" width="160" height="16" fill="var(--cloud-shade)"/>
+      <rect x="192" y="336" width="80" height="16" fill="var(--cloud)"/>
+      <rect x="160" y="352" width="144" height="16" fill="var(--cloud)"/>
+      <rect x="176" y="368" width="112" height="16" fill="var(--cloud-shade)"/>
+      <rect x="1120" y="256" width="80" height="16" fill="var(--cloud)"/>
+      <rect x="1088" y="272" width="144" height="16" fill="var(--cloud)"/>
+      <rect x="1104" y="288" width="112" height="16" fill="var(--cloud-shade)"/>
+      <rect x="1392" y="208" width="96" height="16" fill="var(--cloud)"/>
+      <rect x="1360" y="224" width="160" height="16" fill="var(--cloud)"/>
+      <rect x="1344" y="240" width="192" height="16" fill="var(--cloud)"/>
+      <rect x="1360" y="256" width="160" height="16" fill="var(--cloud-shade)"/>
+      <rect x="1696" y="304" width="80" height="16" fill="var(--cloud)"/>
+      <rect x="1664" y="320" width="144" height="16" fill="var(--cloud)"/>
+      <rect x="1680" y="336" width="112" height="16" fill="var(--cloud-shade)"/>
+    </svg>
+    <!-- layer: mountains (speed 0.3) -->
+    <svg class="parallax-layer" data-speed="0.3" viewBox="0 0 1920 1080"
+         preserveAspectRatio="xMidYMax slice" shape-rendering="crispEdges"
+         xmlns="http://www.w3.org/2000/svg" role="presentation" focusable="false">
+      <rect x="208" y="608" width="32" height="16" fill="var(--rock-far)"/>
+      <rect x="192" y="624" width="64" height="16" fill="var(--rock-far)"/>
+      <rect x="176" y="640" width="96" height="16" fill="var(--rock-far)"/>
+      <rect x="160" y="656" width="128" height="16" fill="var(--rock-far)"/>
+      <rect x="144" y="672" width="160" height="16" fill="var(--rock-far)"/>
+      <rect x="128" y="688" width="192" height="16" fill="var(--rock-far)"/>
+      <rect x="112" y="704" width="224" height="16" fill="var(--rock-far)"/>
+      <rect x="96" y="720" width="256" height="16" fill="var(--rock-far)"/>
+      <rect x="80" y="736" width="288" height="16" fill="var(--rock-far)"/>
+      <rect x="432" y="432" width="32" height="16" fill="var(--snow)"/>
+      <rect x="416" y="448" width="64" height="16" fill="var(--snow)"/>
+      <rect x="400" y="464" width="96" height="16" fill="var(--snow)"/>
+      <rect x="384" y="480" width="128" height="16" fill="var(--snow)"/>
+      <rect x="368" y="496" width="160" height="16" fill="var(--snow)"/>
+      <rect x="352" y="512" width="192" height="16" fill="var(--snow-shade)"/>
+      <rect x="336" y="528" width="224" height="16" fill="var(--rock-far)"/>
+      <rect x="320" y="544" width="256" height="16" fill="var(--rock-far)"/>
+      <rect x="304" y="560" width="288" height="16" fill="var(--rock-far)"/>
+      <rect x="288" y="576" width="320" height="16" fill="var(--rock-far)"/>
+      <rect x="272" y="592" width="352" height="16" fill="var(--rock-far)"/>
+      <rect x="256" y="608" width="384" height="16" fill="var(--rock-far)"/>
+      <rect x="240" y="624" width="416" height="16" fill="var(--rock-far)"/>
+      <rect x="224" y="640" width="448" height="16" fill="var(--rock-far)"/>
+      <rect x="208" y="656" width="480" height="16" fill="var(--rock-far)"/>
+      <rect x="192" y="672" width="512" height="16" fill="var(--rock-far)"/>
+      <rect x="176" y="688" width="544" height="16" fill="var(--rock-far)"/>
+      <rect x="160" y="704" width="576" height="16" fill="var(--rock-far)"/>
+      <rect x="144" y="720" width="608" height="16" fill="var(--rock-far)"/>
+      <rect x="128" y="736" width="640" height="16" fill="var(--rock-far)"/>
+      <rect x="720" y="352" width="32" height="16" fill="var(--snow)"/>
+      <rect x="704" y="368" width="64" height="16" fill="var(--snow)"/>
+      <rect x="688" y="384" width="96" height="16" fill="var(--snow)"/>
+      <rect x="672" y="400" width="128" height="16" fill="var(--snow)"/>
+      <rect x="656" y="416" width="160" height="16" fill="var(--snow)"/>
+      <rect x="640" y="432" width="192" height="16" fill="var(--snow-shade)"/>
+      <rect x="624" y="448" width="224" height="16" fill="var(--rock-far)"/>
+      <rect x="608" y="464" width="256" height="16" fill="var(--rock-far)"/>
+      <rect x="592" y="480" width="288" height="16" fill="var(--rock-far)"/>
+      <rect x="576" y="496" width="320" height="16" fill="var(--rock-far)"/>
+      <rect x="560" y="512" width="352" height="16" fill="var(--rock-far)"/>
+      <rect x="544" y="528" width="384" height="16" fill="var(--rock-far)"/>
+      <rect x="528" y="544" width="416" height="16" fill="var(--rock-far)"/>
+      <rect x="512" y="560" width="448" height="16" fill="var(--rock-far)"/>
+      <rect x="496" y="576" width="480" height="16" fill="var(--rock-far)"/>
+      <rect x="480" y="592" width="512" height="16" fill="var(--rock-far)"/>
+      <rect x="464" y="608" width="544" height="16" fill="var(--rock-far)"/>
+      <rect x="448" y="624" width="576" height="16" fill="var(--rock-far)"/>
+      <rect x="432" y="640" width="608" height="16" fill="var(--rock-far)"/>
+      <rect x="416" y="656" width="640" height="16" fill="var(--rock-far)"/>
+      <rect x="400" y="672" width="672" height="16" fill="var(--rock-far)"/>
+      <rect x="384" y="688" width="704" height="16" fill="var(--rock-far)"/>
+      <rect x="368" y="704" width="736" height="16" fill="var(--rock-far)"/>
+      <rect x="352" y="720" width="768" height="16" fill="var(--rock-far)"/>
+      <rect x="336" y="736" width="800" height="16" fill="var(--rock-far)"/>
+      <rect x="1040" y="400" width="32" height="16" fill="var(--snow)"/>
+      <rect x="1024" y="416" width="64" height="16" fill="var(--snow)"/>
+      <rect x="1008" y="432" width="96" height="16" fill="var(--snow)"/>
+      <rect x="992" y="448" width="128" height="16" fill="var(--snow)"/>
+      <rect x="976" y="464" width="160" height="16" fill="var(--snow)"/>
+      <rect x="960" y="480" width="192" height="16" fill="var(--snow-shade)"/>
+      <rect x="944" y="496" width="224" height="16" fill="var(--rock-far)"/>
+      <rect x="928" y="512" width="256" height="16" fill="var(--rock-far)"/>
+      <rect x="912" y="528" width="288" height="16" fill="var(--rock-far)"/>
+      <rect x="896" y="544" width="320" height="16" fill="var(--rock-far)"/>
+      <rect x="880" y="560" width="352" height="16" fill="var(--rock-far)"/>
+      <rect x="864" y="576" width="384" height="16" fill="var(--rock-far)"/>
+      <rect x="848" y="592" width="416" height="16" fill="var(--rock-far)"/>
+      <rect x="832" y="608" width="448" height="16" fill="var(--rock-far)"/>
+      <rect x="816" y="624" width="480" height="16" fill="var(--rock-far)"/>
+      <rect x="800" y="640" width="512" height="16" fill="var(--rock-far)"/>
+      <rect x="784" y="656" width="544" height="16" fill="var(--rock-far)"/>
+      <rect x="768" y="672" width="576" height="16" fill="var(--rock-far)"/>
+      <rect x="752" y="688" width="608" height="16" fill="var(--rock-far)"/>
+      <rect x="736" y="704" width="640" height="16" fill="var(--rock-far)"/>
+      <rect x="720" y="720" width="672" height="16" fill="var(--rock-far)"/>
+      <rect x="704" y="736" width="704" height="16" fill="var(--rock-far)"/>
+      <rect x="1360" y="336" width="32" height="16" fill="var(--snow)"/>
+      <rect x="1344" y="352" width="64" height="16" fill="var(--snow)"/>
+      <rect x="1328" y="368" width="96" height="16" fill="var(--snow)"/>
+      <rect x="1312" y="384" width="128" height="16" fill="var(--snow)"/>
+      <rect x="1296" y="400" width="160" height="16" fill="var(--snow)"/>
+      <rect x="1280" y="416" width="192" height="16" fill="var(--snow-shade)"/>
+      <rect x="1264" y="432" width="224" height="16" fill="var(--rock-far)"/>
+      <rect x="1248" y="448" width="256" height="16" fill="var(--rock-far)"/>
+      <rect x="1232" y="464" width="288" height="16" fill="var(--rock-far)"/>
+      <rect x="1216" y="480" width="320" height="16" fill="var(--rock-far)"/>
+      <rect x="1200" y="496" width="352" height="16" fill="var(--rock-far)"/>
+      <rect x="1184" y="512" width="384" height="16" fill="var(--rock-far)"/>
+      <rect x="1168" y="528" width="416" height="16" fill="var(--rock-far)"/>
+      <rect x="1152" y="544" width="448" height="16" fill="var(--rock-far)"/>
+      <rect x="1136" y="560" width="480" height="16" fill="var(--rock-far)"/>
+      <rect x="1120" y="576" width="512" height="16" fill="var(--rock-far)"/>
+      <rect x="1104" y="592" width="544" height="16" fill="var(--rock-far)"/>
+      <rect x="1088" y="608" width="576" height="16" fill="var(--rock-far)"/>
+      <rect x="1072" y="624" width="608" height="16" fill="var(--rock-far)"/>
+      <rect x="1056" y="640" width="640" height="16" fill="var(--rock-far)"/>
+      <rect x="1040" y="656" width="672" height="16" fill="var(--rock-far)"/>
+      <rect x="1024" y="672" width="704" height="16" fill="var(--rock-far)"/>
+      <rect x="1008" y="688" width="736" height="16" fill="var(--rock-far)"/>
+      <rect x="992" y="704" width="768" height="16" fill="var(--rock-far)"/>
+      <rect x="976" y="720" width="800" height="16" fill="var(--rock-far)"/>
+      <rect x="960" y="736" width="832" height="16" fill="var(--rock-far)"/>
+      <rect x="1616" y="480" width="32" height="16" fill="var(--snow)"/>
+      <rect x="1600" y="496" width="64" height="16" fill="var(--snow)"/>
+      <rect x="1584" y="512" width="96" height="16" fill="var(--snow)"/>
+      <rect x="1568" y="528" width="128" height="16" fill="var(--snow)"/>
+      <rect x="1552" y="544" width="160" height="16" fill="var(--snow)"/>
+      <rect x="1536" y="560" width="192" height="16" fill="var(--snow-shade)"/>
+      <rect x="1520" y="576" width="224" height="16" fill="var(--rock-far)"/>
+      <rect x="1504" y="592" width="256" height="16" fill="var(--rock-far)"/>
+      <rect x="1488" y="608" width="288" height="16" fill="var(--rock-far)"/>
+      <rect x="1472" y="624" width="320" height="16" fill="var(--rock-far)"/>
+      <rect x="1456" y="640" width="352" height="16" fill="var(--rock-far)"/>
+      <rect x="1440" y="656" width="384" height="16" fill="var(--rock-far)"/>
+      <rect x="1424" y="672" width="416" height="16" fill="var(--rock-far)"/>
+      <rect x="1408" y="688" width="448" height="16" fill="var(--rock-far)"/>
+      <rect x="1392" y="704" width="480" height="16" fill="var(--rock-far)"/>
+      <rect x="1376" y="720" width="512" height="16" fill="var(--rock-far)"/>
+      <rect x="1360" y="736" width="544" height="16" fill="var(--rock-far)"/>
+      <rect x="1712" y="592" width="32" height="16" fill="var(--rock-far)"/>
+      <rect x="1696" y="608" width="64" height="16" fill="var(--rock-far)"/>
+      <rect x="1680" y="624" width="96" height="16" fill="var(--rock-far)"/>
+      <rect x="1664" y="640" width="128" height="16" fill="var(--rock-far)"/>
+      <rect x="1648" y="656" width="160" height="16" fill="var(--rock-far)"/>
+      <rect x="1632" y="672" width="192" height="16" fill="var(--rock-far)"/>
+      <rect x="1616" y="688" width="224" height="16" fill="var(--rock-far)"/>
+      <rect x="1600" y="704" width="256" height="16" fill="var(--rock-far)"/>
+      <rect x="1584" y="720" width="288" height="16" fill="var(--rock-far)"/>
+      <rect x="1568" y="736" width="320" height="16" fill="var(--rock-far)"/>
+      <rect x="0" y="752" width="1920" height="328" fill="var(--rock-far)"/>
+      <rect x="144" y="672" width="32" height="16" fill="var(--rock)"/>
+      <rect x="128" y="688" width="64" height="16" fill="var(--rock)"/>
+      <rect x="112" y="704" width="96" height="16" fill="var(--rock)"/>
+      <rect x="96" y="720" width="128" height="16" fill="var(--rock)"/>
+      <rect x="80" y="736" width="160" height="16" fill="var(--rock)"/>
+      <rect x="64" y="752" width="192" height="16" fill="var(--rock)"/>
+      <rect x="48" y="768" width="224" height="16" fill="var(--rock)"/>
+      <rect x="32" y="784" width="256" height="16" fill="var(--rock)"/>
+      <rect x="368" y="528" width="32" height="16" fill="var(--snow)"/>
+      <rect x="352" y="544" width="64" height="16" fill="var(--snow)"/>
+      <rect x="336" y="560" width="96" height="16" fill="var(--snow)"/>
+      <rect x="320" y="576" width="128" height="16" fill="var(--snow)"/>
+      <rect x="304" y="592" width="160" height="16" fill="var(--snow-shade)"/>
+      <rect x="288" y="608" width="192" height="16" fill="var(--rock)"/>
+      <rect x="272" y="624" width="224" height="16" fill="var(--rock)"/>
+      <rect x="256" y="640" width="256" height="16" fill="var(--rock)"/>
+      <rect x="240" y="656" width="288" height="16" fill="var(--rock)"/>
+      <rect x="224" y="672" width="320" height="16" fill="var(--rock)"/>
+      <rect x="208" y="688" width="352" height="16" fill="var(--rock)"/>
+      <rect x="192" y="704" width="384" height="16" fill="var(--rock)"/>
+      <rect x="176" y="720" width="416" height="16" fill="var(--rock)"/>
+      <rect x="160" y="736" width="448" height="16" fill="var(--rock)"/>
+      <rect x="144" y="752" width="480" height="16" fill="var(--rock)"/>
+      <rect x="128" y="768" width="512" height="16" fill="var(--rock)"/>
+      <rect x="112" y="784" width="544" height="16" fill="var(--rock)"/>
+      <rect x="656" y="464" width="32" height="16" fill="var(--snow)"/>
+      <rect x="640" y="480" width="64" height="16" fill="var(--snow)"/>
+      <rect x="624" y="496" width="96" height="16" fill="var(--snow)"/>
+      <rect x="608" y="512" width="128" height="16" fill="var(--snow)"/>
+      <rect x="592" y="528" width="160" height="16" fill="var(--snow-shade)"/>
+      <rect x="576" y="544" width="192" height="16" fill="var(--rock)"/>
+      <rect x="560" y="560" width="224" height="16" fill="var(--rock)"/>
+      <rect x="544" y="576" width="256" height="16" fill="var(--rock)"/>
+      <rect x="528" y="592" width="288" height="16" fill="var(--rock)"/>
+      <rect x="512" y="608" width="320" height="16" fill="var(--rock)"/>
+      <rect x="496" y="624" width="352" height="16" fill="var(--rock)"/>
+      <rect x="480" y="640" width="384" height="16" fill="var(--rock)"/>
+      <rect x="464" y="656" width="416" height="16" fill="var(--rock)"/>
+      <rect x="448" y="672" width="448" height="16" fill="var(--rock)"/>
+      <rect x="432" y="688" width="480" height="16" fill="var(--rock)"/>
+      <rect x="416" y="704" width="512" height="16" fill="var(--rock)"/>
+      <rect x="400" y="720" width="544" height="16" fill="var(--rock)"/>
+      <rect x="384" y="736" width="576" height="16" fill="var(--rock)"/>
+      <rect x="368" y="752" width="608" height="16" fill="var(--rock)"/>
+      <rect x="352" y="768" width="640" height="16" fill="var(--rock)"/>
+      <rect x="336" y="784" width="672" height="16" fill="var(--rock)"/>
+      <rect x="944" y="544" width="32" height="16" fill="var(--snow)"/>
+      <rect x="928" y="560" width="64" height="16" fill="var(--snow)"/>
+      <rect x="912" y="576" width="96" height="16" fill="var(--snow)"/>
+      <rect x="896" y="592" width="128" height="16" fill="var(--snow)"/>
+      <rect x="880" y="608" width="160" height="16" fill="var(--snow-shade)"/>
+      <rect x="864" y="624" width="192" height="16" fill="var(--rock)"/>
+      <rect x="848" y="640" width="224" height="16" fill="var(--rock)"/>
+      <rect x="832" y="656" width="256" height="16" fill="var(--rock)"/>
+      <rect x="816" y="672" width="288" height="16" fill="var(--rock)"/>
+      <rect x="800" y="688" width="320" height="16" fill="var(--rock)"/>
+      <rect x="784" y="704" width="352" height="16" fill="var(--rock)"/>
+      <rect x="768" y="720" width="384" height="16" fill="var(--rock)"/>
+      <rect x="752" y="736" width="416" height="16" fill="var(--rock)"/>
+      <rect x="736" y="752" width="448" height="16" fill="var(--rock)"/>
+      <rect x="720" y="768" width="480" height="16" fill="var(--rock)"/>
+      <rect x="704" y="784" width="512" height="16" fill="var(--rock)"/>
+      <rect x="1200" y="448" width="32" height="16" fill="var(--snow)"/>
+      <rect x="1184" y="464" width="64" height="16" fill="var(--snow)"/>
+      <rect x="1168" y="480" width="96" height="16" fill="var(--snow)"/>
+      <rect x="1152" y="496" width="128" height="16" fill="var(--snow)"/>
+      <rect x="1136" y="512" width="160" height="16" fill="var(--snow-shade)"/>
+      <rect x="1120" y="528" width="192" height="16" fill="var(--rock)"/>
+      <rect x="1104" y="544" width="224" height="16" fill="var(--rock)"/>
+      <rect x="1088" y="560" width="256" height="16" fill="var(--rock)"/>
+      <rect x="1072" y="576" width="288" height="16" fill="var(--rock)"/>
+      <rect x="1056" y="592" width="320" height="16" fill="var(--rock)"/>
+      <rect x="1040" y="608" width="352" height="16" fill="var(--rock)"/>
+      <rect x="1024" y="624" width="384" height="16" fill="var(--rock)"/>
+      <rect x="1008" y="640" width="416" height="16" fill="var(--rock)"/>
+      <rect x="992" y="656" width="448" height="16" fill="var(--rock)"/>
+      <rect x="976" y="672" width="480" height="16" fill="var(--rock)"/>
+      <rect x="960" y="688" width="512" height="16" fill="var(--rock)"/>
+      <rect x="944" y="704" width="544" height="16" fill="var(--rock)"/>
+      <rect x="928" y="720" width="576" height="16" fill="var(--rock)"/>
+      <rect x="912" y="736" width="608" height="16" fill="var(--rock)"/>
+      <rect x="896" y="752" width="640" height="16" fill="var(--rock)"/>
+      <rect x="880" y="768" width="672" height="16" fill="var(--rock)"/>
+      <rect x="864" y="784" width="704" height="16" fill="var(--rock)"/>
+      <rect x="1488" y="512" width="32" height="16" fill="var(--snow)"/>
+      <rect x="1472" y="528" width="64" height="16" fill="var(--snow)"/>
+      <rect x="1456" y="544" width="96" height="16" fill="var(--snow)"/>
+      <rect x="1440" y="560" width="128" height="16" fill="var(--snow)"/>
+      <rect x="1424" y="576" width="160" height="16" fill="var(--snow-shade)"/>
+      <rect x="1408" y="592" width="192" height="16" fill="var(--rock)"/>
+      <rect x="1392" y="608" width="224" height="16" fill="var(--rock)"/>
+      <rect x="1376" y="624" width="256" height="16" fill="var(--rock)"/>
+      <rect x="1360" y="640" width="288" height="16" fill="var(--rock)"/>
+      <rect x="1344" y="656" width="320" height="16" fill="var(--rock)"/>
+      <rect x="1328" y="672" width="352" height="16" fill="var(--rock)"/>
+      <rect x="1312" y="688" width="384" height="16" fill="var(--rock)"/>
+      <rect x="1296" y="704" width="416" height="16" fill="var(--rock)"/>
+      <rect x="1280" y="720" width="448" height="16" fill="var(--rock)"/>
+      <rect x="1264" y="736" width="480" height="16" fill="var(--rock)"/>
+      <rect x="1248" y="752" width="512" height="16" fill="var(--rock)"/>
+      <rect x="1232" y="768" width="544" height="16" fill="var(--rock)"/>
+      <rect x="1216" y="784" width="576" height="16" fill="var(--rock)"/>
+      <rect x="1712" y="640" width="32" height="16" fill="var(--rock)"/>
+      <rect x="1696" y="656" width="64" height="16" fill="var(--rock)"/>
+      <rect x="1680" y="672" width="96" height="16" fill="var(--rock)"/>
+      <rect x="1664" y="688" width="128" height="16" fill="var(--rock)"/>
+      <rect x="1648" y="704" width="160" height="16" fill="var(--rock)"/>
+      <rect x="1632" y="720" width="192" height="16" fill="var(--rock)"/>
+      <rect x="1616" y="736" width="224" height="16" fill="var(--rock)"/>
+      <rect x="1600" y="752" width="256" height="16" fill="var(--rock)"/>
+      <rect x="1584" y="768" width="288" height="16" fill="var(--rock)"/>
+      <rect x="1568" y="784" width="320" height="16" fill="var(--rock)"/>
+      <rect x="0" y="800" width="1920" height="280" fill="var(--rock)"/>
+    </svg>
+    <!-- layer: hills (speed 0.6) -->
+    <svg class="parallax-layer" data-speed="0.6" viewBox="0 0 1920 1080"
+         preserveAspectRatio="xMidYMax slice" shape-rendering="crispEdges"
+         xmlns="http://www.w3.org/2000/svg" role="presentation" focusable="false">
+      <rect x="176" y="864" width="32" height="16" fill="var(--hill-light)"/>
+      <rect x="128" y="880" width="128" height="16" fill="var(--hill)"/>
+      <rect x="128" y="880" width="64" height="16" fill="var(--hill-light)"/>
+      <rect x="80" y="896" width="224" height="16" fill="var(--hill)"/>
+      <rect x="32" y="912" width="320" height="16" fill="var(--hill)"/>
+      <rect x="496" y="816" width="32" height="16" fill="var(--hill-light)"/>
+      <rect x="448" y="832" width="128" height="16" fill="var(--hill)"/>
+      <rect x="448" y="832" width="64" height="16" fill="var(--hill-light)"/>
+      <rect x="400" y="848" width="224" height="16" fill="var(--hill)"/>
+      <rect x="352" y="864" width="320" height="16" fill="var(--hill)"/>
+      <rect x="304" y="880" width="416" height="16" fill="var(--hill)"/>
+      <rect x="256" y="896" width="512" height="16" fill="var(--hill)"/>
+      <rect x="208" y="912" width="608" height="16" fill="var(--hill)"/>
+      <rect x="848" y="784" width="32" height="16" fill="var(--hill-light)"/>
+      <rect x="800" y="800" width="128" height="16" fill="var(--hill)"/>
+      <rect x="800" y="800" width="64" height="16" fill="var(--hill-light)"/>
+      <rect x="752" y="816" width="224" height="16" fill="var(--hill)"/>
+      <rect x="704" y="832" width="320" height="16" fill="var(--hill)"/>
+      <rect x="656" y="848" width="416" height="16" fill="var(--hill)"/>
+      <rect x="608" y="864" width="512" height="16" fill="var(--hill)"/>
+      <rect x="560" y="880" width="608" height="16" fill="var(--hill)"/>
+      <rect x="512" y="896" width="704" height="16" fill="var(--hill)"/>
+      <rect x="464" y="912" width="800" height="16" fill="var(--hill)"/>
+      <rect x="1200" y="832" width="32" height="16" fill="var(--hill-light)"/>
+      <rect x="1152" y="848" width="128" height="16" fill="var(--hill)"/>
+      <rect x="1152" y="848" width="64" height="16" fill="var(--hill-light)"/>
+      <rect x="1104" y="864" width="224" height="16" fill="var(--hill)"/>
+      <rect x="1056" y="880" width="320" height="16" fill="var(--hill)"/>
+      <rect x="1008" y="896" width="416" height="16" fill="var(--hill)"/>
+      <rect x="960" y="912" width="512" height="16" fill="var(--hill)"/>
+      <rect x="1520" y="800" width="32" height="16" fill="var(--hill-light)"/>
+      <rect x="1472" y="816" width="128" height="16" fill="var(--hill)"/>
+      <rect x="1472" y="816" width="64" height="16" fill="var(--hill-light)"/>
+      <rect x="1424" y="832" width="224" height="16" fill="var(--hill)"/>
+      <rect x="1376" y="848" width="320" height="16" fill="var(--hill)"/>
+      <rect x="1328" y="864" width="416" height="16" fill="var(--hill)"/>
+      <rect x="1280" y="880" width="512" height="16" fill="var(--hill)"/>
+      <rect x="1232" y="896" width="608" height="16" fill="var(--hill)"/>
+      <rect x="1184" y="912" width="704" height="16" fill="var(--hill)"/>
+      <rect x="1712" y="864" width="32" height="16" fill="var(--hill-light)"/>
+      <rect x="1664" y="880" width="128" height="16" fill="var(--hill)"/>
+      <rect x="1664" y="880" width="64" height="16" fill="var(--hill-light)"/>
+      <rect x="1616" y="896" width="224" height="16" fill="var(--hill)"/>
+      <rect x="1568" y="912" width="320" height="16" fill="var(--hill)"/>
+      <rect x="0" y="928" width="1920" height="152" fill="var(--hill)"/>
+      <rect x="576" y="800" width="16" height="16" fill="var(--hill-shade)"/>
+      <rect x="560" y="816" width="48" height="16" fill="var(--hill-shade)"/>
+      <rect x="560" y="832" width="48" height="16" fill="var(--hill-shade)"/>
+      <rect x="576" y="848" width="16" height="16" fill="var(--hill-shade)"/>
+      <rect x="768" y="768" width="16" height="16" fill="var(--hill-shade)"/>
+      <rect x="752" y="784" width="48" height="16" fill="var(--hill-shade)"/>
+      <rect x="752" y="800" width="48" height="16" fill="var(--hill-shade)"/>
+      <rect x="768" y="816" width="16" height="16" fill="var(--hill-shade)"/>
+      <rect x="1264" y="800" width="16" height="16" fill="var(--hill-shade)"/>
+      <rect x="1248" y="816" width="48" height="16" fill="var(--hill-shade)"/>
+      <rect x="1248" y="832" width="48" height="16" fill="var(--hill-shade)"/>
+      <rect x="1264" y="848" width="16" height="16" fill="var(--hill-shade)"/>
+      <rect x="1456" y="784" width="16" height="16" fill="var(--hill-shade)"/>
+      <rect x="1440" y="800" width="48" height="16" fill="var(--hill-shade)"/>
+      <rect x="1440" y="816" width="48" height="16" fill="var(--hill-shade)"/>
+      <rect x="1456" y="832" width="16" height="16" fill="var(--hill-shade)"/>
+      <rect x="1008" y="784" width="16" height="16" fill="var(--hill-shade)"/>
+      <rect x="992" y="800" width="48" height="16" fill="var(--hill-shade)"/>
+      <rect x="992" y="816" width="48" height="16" fill="var(--hill-shade)"/>
+      <rect x="1008" y="832" width="16" height="16" fill="var(--hill-shade)"/>
+      <rect x="1632" y="784" width="16" height="16" fill="var(--hill-shade)"/>
+      <rect x="1616" y="800" width="48" height="16" fill="var(--hill-shade)"/>
+      <rect x="1616" y="816" width="48" height="16" fill="var(--hill-shade)"/>
+      <rect x="1632" y="832" width="16" height="16" fill="var(--hill-shade)"/>
+    </svg>
+    <!-- layer: trees (speed 1.0) -->
+    <svg class="parallax-layer" data-speed="1.0" viewBox="0 0 1920 1080"
+         preserveAspectRatio="xMidYMax slice" shape-rendering="crispEdges"
+         xmlns="http://www.w3.org/2000/svg" role="presentation" focusable="false">
+      <rect x="0" y="960" width="1920" height="120" fill="var(--fg)"/>
+      <rect x="0" y="1024" width="1920" height="56" fill="var(--fg-dark)"/>
+      <rect x="16" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="32" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="48" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="80" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="96" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="160" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="208" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="240" y="944" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="256" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="272" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="320" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="336" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="352" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="368" y="944" width="16" height="16" fill="var(--fg)"/>
+      <rect x="416" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="432" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="432" y="944" width="16" height="16" fill="var(--fg)"/>
+      <rect x="448" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="496" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="512" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="528" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="608" y="944" width="16" height="16" fill="var(--fg)"/>
+      <rect x="624" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="672" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="784" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="864" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="880" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="912" y="944" width="16" height="16" fill="var(--fg)"/>
+      <rect x="944" y="944" width="16" height="16" fill="var(--fg)"/>
+      <rect x="960" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="976" y="944" width="16" height="16" fill="var(--fg)"/>
+      <rect x="992" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1008" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1040" y="944" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1072" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1088" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1152" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1152" y="944" width="16" height="16" fill="var(--fg)"/>
+      <rect x="1184" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1216" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1248" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1264" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1264" y="944" width="16" height="16" fill="var(--fg)"/>
+      <rect x="1328" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1360" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1376" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1456" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1520" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1536" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1584" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1616" y="944" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1632" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1664" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1680" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1728" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1760" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1776" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1808" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1824" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1888" y="944" width="16" height="16" fill="var(--fg)"/>
+      <rect x="560" y="944" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="544" y="960" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="544" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="816" y="944" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="800" y="960" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="800" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1232" y="944" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="1216" y="960" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="1216" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1680" y="944" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="1664" y="960" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="1664" y="960" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="96" y="976" width="16" height="32" fill="var(--trunk)"/>
+      <rect x="96" y="848" width="16" height="16" fill="var(--fg-dark)"/>
+      <rect x="80" y="864" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="80" y="880" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="80" y="880" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="64" y="896" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="64" y="912" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="64" y="912" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="48" y="928" width="112" height="16" fill="var(--fg-dark)"/>
+      <rect x="48" y="944" width="112" height="16" fill="var(--fg-dark)"/>
+      <rect x="48" y="944" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="32" y="960" width="144" height="16" fill="var(--fg-dark)"/>
+      <rect x="224" y="960" width="16" height="48" fill="var(--trunk)"/>
+      <rect x="224" y="784" width="16" height="16" fill="var(--fg-dark)"/>
+      <rect x="224" y="800" width="16" height="16" fill="var(--fg-dark)"/>
+      <rect x="208" y="816" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="208" y="816" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="208" y="832" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="192" y="848" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="192" y="848" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="192" y="864" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="176" y="880" width="112" height="16" fill="var(--fg-dark)"/>
+      <rect x="176" y="880" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="176" y="896" width="112" height="16" fill="var(--fg-dark)"/>
+      <rect x="160" y="912" width="144" height="16" fill="var(--fg-dark)"/>
+      <rect x="160" y="912" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="160" y="928" width="144" height="16" fill="var(--fg-dark)"/>
+      <rect x="144" y="944" width="176" height="16" fill="var(--fg-dark)"/>
+      <rect x="144" y="944" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="384" y="976" width="16" height="32" fill="var(--trunk)"/>
+      <rect x="384" y="880" width="16" height="16" fill="var(--fg-dark)"/>
+      <rect x="368" y="896" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="368" y="912" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="368" y="912" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="352" y="928" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="352" y="944" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="352" y="944" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="336" y="960" width="112" height="16" fill="var(--fg-dark)"/>
+      <rect x="704" y="976" width="16" height="32" fill="var(--trunk)"/>
+      <rect x="704" y="848" width="16" height="16" fill="var(--fg-dark)"/>
+      <rect x="688" y="864" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="688" y="880" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="688" y="880" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="672" y="896" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="672" y="912" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="672" y="912" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="656" y="928" width="112" height="16" fill="var(--fg-dark)"/>
+      <rect x="656" y="944" width="112" height="16" fill="var(--fg-dark)"/>
+      <rect x="656" y="944" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="640" y="960" width="144" height="16" fill="var(--fg-dark)"/>
+      <rect x="928" y="960" width="16" height="48" fill="var(--trunk)"/>
+      <rect x="928" y="784" width="16" height="16" fill="var(--fg-dark)"/>
+      <rect x="928" y="800" width="16" height="16" fill="var(--fg-dark)"/>
+      <rect x="912" y="816" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="912" y="816" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="912" y="832" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="896" y="848" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="896" y="848" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="896" y="864" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="880" y="880" width="112" height="16" fill="var(--fg-dark)"/>
+      <rect x="880" y="880" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="880" y="896" width="112" height="16" fill="var(--fg-dark)"/>
+      <rect x="864" y="912" width="144" height="16" fill="var(--fg-dark)"/>
+      <rect x="864" y="912" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="864" y="928" width="144" height="16" fill="var(--fg-dark)"/>
+      <rect x="848" y="944" width="176" height="16" fill="var(--fg-dark)"/>
+      <rect x="848" y="944" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1120" y="976" width="16" height="32" fill="var(--trunk)"/>
+      <rect x="1120" y="880" width="16" height="16" fill="var(--fg-dark)"/>
+      <rect x="1104" y="896" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="1104" y="912" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="1104" y="912" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1088" y="928" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="1088" y="944" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="1088" y="944" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1072" y="960" width="112" height="16" fill="var(--fg-dark)"/>
+      <rect x="1408" y="976" width="16" height="32" fill="var(--trunk)"/>
+      <rect x="1408" y="848" width="16" height="16" fill="var(--fg-dark)"/>
+      <rect x="1392" y="864" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="1392" y="880" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="1392" y="880" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1376" y="896" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="1376" y="912" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="1376" y="912" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1360" y="928" width="112" height="16" fill="var(--fg-dark)"/>
+      <rect x="1360" y="944" width="112" height="16" fill="var(--fg-dark)"/>
+      <rect x="1360" y="944" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1344" y="960" width="144" height="16" fill="var(--fg-dark)"/>
+      <rect x="1600" y="960" width="16" height="48" fill="var(--trunk)"/>
+      <rect x="1600" y="784" width="16" height="16" fill="var(--fg-dark)"/>
+      <rect x="1600" y="800" width="16" height="16" fill="var(--fg-dark)"/>
+      <rect x="1584" y="816" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="1584" y="816" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1584" y="832" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="1568" y="848" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="1568" y="848" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1568" y="864" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="1552" y="880" width="112" height="16" fill="var(--fg-dark)"/>
+      <rect x="1552" y="880" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1552" y="896" width="112" height="16" fill="var(--fg-dark)"/>
+      <rect x="1536" y="912" width="144" height="16" fill="var(--fg-dark)"/>
+      <rect x="1536" y="912" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1536" y="928" width="144" height="16" fill="var(--fg-dark)"/>
+      <rect x="1520" y="944" width="176" height="16" fill="var(--fg-dark)"/>
+      <rect x="1520" y="944" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1776" y="976" width="16" height="32" fill="var(--trunk)"/>
+      <rect x="1776" y="880" width="16" height="16" fill="var(--fg-dark)"/>
+      <rect x="1760" y="896" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="1760" y="912" width="48" height="16" fill="var(--fg-dark)"/>
+      <rect x="1760" y="912" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1744" y="928" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="1744" y="944" width="80" height="16" fill="var(--fg-dark)"/>
+      <rect x="1744" y="944" width="16" height="16" fill="var(--fg-light)"/>
+      <rect x="1728" y="960" width="112" height="16" fill="var(--fg-dark)"/>
+    </svg>
+  </div>
+
+  <main>
+    <section class="hero"><div class="card">
+      <h1>Pixel Valley</h1>
+      <p>scroll to explore &#9660;</p>
+    </div></section>
+    <section class="mid"><div class="card">
+      <p>4 SVG layers &middot; 16px grid &middot; tiles horizontally &middot; CSS-variable palette</p>
+      <p>toggle the sun for dusk</p>
+    </div></section>
+  </main>
+
+  <button id="themeToggle" type="button" aria-label="Toggle day / dusk theme">&#9788; day</button>
+
+<script>
+  // ---------- theme: follow the OS initially, button toggles ----------
+  var rootEl = document.documentElement;
+  var toggleBtn = document.getElementById('themeToggle');
+  function setTheme(dark) {
+    if (dark) rootEl.setAttribute('data-theme', 'dark');
+    else rootEl.removeAttribute('data-theme');
+    toggleBtn.innerHTML = dark ? '&#9789; dusk' : '&#9788; day';
+  }
+  setTheme(window.matchMedia('(prefers-color-scheme: dark)').matches);
+  toggleBtn.addEventListener('click', function () {
+    setTheme(!rootEl.hasAttribute('data-theme'));
+  });
+
+  // ---------- parallax scroll handler (reduced-motion guarded) ----------
+  (function () {
+    var layers = Array.prototype.slice.call(document.querySelectorAll('.parallax-layer'));
+    var motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    var ticking = false;
+
+    function update() {
+      var y = window.scrollY || window.pageYOffset;
+      layers.forEach(function (layer) {
+        var speed = parseFloat(layer.dataset.speed);
+        // negative = layers drift upward as you scroll; the foreground (1.0)
+        // moves with the page, the sky (0.1) barely moves
+        layer.style.transform = 'translate3d(0, ' + (-y * speed).toFixed(1) + 'px, 0)';
+      });
+      ticking = false;
+    }
+    function onScroll() {
+      if (!ticking) { requestAnimationFrame(update); ticking = true; }
+    }
+    function enable() {
+      window.addEventListener('scroll', onScroll, { passive: true });
+      update();
+    }
+    function disable() {
+      window.removeEventListener('scroll', onScroll);
+      layers.forEach(function (layer) { layer.style.transform = ''; });
+    }
+
+    if (!motionQuery.matches) enable();
+    motionQuery.addEventListener('change', function (e) {
+      if (e.matches) disable(); else enable();
+    });
+  })();
+</script>
+</body>
+</html>

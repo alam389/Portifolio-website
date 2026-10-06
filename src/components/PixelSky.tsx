@@ -4,7 +4,8 @@ import { useEffect, useRef } from "react";
 
 // 8-bit sky, theme-aware: night (.dark) = twinkling square stars, drifting
 // blocky clouds, rare shooting stars; day = banded blue sky, bright clouds,
-// and a pixel sun. Drawn at low internal resolution and upscaled with
+// and a pixel sun. A snow-capped mountain range and rolling hills with pines
+// ground the bottom edge. Drawn at low internal resolution and upscaled with
 // image-rendering: pixelated so everything stays blocky.
 // Reduced-motion: one static frame. Pauses on hidden tabs.
 
@@ -41,13 +42,67 @@ const NIGHT = {
   bands: ["#0a0c11", "#0b0d13", "#0d1016", "#0f1219", "#11141c", "#12161f"],
   cloudLight: "rgba(216, 226, 244, 0.055)",
   cloudShadow: "rgba(6, 8, 12, 0.35)",
+  land: {
+    mtnTop: "#1a2233",
+    mtn: "#131a29",
+    snowCap: "#39445f",
+    snowEdge: "#2a3349",
+    farTop: "#171e2e",
+    far: "#121826",
+    midTop: "#142224",
+    mid: "#0f191b",
+    nearTop: "#122219",
+    near: "#0d1812",
+    canopy: "#101f16",
+    canopyLight: "#16291b",
+    trunk: "#14111a",
+    wall: "#1b2132",
+    wallShade: "#151a28",
+    window: "#ffd77a",
+    rock: "#1d2430",
+    flowers: [] as string[],
+  },
 };
 
 const DAY = {
   bands: ["#7fc2ee", "#89c8f1", "#93cdf3", "#9dd3f5", "#a7d8f7", "#b1def9"],
   cloudLight: "rgba(255, 255, 255, 0.92)",
   cloudShadow: "rgba(110, 140, 170, 0.5)",
+  land: {
+    mtnTop: "#c4d5e0",
+    mtn: "#b6cbd8",
+    snowCap: "#f0f6f9",
+    snowEdge: "#dbe7ee",
+    farTop: "#bcd3e0",
+    far: "#a6c2d2",
+    midTop: "#8fbc98",
+    mid: "#79a884",
+    nearTop: "#69b877",
+    near: "#4e9a5a",
+    canopy: "#2e7d44",
+    canopyLight: "#48a35c",
+    trunk: "#7a5230",
+    wall: "#e3cb92",
+    wallShade: "#c2a76b",
+    window: "#6b573a",
+    rock: "#8fa0a8",
+    flowers: ["#ffd95e", "#e0685a", "#f5f2ea", "#e78fb3"],
+  },
 };
+
+// Tiny castle keep on a distant hill (X wall, S shaded wall, O window).
+const CASTLE = [
+  "....X.X.X",
+  "....XXXXX",
+  "....XOXOX",
+  "X.X.XXXXX",
+  "XXX.XXXXX",
+  "XXXXXXXXX",
+  "XSXXXOXSX",
+];
+
+// extra heightmap columns so parallax shifts never read out of bounds
+const LAND_PAD = 24;
 
 export default function PixelSky({ className = "" }: { className?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -66,6 +121,17 @@ export default function PixelSky({ className = "" }: { className?: string }) {
     let stars: Star[] = [];
     let clouds: Cloud[] = [];
     let shooter: Shooter | null = null;
+
+    // landscape: rolling-hill heightmaps (three parallax layers) plus the
+    // props scattered on them, all regenerated on resize
+    let mtn: number[] = [];
+    let snowJit: number[] = [];
+    let hillFar: number[] = [];
+    let hillMid: number[] = [];
+    let hillNear: number[] = [];
+    let trees: { x: number; big: boolean }[] = [];
+    let flowers: { x: number; c: number }[] = [];
+    let rocks: number[] = [];
 
     // parallax: lerped mouse offset, scaled by each star's depth
     let tmx = 0;
@@ -112,8 +178,58 @@ export default function PixelSky({ className = "" }: { className?: string }) {
       clouds = [
         makeCloud(Math.floor(H * 0.14), 1.4),
         makeCloud(Math.floor(H * 0.32), 0.9),
-        makeCloud(Math.floor(H * 0.7), 1.1),
+        makeCloud(Math.floor(H * 0.52), 1.1),
       ];
+
+      // layered sines with random phases give rolling hills; quantizing to
+      // 2px steps keeps the outline blocky
+      const makeHill = (base: number, amp: number) => {
+        const p1 = Math.random() * Math.PI * 2;
+        const p2 = Math.random() * Math.PI * 2;
+        const p3 = Math.random() * Math.PI * 2;
+        return Array.from({ length: W + LAND_PAD * 2 }, (_, i) => {
+          const x = i - LAND_PAD;
+          const v =
+            0.55 * Math.sin(x * 0.012 + p1) +
+            0.33 * Math.sin(x * 0.033 + p2) +
+            0.12 * Math.sin(x * 0.074 + p3);
+          return Math.round((base + v * amp) / 2) * 2;
+        });
+      };
+      hillFar = makeHill(H * 0.78, H * 0.055);
+      hillMid = makeHill(H * 0.85, H * 0.045);
+      hillNear = makeHill(H * 0.92, H * 0.04);
+
+      // snow-capped range behind the hills: overlapping triangular peaks,
+      // quantized to 2px steps so the slopes stay blocky
+      const len = W + LAND_PAD * 2;
+      mtn = new Array(len).fill(H * 0.86);
+      const nPeaks = Math.max(3, Math.round(W / 70));
+      for (let i = 0; i < nPeaks; i++) {
+        const px = ((i + 0.15 + Math.random() * 0.7) / nPeaks) * len;
+        const tip = H * (0.5 + Math.random() * 0.13);
+        const slope = 0.75 + Math.random() * 0.55;
+        for (let j = 0; j < len; j++) {
+          mtn[j] = Math.min(mtn[j], tip + Math.abs(j - px) * slope);
+        }
+      }
+      mtn = mtn.map((v) => Math.round(v / 2) * 2);
+      // ragged snowline offsets, sampled per screen column
+      snowJit = Array.from({ length: 16 }, () =>
+        Math.floor(Math.random() * 3) * 2,
+      );
+
+      trees = [];
+      for (let x = 3; x < W - 3; x += 6 + Math.floor(Math.random() * 10)) {
+        trees.push({ x, big: Math.random() < 0.3 });
+      }
+      flowers = Array.from({ length: Math.floor(W / 14) }, () => ({
+        x: Math.floor(Math.random() * W),
+        c: Math.floor(Math.random() * 4),
+      }));
+      rocks = Array.from({ length: Math.floor(W / 40) }, () =>
+        Math.floor(Math.random() * W),
+      );
     };
 
     const drawSun = () => {
@@ -129,6 +245,106 @@ export default function PixelSky({ className = "" }: { className?: string }) {
       ctx.fillRect(sx + 4, sy, 1, 1);
       ctx.fillRect(sx, sy - 4, 1, 1);
       ctx.fillRect(sx, sy + 4, 1, 1);
+    };
+
+    // A feature at world column x renders at screen column x - shift, and
+    // hill columns are sampled at x + shift, so hills and props stay glued
+    // together while each layer parallaxes at its own rate.
+    const hillAt = (arr: number[], x: number) =>
+      arr[Math.min(arr.length - 1, Math.max(0, x + LAND_PAD))];
+
+    const drawLandscape = (t: number) => {
+      const land = dark ? NIGHT.land : DAY.land;
+      const sFar = Math.round(mx * 2);
+      const sMid = Math.round(mx * 4);
+      const sNear = Math.round(mx * 7);
+
+      const fillLayer = (arr: number[], shift: number, top: string, body: string) => {
+        for (let x = 0; x < W; x++) {
+          const y = hillAt(arr, x + shift);
+          ctx.fillStyle = top;
+          ctx.fillRect(x, y, 1, 2);
+          ctx.fillStyle = body;
+          ctx.fillRect(x, y + 2, 1, H - y);
+        }
+      };
+
+      // mountains sit behind everything and barely move; columns whose tops
+      // rise past the (ragged) snowline get snow caps
+      const sMtn = Math.round(mx * 1);
+      const snowLine = Math.round((H * 0.66) / 2) * 2;
+      for (let x = 0; x < W; x++) {
+        const yTop = hillAt(mtn, x + sMtn);
+        const line = snowLine + snowJit[Math.abs(x + sMtn) % snowJit.length];
+        if (yTop < line) {
+          ctx.fillStyle = land.snowCap;
+          ctx.fillRect(x, yTop, 1, line - yTop);
+          ctx.fillStyle = land.snowEdge;
+          ctx.fillRect(x, line, 1, 2);
+          ctx.fillStyle = land.mtn;
+          ctx.fillRect(x, line + 2, 1, H - line);
+        } else {
+          ctx.fillStyle = land.mtnTop;
+          ctx.fillRect(x, yTop, 1, 2);
+          ctx.fillStyle = land.mtn;
+          ctx.fillRect(x, yTop + 2, 1, H - yTop);
+        }
+      }
+
+      fillLayer(hillFar, sFar, land.farTop, land.far);
+      fillLayer(hillMid, sMid, land.midTop, land.mid);
+
+      // castle keep on a mid-hill crest; windows glow warmly at night
+      const cx = Math.floor(W * 0.72);
+      const cyTop = hillAt(hillMid, cx) - CASTLE.length + 1;
+      const csx = cx - 4 - sMid;
+      CASTLE.forEach((row, ry) => {
+        for (let rx = 0; rx < row.length; rx++) {
+          const ch = row[rx];
+          if (ch === ".") continue;
+          if (ch === "O") {
+            ctx.fillStyle = dark
+              ? `rgba(255, 215, 122, ${(0.75 + 0.2 * Math.sin(t * 2.4 + rx)).toFixed(3)})`
+              : land.window;
+          } else {
+            ctx.fillStyle = ch === "S" ? land.wallShade : land.wall;
+          }
+          ctx.fillRect(csx + rx, cyTop + ry, 1, 1);
+        }
+      });
+
+      fillLayer(hillNear, sNear, land.nearTop, land.near);
+
+      for (const r of rocks) {
+        ctx.fillStyle = land.rock;
+        ctx.fillRect(r - sNear, hillAt(hillNear, r) - 1, 2, 1);
+      }
+      for (const f of flowers) {
+        const c = land.flowers[f.c % (land.flowers.length || 1)];
+        if (!c) break; // no flowers at night
+        ctx.fillStyle = c;
+        ctx.fillRect(f.x - sNear, hillAt(hillNear, f.x) - 1, 1, 1);
+      }
+
+      for (const tr of trees) {
+        const sx = tr.x - sNear;
+        const y0 = hillAt(hillNear, tr.x);
+        ctx.fillStyle = land.trunk;
+        ctx.fillRect(sx, y0 - (tr.big ? 4 : 2), 1, tr.big ? 4 : 2);
+        ctx.fillStyle = land.canopy;
+        if (tr.big) {
+          // stepped alpine pine: tiers widen 1 > 3 > 3 > 5 > 5 > 7
+          ctx.fillRect(sx, y0 - 10, 1, 1);
+          ctx.fillRect(sx - 1, y0 - 9, 3, 2);
+          ctx.fillRect(sx - 2, y0 - 7, 5, 2);
+          ctx.fillRect(sx - 3, y0 - 5, 7, 1);
+        } else {
+          ctx.fillRect(sx, y0 - 5, 1, 1);
+          ctx.fillRect(sx - 1, y0 - 4, 3, 2);
+        }
+        ctx.fillStyle = land.canopyLight;
+        ctx.fillRect(sx - 1, y0 - (tr.big ? 8 : 4), 1, 1);
+      }
     };
 
     const draw = (t: number) => {
@@ -200,6 +416,8 @@ export default function PixelSky({ className = "" }: { className?: string }) {
       } else {
         shooter = null;
       }
+
+      drawLandscape(t);
     };
 
     const reducedMotion = window.matchMedia(

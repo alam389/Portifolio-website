@@ -2,6 +2,36 @@
 
 import { experiences, projects, skills, profile } from "@/data";
 import type { BlockType } from "@/data/agent";
+import type { IconType } from "react-icons";
+import {
+  SiJavascript,
+  SiTypescript,
+  SiSpring,
+  SiExpress,
+  SiNextdotjs,
+  SiReact,
+  SiVite,
+  SiNodedotjs,
+  SiPostgresql,
+} from "react-icons/si";
+import { FaJava, FaDatabase, FaAws } from "react-icons/fa";
+
+// skills.ts icon slugs → react-icons components (the mapping the data layer
+// was authored for).
+const SKILL_ICONS: Record<string, IconType> = {
+  javascript: SiJavascript,
+  typescript: SiTypescript,
+  java: FaJava,
+  database: FaDatabase,
+  spring: SiSpring,
+  express: SiExpress,
+  nextdotjs: SiNextdotjs,
+  react: SiReact,
+  vite: SiVite,
+  nodedotjs: SiNodedotjs,
+  postgresql: SiPostgresql,
+  aws: FaAws,
+};
 
 // Renders the structured block after a twin answer. All data is real @/data.
 // Game-UI styling: skills = hotbar slots, projects = item tooltips,
@@ -56,18 +86,28 @@ function SkillsBlock() {
               {group.label}
             </p>
             <div className="flex flex-wrap gap-1">
-              {items.map((s) => (
-                <div
-                  key={s.name}
-                  title={s.name}
-                  className="flex h-[64px] w-[64px] flex-col items-center justify-center gap-1 border-2 border-b-white/25 border-l-black/40 border-r-white/25 border-t-black/40 bg-black/25 px-1 transition-colors hover:bg-black/40"
-                >
-                  <ItemCube color={s.color} />
-                  <span className="line-clamp-2 text-center text-[8px] leading-[9px] text-fg/85">
-                    {s.name}
-                  </span>
-                </div>
-              ))}
+              {items.map((s) => {
+                const Icon = SKILL_ICONS[s.icon];
+                // black brand marks (Express, Next.js) are invisible on the
+                // dark slot — let them inherit the theme foreground instead
+                const color = s.color === "#000000" ? "currentColor" : s.color;
+                return (
+                  <div
+                    key={s.name}
+                    title={s.name}
+                    className="flex h-[64px] w-[64px] flex-col items-center justify-center gap-1 border-2 border-b-white/25 border-l-black/40 border-r-white/25 border-t-black/40 bg-black/25 px-1 text-fg transition-colors hover:bg-black/40"
+                  >
+                    {Icon ? (
+                      <Icon size={22} color={color} aria-hidden="true" />
+                    ) : (
+                      <ItemCube color={s.color} />
+                    )}
+                    <span className="line-clamp-2 text-center text-[8px] leading-[9px] text-fg/85">
+                      {s.name}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
