@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Dock from "@/components/Dock";
-import { dockInitScript } from "@/components/dockPlacement";
+import Sidebar from "@/components/Sidebar";
 import SmoothScroll from "@/components/SmoothScroll";
 import { profile } from "@/data";
 import "./globals.css";
@@ -27,20 +26,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // suppressHydrationWarning: the dock script sets data-dock/--dock-t on
-    // <html> before React hydrates.
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: dockInitScript }} />
-      </head>
+    <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SmoothScroll />
-        <Dock />
-        <main className="page mx-auto box-content max-w-3xl px-6 pt-10 pb-28 md:px-24 md:py-16">
-          {children}
-        </main>
+        <Sidebar />
+        <div className="md:pl-18">
+          <main className="mx-auto box-content max-w-3xl px-6 pt-10 pb-28 md:px-16 md:py-16">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
