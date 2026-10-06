@@ -30,12 +30,25 @@ export interface Experience {
 
 export type ProjectStatus = "shipped" | "in-progress" | "early" | "school";
 
+/** What kind of work a project is; shown as category tags on the card. */
+export type ProjectTag =
+  | "AI"
+  | "RAG"
+  | "Backend"
+  | "Data"
+  | "Mobile"
+  | "Computer Vision"
+  | "Client work"
+  | "Hackathon"
+  | "Capstone";
+
 export interface Project {
   id: string;
   title: string;
   tagline: string;
   description: string;
   status: ProjectStatus;
+  tags: ProjectTag[];
   period?: string;
   technologies: string[];
   github?: string;
