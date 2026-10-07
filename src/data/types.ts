@@ -17,6 +17,12 @@ export interface Profile {
     coursework: string[];
   };
   socials: Social[];
+  /** The "Now" section on About: what Anthony is focused on at the moment. */
+  now: {
+    /** Display date for when this was last true, e.g. "Oct 2026". */
+    updated: string;
+    items: string[];
+  };
 }
 
 export interface Experience {

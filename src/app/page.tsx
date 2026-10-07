@@ -32,6 +32,25 @@ export default function About() {
       </section>
 
       <section>
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="text-xl font-semibold">Now</h2>
+          <p className="font-mono text-xs text-foreground/50">
+            Updated {profile.now.updated}
+          </p>
+        </div>
+        <ul className="mt-3 flex flex-col gap-2 text-foreground/80">
+          {profile.now.items.map((item) => (
+            <li key={item} className="flex gap-3">
+              <span aria-hidden className="text-foreground/30">
+                →
+              </span>
+              {item}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section>
         <h2 className="text-xl font-semibold">Education</h2>
         <p className="mt-3 font-medium">{education.school}</p>
         <p className="text-foreground/70">

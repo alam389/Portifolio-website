@@ -29,6 +29,15 @@ export const profile: Profile = {
     { label: "LinkedIn", href: "https://www.linkedin.com/in/anthony-lam/" },
     { label: "Email", href: "mailto:lamanthony167@gmail.com" },
   ],
+  // Restates the summary; update both when something changes.
+  now: {
+    updated: "Oct 2026",
+    items: [
+      "Interning at Kiyoko Beauty, building the retrieval pipelines behind its Shopify beauty assistant.",
+      "Building a React Native + Supabase app that turns any set of products into a skincare routine.",
+      "Building Mneme, my document-to-memory service, on the side.",
+    ],
+  },
 };
 
 export const skills: SkillGroup[] = [
