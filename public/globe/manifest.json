@@ -9,6 +9,7 @@
       "stops": [
         "born",
         "western",
+        "tsi",
         "bgc",
         "mcgregor",
         "plan-catalyst",
@@ -51,6 +52,7 @@
   "stopElevation": {
     "born": 176,
     "western": 251,
+    "tsi": 251,
     "trip-vancouver": 25,
     "bgc": 251,
     "trip-tokyo": 25,

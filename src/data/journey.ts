@@ -3,8 +3,10 @@ import type { JourneyStop } from "./types";
 const MOCK = "Placeholder trip. Replace with a real one or delete.";
 const REMOTE_PIN = "Remote role. Confirm where you were based.";
 
-// Chronological. Career and education come from the current resume; the
-// travel stops are mocks until replaced.
+// Array order is the journey's order: the cards scroll and the globe flies
+// from stop to stop exactly as listed here, and dates are display-only. Career
+// and education come from the current resume; the travel stops are mocks
+// until replaced.
 export const journey: JourneyStop[] = [
   {
     id: "born",
@@ -14,6 +16,8 @@ export const journey: JourneyStop[] = [
     lng: -79.0849,
     kind: "life",
     title: "Born in Niagara",
+    description: "This is where I spent the majority of my life here. It's a quiet and peaceful area and shaped much of who I am, but it couldn't contain my ambitions",
+
   },
   {
     id: "western",
@@ -25,15 +29,15 @@ export const journey: JourneyStop[] = [
     title: "Started Software Engineering at Western",
     description: "BASc Software Engineering, University of Western Ontario.",
   },
-  {
-    id: "trip-vancouver",
-    date: "Jul 2023",
-    place: "Vancouver, BC",
-    lat: 49.2827,
-    lng: -123.1207,
-    kind: "travel",
-    title: "West coast trip",
-    draft: MOCK,
+  { 
+    id: "tsi",
+    date: "Sept 2024",
+    place: "London, ON",
+    lat: 43.0096,
+    lng: -81.2737,
+    kind: "volunteering",
+    title: "Founding member of Tech for Social Impact (TETHOS)",
+    description: "I was brought in as a Project Manager to lead projects to develop free software solutions for non-for-profits orgs",
   },
   {
     id: "bgc",
@@ -41,20 +45,10 @@ export const journey: JourneyStop[] = [
     place: "London, ON",
     lat: 43.0096,
     lng: -81.2737,
-    kind: "work",
+    kind: "volunteering",
     title: "Team Lead, Boys & Girls Club",
     description:
       "Delivered a web analytics solution that let BGC London track traffic from 1,000+ users for the first time.",
-  },
-  {
-    id: "trip-tokyo",
-    date: "Dec 2024",
-    place: "Tokyo, Japan",
-    lat: 35.6762,
-    lng: 139.6503,
-    kind: "travel",
-    title: "Winter in Tokyo",
-    draft: MOCK,
   },
   {
     id: "mcgregor",
@@ -68,27 +62,28 @@ export const journey: JourneyStop[] = [
       "Built an ERP web app and a Graph-RAG pipeline indexing 10,000+ pages of engineering documents.",
   },
   {
-    id: "trip-lisbon",
-    date: "Aug 2025",
-    place: "Lisbon, Portugal",
-    lat: 38.7223,
-    lng: -9.1393,
+    id: "trip",
+    date: "July 2025",
+    place: "Westlock County, AB",
+    lat: 53.9835,
+    lng: -113.8709,
     kind: "travel",
-    title: "Summer in Lisbon",
-    draft: MOCK,
+    title: "Meditation retreat at Westlock",
+    description:
+      "A retreat at the Westlock Meditation Centre north of Edmonton: sitting and walking meditation, mindful eating, and Dharma talks.",
   },
   {
     id: "plan-catalyst",
     date: "Sept 2025",
-    place: "North York, ON",
-    lat: 43.7615,
-    lng: -79.4111,
-    kind: "work",
+    place: "United Kingdom",
+    lat: 51.5074,
+    lng: -0.1278,
+    kind: "volunteering",
     title: "Project Manager, Plan Catalyst",
     description:
       "Led two engineering squads using SAFe Agile to deliver a database system for Project SHARE.",
     remote: true,
-    draft: REMOTE_PIN,
+    draft: "UK-based org. City unconfirmed; pinned at London.",
   },
   {
     id: "hack-the-valley",

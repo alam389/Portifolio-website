@@ -60,11 +60,11 @@ export interface SkillGroup {
   items: string[];
 }
 
-export type JourneyKind = "life" | "education" | "work" | "project" | "travel";
+export type JourneyKind = "life" | "education" | "work" | "project" | "travel" | "volunteering";
 
 export interface JourneyStop {
   id: string;
-  /** Display date, e.g. "Sept 2022". Stops are listed in chronological order. */
+  /** Display date only, e.g. "Sept 2022". Position in the array sets the order. */
   date: string;
   place: string;
   lat: number;

@@ -25,16 +25,30 @@ export const experiences: Experience[] = [
       "Built RFP automation workflows using RAG, the Claude API, Hugging Face embedding models and Chroma to generate grounded technical responses from IBM product documentation.",
     ],
   },
+];
+
+export const volunteering: Experience[] = [
   {
     id: "plan-catalyst",
     title: "Project Manager",
     company: "Plan Catalyst",
-    location: "Remote / Freelance",
+    location: "Remote (UK)",
     period: "Sept 2025 – Dec 2025",
     highlights: [
       "Led two engineering squads using SAFe Agile to deliver a database management system for Project SHARE.",
       "Managed scope, sprint planning, backlog priorities and task tracking in Jira across design, development and stakeholder teams.",
       "Conducted user testing, A/B testing and feedback analysis to drive usability improvements.",
+    ],
+  },
+  {
+    id: "fls",
+    title: "IT Manager",
+    company: "Fashion & Lifestyle Society",
+    location: "London, ON",
+    period: "Fall – Winter 2025",
+    highlights: [
+      "Led development of a new website for F&LS focused on user experience, showcasing past fall/winter shows, news articles and magazine issues (React, Vite, TypeScript).",
+      "Set up communication channels for 100+ members to collaborate on the fashion shows.",
     ],
   },
   {
@@ -46,20 +60,6 @@ export const experiences: Experience[] = [
     highlights: [
       "Worked with the club to address a lack of visibility into user insights and analytics.",
       "Delivered a web analytics solution that let the organization track and analyze traffic from 1,000+ users for the first time.",
-    ],
-  },
-];
-
-export const volunteering: Experience[] = [
-  {
-    id: "fls",
-    title: "IT Manager",
-    company: "Fashion & Lifestyle Society",
-    location: "London, ON",
-    period: "Fall – Winter 2025",
-    highlights: [
-      "Led development of a new website for F&LS focused on user experience, showcasing past fall/winter shows, news articles and magazine issues (React, Vite, TypeScript).",
-      "Set up communication channels for 100+ members to collaborate on the fashion shows.",
     ],
   },
 ];

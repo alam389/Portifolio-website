@@ -13,6 +13,7 @@ const kindLabel: Record<JourneyKind, string> = {
   work: "Work",
   project: "Project",
   travel: "Travel",
+  volunteering: "Volunteering",
 };
 
 export default function Journey() {
