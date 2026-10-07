@@ -8,10 +8,13 @@ import {
   House,
   Link as LinkIcon,
   Mail,
+  Moon,
   Route,
+  Sun,
   type LucideIcon,
 } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
+import { THEME_STORAGE_KEY, type Theme } from "@/components/theme";
 import { profile } from "@/data";
 
 const links: { href: string; label: string; icon: LucideIcon }[] = [
@@ -63,10 +66,38 @@ function Tip({ label }: { label: string }) {
   return (
     <span
       aria-hidden
-      className="pointer-events-none absolute left-full top-1/2 ml-4 -translate-y-1/2 whitespace-nowrap rounded-md border border-foreground/10 bg-neutral-900 px-2 py-1 text-xs text-foreground opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100"
+      className="pointer-events-none absolute left-full top-1/2 ml-4 -translate-y-1/2 whitespace-nowrap rounded-md border border-foreground/10 bg-surface px-2 py-1 text-xs text-foreground opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100"
     >
       {label}
     </span>
+  );
+}
+
+function toggleTheme() {
+  const root = document.documentElement;
+  const next: Theme = root.dataset.theme === "light" ? "dark" : "light";
+  root.dataset.theme = next;
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, next);
+  } catch {
+    // Storage blocked: the switch still works, it just won't be remembered.
+  }
+}
+
+// The theme is only known on the client, so both icons render and CSS shows
+// the right one; that keeps server and client markup identical.
+function ThemeToggle({ size, tip }: { size: number; tip?: boolean }) {
+  return (
+    <button
+      type="button"
+      aria-label="Toggle light and dark theme"
+      onClick={toggleTheme}
+      className={`${item} ${idle}`}
+    >
+      <Sun size={size} strokeWidth={1.75} aria-hidden className="light:hidden" />
+      <Moon size={size} strokeWidth={1.75} aria-hidden className="hidden light:block" />
+      {tip && <Tip label="Toggle theme" />}
+    </button>
   );
 }
 
@@ -76,7 +107,7 @@ export default function Sidebar() {
   return (
     <>
       {/* Desktop: floating full-height rail, inset from the left edge */}
-      <aside className="fixed inset-y-4 left-4 z-30 hidden w-14 flex-col items-center rounded-[20px] border border-foreground/10 bg-neutral-900/90 py-3 shadow-lg shadow-black/40 backdrop-blur-md md:flex">
+      <aside className="fixed inset-y-4 left-4 z-30 hidden w-14 flex-col items-center rounded-[20px] border border-foreground/10 bg-surface/90 py-3 shadow-lg shadow-black/40 light:shadow-black/10 backdrop-blur-md md:flex">
         <Link
           href="/"
           aria-label={`${profile.name}, home`}
@@ -106,7 +137,11 @@ export default function Sidebar() {
           </ul>
         </nav>
 
-        <ul aria-label="Links" className="mt-auto flex flex-col gap-1 border-t border-foreground/10 pt-2">
+        <div className="mt-auto mb-2">
+          <ThemeToggle size={18} tip />
+        </div>
+
+        <ul aria-label="Links" className="flex flex-col gap-1 border-t border-foreground/10 pt-2">
           {profile.socials.map(({ label, href }) => {
             const Icon = socialIcons[label] ?? LinkIcon;
             const external = href.startsWith("http");
@@ -127,10 +162,10 @@ export default function Sidebar() {
         </ul>
       </aside>
 
-      {/* Mobile: fixed bottom bar with the page links */}
+      {/* Mobile: fixed bottom bar with the page links and theme toggle */}
       <nav
         aria-label="Main"
-        className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-1/2 z-30 -translate-x-1/2 rounded-[28px] border border-foreground/10 bg-neutral-900/90 p-2 shadow-lg shadow-black/40 backdrop-blur-md md:hidden"
+        className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-1/2 z-30 -translate-x-1/2 rounded-[28px] border border-foreground/10 bg-surface/90 p-2 shadow-lg shadow-black/40 light:shadow-black/10 backdrop-blur-md md:hidden"
       >
         <ul className="flex gap-1.5">
           {links.map(({ href, label, icon: Icon }) => {
@@ -148,6 +183,9 @@ export default function Sidebar() {
               </li>
             );
           })}
+          <li className="ml-0.5 border-l border-foreground/10 pl-2">
+            <ThemeToggle size={20} />
+          </li>
         </ul>
       </nav>
     </>
