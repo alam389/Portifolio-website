@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Code,
   FileText,
+  Heart,
   House,
   Link as LinkIcon,
   Mail,
@@ -22,6 +23,7 @@ const links: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/experience", label: "Experience", icon: FileText },
   { href: "/projects", label: "Projects", icon: Code },
   { href: "/journey", label: "Journey", icon: Route },
+  { href: "/interests", label: "Interests", icon: Heart },
 ];
 
 type IconProps = SVGProps<SVGSVGElement> & { size?: number };
