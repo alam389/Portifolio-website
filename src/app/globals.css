@@ -25,6 +25,7 @@
   --color-surface: var(--surface);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-fraunces);
 }
 
 /* Lenis: required rules so native smooth scroll doesn't fight it */
@@ -45,4 +46,12 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Page and section headings get the display serif; everything else stays
+   Geist. SOFT rounds Fraunces' terminals so it reads warm, not bookish. */
+h1,
+h2 {
+  font-family: var(--font-display), Georgia, serif;
+  font-variation-settings: "SOFT" 50;
 }

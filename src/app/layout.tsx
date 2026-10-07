@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Geist, Geist_Mono } from "next/font/google";
 import Sidebar from "@/components/Sidebar";
 import SmoothScroll from "@/components/SmoothScroll";
 import { themeInitScript } from "@/components/theme";
-import { profile } from "@/data";
+import { profile, site } from "@/data";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,6 +14,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Display serif for h1/h2 (see globals.css). Variable, so the SOFT axis works.
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  axes: ["SOFT", "opsz"],
 });
 
 export const metadata: Metadata = {
@@ -34,13 +41,16 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} antialiased`}
       >
         <SmoothScroll />
         <Sidebar />
         <div className="md:pl-18">
           <main className="mx-auto box-content max-w-3xl px-6 pt-10 pb-28 md:px-16 md:py-16">
             {children}
+            <footer className="mt-24 border-t border-foreground/10 pt-6 text-xs text-foreground/45">
+              {site.colophon}
+            </footer>
           </main>
         </div>
       </body>
