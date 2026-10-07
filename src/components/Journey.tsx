@@ -3,6 +3,8 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { journey, type JourneyKind } from "@/data";
+import JourneySteps from "./JourneySteps";
+import { scrollToY } from "./SmoothScroll";
 
 // three.js only loads on this page, and only in the browser.
 const JourneyGlobe = dynamic(() => import("./JourneyGlobe"), { ssr: false });
@@ -51,6 +53,32 @@ export default function Journey() {
     [],
   );
 
+  // The stop whose card is closest to filling the screen; -1 on the intro.
+  const [active, setActive] = useState(-1);
+  useEffect(() => {
+    const update = () => {
+      const p = getProgress();
+      setActive(p < -0.5 ? -1 : Math.min(journey.length - 1, Math.round(p)));
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [getProgress]);
+
+  // Scroll so stop i's card fills the screen. Longer jumps take a little
+  // longer so the globe can fly the path in between without whipping.
+  const goTo = (i: number) => {
+    const hops = Math.abs(i - Math.max(active, 0));
+    scrollToY(
+      top.current + sectionHeight.current * (i + 1),
+      Math.min(3, 1 + 0.25 * hops),
+    );
+  };
+
   return (
     <>
       <div
@@ -63,6 +91,8 @@ export default function Journey() {
           reducedMotion={reducedMotion}
         />
       </div>
+
+      <JourneySteps stops={journey} active={active} onSelect={goTo} />
 
       <div ref={containerRef} className="relative z-10">
         <section className="flex h-svh flex-col justify-center">
