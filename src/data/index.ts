@@ -6,6 +6,8 @@ export { journey } from "./journey";
 export {
   interestIntros,
   papers,
+  books,
+  podcasts,
   dishes,
   restaurants,
   activities,

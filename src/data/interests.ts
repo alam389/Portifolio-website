@@ -1,4 +1,11 @@
-import type { Activity, Dish, Paper, Restaurant } from "./types";
+import type {
+  Activity,
+  Book,
+  Dish,
+  Paper,
+  Podcast,
+  Restaurant,
+} from "./types";
 
 const MOCK = "Placeholder. Replace with a real entry or delete.";
 
@@ -7,7 +14,8 @@ const MOCK = "Placeholder. Replace with a real entry or delete.";
 
 /** One-line intros under each Interests section heading. */
 export const interestIntros = {
-  ai: "Papers and books I've been reading.",
+  ai: "What I've been reading and listening to.",
+  food: "What I cook, and where I eat.",
   cook: "What I make at home.",
   eat: "Where I eat, and what to order.",
   active: "How I get away from the screen.",
@@ -144,41 +152,57 @@ export const papers: Paper[] = [
       ],
     },
   },
+];
+
+export const books: Book[] = [
   {
     id: "ai-engineering",
     title: "AI Engineering: Building Applications with Foundation Models",
     authors: "Chip Huyen",
     year: 2025,
-    venue: "O'Reilly",
+    publisher: "O'Reilly",
     url: "https://openlibrary.org/isbn/9781098166304",
-    tags: ["book", "LLMs"],
+    tags: ["LLMs"],
   },
   {
     id: "building-applications-with-ai-agents",
     title: "Building Applications with AI Agents: Designing and Implementing Multiagent Systems",
     authors: "Michael Albada",
     year: 2025,
-    venue: "O'Reilly",
+    publisher: "O'Reilly",
     url: "https://openlibrary.org/isbn/9781098176501",
-    tags: ["book", "agents"],
+    tags: ["agents"],
   },
   {
     id: "learning-langchain",
     title: "Learning LangChain: Building AI and LLM Applications with LangChain and LangGraph",
     authors: "Mayo Oshin, Nuno Campos",
     year: 2025,
-    venue: "O'Reilly",
+    publisher: "O'Reilly",
     url: "https://openlibrary.org/isbn/9781098167288",
-    tags: ["book", "RAG", "agents"],
+    tags: ["RAG", "agents"],
   },
   {
     id: "pragmatic-programmer",
     title: "The Pragmatic Programmer, 20th Anniversary Edition",
     authors: "David Thomas, Andrew Hunt",
     year: 2019,
-    venue: "Addison-Wesley",
+    publisher: "Addison-Wesley",
     url: "https://pragprog.com/titles/tpp20/",
-    tags: ["book", "craft"],
+    tags: ["craft"],
+  },
+];
+
+// One entry per episode, so each takeaway stays tied to what was said.
+export const podcasts: Podcast[] = [
+  {
+    id: "podcast-one",
+    show: "Show name",
+    episode: "Episode title",
+    date: "Oct 2026",
+    url: "https://example.com",
+    tags: ["agents"],
+    draft: MOCK,
   },
 ];
 

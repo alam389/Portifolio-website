@@ -56,10 +56,10 @@ export default async function PaperPage({ params }: Props) {
   return (
     <article>
       <Link
-        href="/interests#ai"
+        href="/interests/ai"
         className="text-sm text-foreground/60 transition-colors hover:text-foreground"
       >
-        ← Interests
+        ← AI
       </Link>
 
       <h1 className="mt-6 text-3xl font-semibold tracking-tight">{paper.title}</h1>
