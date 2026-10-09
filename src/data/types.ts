@@ -78,6 +78,14 @@ export interface JourneyStop {
   kind: JourneyKind;
   title: string;
   description?: string;
+  /** External links shown under the description, e.g. the company site. */
+  links?: Social[];
+  /** Organization logo shown at the top of the card; a dark mark on transparent. */
+  logo?: Photo;
+  /** Photos from this stop, shown as a row of thumbnails; the first leads. */
+  photos?: Photo[];
+  /** An embeddable post (e.g. LinkedIn's "Embed this post" URL) shown in the card. */
+  embed?: { src: string; title: string };
   /** Remote role: pinned where Anthony was, not where the company is. */
   remote?: boolean;
   /** The current stop; the journey ends here. */
@@ -89,7 +97,7 @@ export interface JourneyStop {
 // Interests page. Every entry can carry `draft`: shown with a "Draft" badge
 // in dev, filtered out of production builds.
 
-/** An image under public/, e.g. "/interests/cooking/ramen.jpg". */
+/** An image URL: media("journey/banff.webp") for the Supabase bucket, or a path under public/. */
 export interface Photo {
   src: string;
   alt: string;

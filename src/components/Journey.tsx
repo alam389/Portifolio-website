@@ -1,10 +1,13 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { journey, type JourneyKind } from "@/data";
 import JourneySteps from "./JourneySteps";
+import PhotoCarousel from "./PhotoCarousel";
 import { scrollToY } from "./SmoothScroll";
+import { useStepKeys } from "./useStepKeys";
 
 // three.js only loads on this page, and only in the browser.
 const JourneyGlobe = dynamic(() => import("./JourneyGlobe"), { ssr: false });
@@ -53,12 +56,19 @@ export default function Journey() {
     [],
   );
 
+  // Where paging is headed: -1 = intro, 0..n-1 = stops, n = the footer below.
+  // Follows the scroll position whenever no step is animating.
+  const target = useRef(-1);
+  const busyUntil = useRef(0);
+
   // The stop whose card is closest to filling the screen; -1 on the intro.
   const [active, setActive] = useState(-1);
   useEffect(() => {
     const update = () => {
       const p = getProgress();
-      setActive(p < -0.5 ? -1 : Math.min(journey.length - 1, Math.round(p)));
+      const i = p < -0.5 ? -1 : Math.min(journey.length - 1, Math.round(p));
+      setActive(i);
+      if (performance.now() > busyUntil.current) target.current = i;
     };
     update();
     window.addEventListener("scroll", update, { passive: true });
@@ -69,15 +79,26 @@ export default function Journey() {
     };
   }, [getProgress]);
 
-  // Scroll so stop i's card fills the screen. Longer jumps take a little
-  // longer so the globe can fly the path in between without whipping.
+  // Scroll so stop i's card fills the screen (i = n: the page's end). Longer
+  // jumps take a little longer so the globe can fly the path in between
+  // without whipping.
   const goTo = (i: number) => {
-    const hops = Math.abs(i - Math.max(active, 0));
-    scrollToY(
-      top.current + sectionHeight.current * (i + 1),
-      Math.min(3, 1 + 0.25 * hops),
-    );
+    const hops = Math.abs(i - Math.max(target.current, 0));
+    const duration = Math.min(3, 1 + 0.25 * hops);
+    const y =
+      i >= journey.length
+        ? document.documentElement.scrollHeight - window.innerHeight
+        : top.current + sectionHeight.current * (i + 1);
+    target.current = i;
+    busyUntil.current = performance.now() + (reducedMotion ? 0 : duration * 1000);
+    scrollToY(y, duration);
   };
+
+  // Arrow and Page keys move one stop; pressing again mid-flight keeps going.
+  useStepKeys((dir) => {
+    const next = Math.max(-1, Math.min(journey.length, target.current + dir));
+    if (next !== target.current) goTo(next);
+  });
 
   return (
     <>
@@ -107,9 +128,30 @@ export default function Journey() {
           {journey.map((stop) => (
             <li
               key={stop.id}
-              className="flex h-svh items-end pb-8 md:items-center md:pb-0"
+              className="flex h-svh items-end pb-28 md:items-center md:pb-0"
             >
-              <article className="w-full max-w-sm rounded-xl border border-foreground/10 bg-background/60 p-5 backdrop-blur-md">
+              <article
+                className={`w-full overflow-hidden rounded-xl border border-foreground/10 bg-background/60 p-5 backdrop-blur-md ${
+                  stop.photos || stop.embed ? "max-w-md" : "max-w-sm"
+                }`}
+              >
+                {stop.photos && (
+                  <PhotoCarousel
+                    photos={stop.photos}
+                    label={stop.title}
+                    className="-mx-5 -mt-5 mb-4"
+                  />
+                )}
+                {stop.logo && (
+                  // Logos are dark marks; flip them to light on the dark theme.
+                  <Image
+                    src={stop.logo.src}
+                    alt={stop.logo.alt}
+                    width={99}
+                    height={32}
+                    className="mb-4 h-6 w-auto invert light:invert-0"
+                  />
+                )}
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs text-foreground/50">
                   <span>{stop.date}</span>
                   <span aria-hidden>·</span>
@@ -129,6 +171,31 @@ export default function Journey() {
                   <p className="mt-3 text-sm text-foreground/80">
                     {stop.description}
                   </p>
+                )}
+                {stop.embed && (
+                  // LinkedIn's suggested 670px, capped so the card fits short screens.
+                  <iframe
+                    src={stop.embed.src}
+                    title={stop.embed.title}
+                    loading="lazy"
+                    allowFullScreen
+                    className="mt-3 h-[min(670px,55svh)] w-full rounded-md border border-foreground/10 bg-white"
+                  />
+                )}
+                {stop.links && (
+                  <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                    {stop.links.map((link) => (
+                      <a
+                        key={link.href}
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline underline-offset-4"
+                      >
+                        {link.label} ↗
+                      </a>
+                    ))}
+                  </div>
                 )}
                 {stop.draft && (
                   <p className="mt-3 flex items-start gap-2 text-xs text-amber-300/90">

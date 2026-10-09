@@ -1,7 +1,7 @@
+import { media } from "./media";
 import type { JourneyStop } from "./types";
 
 const MOCK = "Placeholder trip. Replace with a real one or delete.";
-const REMOTE_PIN = "Remote role. Confirm where you were based.";
 
 // Array order is the journey's order: the cards scroll and the globe flies
 // from stop to stop exactly as listed here, and dates are display-only. Career
@@ -18,6 +18,9 @@ export const journey: JourneyStop[] = [
     title: "Born in Niagara",
     description: "This is where I spent the majority of my life here. It's a quiet and peaceful area and shaped much of who I am, but it couldn't contain my ambitions",
 
+    photos: [
+      { src: media("journey/niagara1.webp"), alt: "A golfer mid-swing at a driving range under an evening sky." },
+    ],
   },
   {
     id: "western",
@@ -28,6 +31,25 @@ export const journey: JourneyStop[] = [
     kind: "education",
     title: "Started Software Engineering at Western",
     description: "BASc Software Engineering, University of Western Ontario.",
+  },
+  {
+    id: "westlock",
+    date: "July 2024",
+    place: "Westlock County, AB",
+    lat: 53.9835,
+    lng: -113.8709,
+    kind: "travel",
+    title: "Meditation retreat at Westlock",
+    description:
+      "A retreat at the Westlock Meditation Centre north of Edmonton: sitting and walking meditation, mindful eating, and Dharma talks.",
+    photos: [
+      { src: media("journey/westlock.webp"), alt: "The northern lights above a statue on the retreat grounds at night." },
+      { src: media("journey/westlock1.webp"), alt: "A group photo of retreat participants on the lawn at dusk." },
+      { src: media("journey/westlock2.webp"), alt: "Six friends posing indoors at the meditation centre." },
+      { src: media("journey/westlock3.webp"), alt: "A volleyball game on the lawn, with a monk in robes looking on." },
+      { src: media("journey/westlock4.webp"), alt: "A white laughing Buddha statue outside a temple building." },
+      { src: media("journey/westlock5.webp"), alt: "A pond at sunset framed by trees and a rock garden." },
+    ],
   },
   { 
     id: "tsi",
@@ -49,6 +71,10 @@ export const journey: JourneyStop[] = [
     title: "Team Lead, Boys & Girls Club",
     description:
       "Delivered a web analytics solution that let BGC London track traffic from 1,000+ users for the first time.",
+    embed: {
+      src: "https://www.linkedin.com/embed/feed/update/urn:li:share:7272254151802150912?collapsed=1",
+      title: "LinkedIn post about the Boys & Girls Club project",
+    },
   },
   {
     id: "mcgregor",
@@ -62,15 +88,19 @@ export const journey: JourneyStop[] = [
       "Built an ERP web app and a Graph-RAG pipeline indexing 10,000+ pages of engineering documents.",
   },
   {
-    id: "trip",
+    id: "banff",
     date: "July 2025",
-    place: "Westlock County, AB",
-    lat: 53.9835,
-    lng: -113.8709,
+    place: "Banff National Park, AB",
+    lat: 51.1784,
+    lng: -115.5708,
     kind: "travel",
-    title: "Meditation retreat at Westlock",
-    description:
-      "A retreat at the Westlock Meditation Centre north of Edmonton: sitting and walking meditation, mindful eating, and Dharma talks.",
+    title: "Banff National Park",
+    description: "A trip out to Banff National Park in the Canadian Rockies.",
+    photos: [
+      { src: media("journey/banff1.webp"), alt: "Five friends sitting on a stone wall in front of a turquoise lake and mountains." },
+      { src: media("journey/banff.webp"), alt: "A mountain and turquoise lake seen through pine trees." },
+      { src: media("journey/banff2.webp"), alt: "A turquoise alpine lake below a rock face and pine forest." },
+    ],
   },
   {
     id: "plan-catalyst",
@@ -107,8 +137,12 @@ export const journey: JourneyStop[] = [
     title: "Software Engineer Intern, Kiyoko Beauty",
     description:
       "Helped launch an AI beauty assistant on Shopify; 20% of conversations ended in an add-to-cart across 1,000+ beta sessions.",
+    logo: { src: "/logos/kiyoko.svg", alt: "Kiyoko Beauty" },
+    links: [
+      { label: "Kiyoko", href: "https://kiyoko.ca/en-ca" },
+      { label: "LinkedIn post", href: "https://lnkd.in/p/g7aDVcWV" },
+    ],
     remote: true,
-    draft: REMOTE_PIN,
   },
   {
     id: "now",
