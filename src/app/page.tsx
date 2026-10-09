@@ -1,3 +1,4 @@
+import ResumeLink from "@/components/ResumeLink";
 import { profile, skills } from "@/data";
 
 export default function About() {
@@ -24,6 +25,7 @@ export default function About() {
             </li>
           ))}
         </ul>
+        <ResumeLink className="mt-4" />
         <div className="mt-6 flex flex-col gap-4 text-foreground/80">
           {profile.summary.map((p) => (
             <p key={p}>{p}</p>
