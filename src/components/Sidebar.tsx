@@ -103,13 +103,18 @@ function ThemeToggle({ size, tip }: { size: number; tip?: boolean }) {
   );
 }
 
+// A section stays highlighted on its subpages (/interests/ai); Home only on "/".
+function isCurrent(href: string, pathname: string) {
+  return href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export default function Sidebar() {
   const pathname = usePathname();
 
   return (
     <>
-      {/* Desktop: floating full-height rail, inset from the left edge */}
-      <aside className="fixed inset-y-4 left-4 z-30 hidden w-14 flex-col items-center rounded-[20px] border border-foreground/10 bg-surface/90 py-3 shadow-lg shadow-black/40 light:shadow-black/10 backdrop-blur-md md:flex">
+      {/* Desktop: floating rail sized to its contents, centered on the left edge */}
+      <aside className="fixed top-1/2 left-4 z-30 hidden w-14 -translate-y-1/2 flex-col items-center rounded-[20px] border border-foreground/10 bg-surface/90 py-3 shadow-lg shadow-black/40 light:shadow-black/10 backdrop-blur-md md:flex">
         <Link
           href="/"
           aria-label={`${profile.name}, home`}
@@ -121,7 +126,7 @@ export default function Sidebar() {
         <nav aria-label="Main">
           <ul className="flex flex-col gap-1">
             {links.map(({ href, label, icon: Icon }) => {
-              const isActive = href === pathname;
+              const isActive = isCurrent(href, pathname);
               return (
                 <li key={href}>
                   <Link
@@ -139,7 +144,7 @@ export default function Sidebar() {
           </ul>
         </nav>
 
-        <div className="mt-auto mb-2">
+        <div className="mt-3 mb-2 border-t border-foreground/10 pt-2">
           <ThemeToggle size={18} tip />
         </div>
 
@@ -171,7 +176,7 @@ export default function Sidebar() {
       >
         <ul className="flex gap-1.5">
           {links.map(({ href, label, icon: Icon }) => {
-            const isActive = href === pathname;
+            const isActive = isCurrent(href, pathname);
             return (
               <li key={href}>
                 <Link
