@@ -3,6 +3,17 @@ export interface Social {
   href: string;
 }
 
+/** An award or recognition, shown under the school on the Experience page. */
+export interface Award {
+  id: string;
+  title: string;
+  /** Who gave it, e.g. a course and instructor. */
+  issuer: string;
+  /** Display date, e.g. "Apr 2023". */
+  date: string;
+  description: string;
+}
+
 export interface Profile {
   name: string;
   role: string;
@@ -15,6 +26,7 @@ export interface Profile {
     period: string;
     gpa: string;
     coursework: string[];
+    awards: Award[];
   };
   socials: Social[];
   /** The "Now" section on About: what Anthony is focused on at the moment. */
@@ -32,6 +44,8 @@ export interface Experience {
   location: string;
   period: string;
   highlights: string[];
+  /** Roles held under this one, e.g. client projects led within an organization. */
+  subroles?: Experience[];
 }
 
 export type ProjectStatus = "shipped" | "in-progress" | "early" | "school";
@@ -134,6 +148,36 @@ export interface PaperSummary {
   stats?: { label: string; value: string }[];
   /** Caveats the authors raise themselves. */
   limitations?: string[];
+}
+
+/** A book Anthony has read. */
+export interface Book {
+  id: string;
+  title: string;
+  authors: string;
+  year: number;
+  publisher?: string;
+  url: string;
+  /** Anthony's own one- or two-line takeaway. */
+  takeaway?: string;
+  tags: string[];
+  draft?: string;
+}
+
+/** A single podcast episode, so the takeaway is tied to what was said. */
+export interface Podcast {
+  id: string;
+  /** The show, e.g. "Latent Space". */
+  show: string;
+  episode: string;
+  guest?: string;
+  /** Display date, e.g. "Oct 2026". */
+  date: string;
+  /** Episode link (Spotify, Apple, YouTube or the show's site). */
+  url: string;
+  takeaway?: string;
+  tags: string[];
+  draft?: string;
 }
 
 /** A dish Anthony cooks. Without a photo it renders as a plain name card. */

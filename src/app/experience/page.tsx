@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import ResumeLink from "@/components/ResumeLink";
 import {
   experiences,
   volunteering,
   projects,
+  profile,
   projectStatusLabel,
   skills,
   type Experience as Job,
@@ -44,13 +46,18 @@ function Row({ left, right }: { left: ReactNode; right: ReactNode }) {
   );
 }
 
-function Jobs({ jobs }: { jobs: Job[] }) {
+function Jobs({ jobs, nested = false }: { jobs: Job[]; nested?: boolean }) {
+  const Title = nested ? "h4" : "h3";
   return (
-    <ol className="flex flex-col gap-8">
+    <ol className={nested ? "mt-5 flex flex-col gap-6" : "flex flex-col gap-8"}>
       {jobs.map((job) => (
         <li key={job.id}>
           <Row
-            left={<h3 className="text-lg font-semibold">{job.company}</h3>}
+            left={
+              <Title className={nested ? "font-semibold" : "text-lg font-semibold"}>
+                {job.company}
+              </Title>
+            }
             right={
               <span className="text-sm text-foreground/60">{job.location}</span>
             }
@@ -63,11 +70,18 @@ function Jobs({ jobs }: { jobs: Job[] }) {
               </span>
             }
           />
-          <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-5 text-foreground/80 marker:text-foreground/40">
-            {job.highlights.map((h) => (
-              <li key={h}>{h}</li>
-            ))}
-          </ul>
+          {job.highlights.length > 0 && (
+            <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-5 text-foreground/80 marker:text-foreground/40">
+              {job.highlights.map((h) => (
+                <li key={h}>{h}</li>
+              ))}
+            </ul>
+          )}
+          {job.subroles && (
+            <div className="ml-1 border-l border-foreground/15 pl-5">
+              <Jobs jobs={job.subroles} nested />
+            </div>
+          )}
         </li>
       ))}
     </ol>
@@ -78,6 +92,7 @@ export default function Experience() {
   return (
     <div className="flex flex-col gap-14">
       <Section title="Experience" first>
+        <ResumeLink className="mb-6" from="experience" />
         <Jobs jobs={experiences} />
       </Section>
 
@@ -133,6 +148,37 @@ export default function Experience() {
             </li>
           ))}
         </ol>
+      </Section>
+
+      <Section title="Education">
+        <Row
+          left={<h3 className="text-lg font-semibold">{profile.education.school}</h3>}
+          right={
+            <span className="font-mono text-sm text-foreground/60">
+              {profile.education.period}
+            </span>
+          }
+        />
+        <p className="italic text-foreground/80">
+          {profile.education.degree} · GPA {profile.education.gpa}
+        </p>
+        <h4 className="mt-5 text-sm font-semibold uppercase tracking-wide text-foreground/50">
+          Awards
+        </h4>
+        <ul className="mt-3 flex flex-col gap-5">
+          {profile.education.awards.map((a) => (
+            <li key={a.id}>
+              <Row
+                left={<p className="font-semibold">{a.title}</p>}
+                right={
+                  <span className="font-mono text-sm text-foreground/60">{a.date}</span>
+                }
+              />
+              <p className="text-sm text-foreground/60">{a.issuer}</p>
+              <p className="mt-1.5 text-foreground/80">{a.description}</p>
+            </li>
+          ))}
+        </ul>
       </Section>
 
       <Section title="Skills">

@@ -62,6 +62,19 @@ export const journey: JourneyStop[] = [
     description: "I was brought in as a Project Manager to lead projects to develop free software solutions for non-for-profits orgs",
   },
   {
+    id: "plan-catalyst",
+    date: "Sept 2025",
+    place: "United Kingdom",
+    lat: 51.5074,
+    lng: -0.1278,
+    kind: "volunteering",
+    title: "Project Manager, Plan Catalyst",
+    description:
+      "Led two engineering squads using SAFe Agile to deliver a database system for Project SHARE.",
+    remote: true,
+    draft: "UK-based org. City unconfirmed; pinned at London.",
+  },
+  {
     id: "bgc",
     date: "Sept 2024",
     place: "London, ON",
@@ -101,19 +114,6 @@ export const journey: JourneyStop[] = [
       { src: media("journey/banff.webp"), alt: "A mountain and turquoise lake seen through pine trees." },
       { src: media("journey/banff2.webp"), alt: "A turquoise alpine lake below a rock face and pine forest." },
     ],
-  },
-  {
-    id: "plan-catalyst",
-    date: "Sept 2025",
-    place: "United Kingdom",
-    lat: 51.5074,
-    lng: -0.1278,
-    kind: "volunteering",
-    title: "Project Manager, Plan Catalyst",
-    description:
-      "Led two engineering squads using SAFe Agile to deliver a database system for Project SHARE.",
-    remote: true,
-    draft: "UK-based org. City unconfirmed; pinned at London.",
   },
   {
     id: "hack-the-valley",

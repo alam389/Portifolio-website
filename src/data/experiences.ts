@@ -29,15 +29,36 @@ export const experiences: Experience[] = [
 
 export const volunteering: Experience[] = [
   {
-    id: "plan-catalyst",
-    title: "Project Manager",
-    company: "Plan Catalyst",
-    location: "Remote (UK)",
-    period: "Sept 2025 – Dec 2025",
-    highlights: [
-      "Led two engineering squads using SAFe Agile to deliver a database management system for Project SHARE.",
-      "Managed scope, sprint planning, backlog priorities and task tracking in Jira across design, development and stakeholder teams.",
-      "Conducted user testing, A/B testing and feedback analysis to drive usability improvements.",
+    id: "tethos",
+    title: "Founding Member & SWE Lead",
+    company: "Tech for Social Impact (TETHOS)",
+    location: "London, ON / UWO campus",
+    period: "Sept 2023 – Apr 2025",
+    highlights: [],
+    subroles: [
+      {
+        id: "plan-catalyst",
+        title: "Project Manager",
+        company: "Plan Catalyst",
+        location: "Remote (UK)",
+        period: "Sept 2025 – Dec 2025",
+        highlights: [
+          "Led two engineering squads using SAFe Agile to deliver a database management system for Project SHARE.",
+          "Managed scope, sprint planning, backlog priorities and task tracking in Jira across design, development and stakeholder teams.",
+          "Conducted user testing, A/B testing and feedback analysis to drive usability improvements.",
+        ],
+      },
+      {
+        id: "bgc",
+        title: "Team Lead",
+        company: "Boys & Girls Club",
+        location: "London, ON",
+        period: "Sept 2024 – Jan 2025",
+        highlights: [
+          "Worked with the club to address a lack of visibility into user insights and analytics.",
+          "Delivered a web analytics solution that let the organization track and analyze traffic from 1,000+ users for the first time.",
+        ],
+      },
     ],
   },
   {
@@ -49,17 +70,6 @@ export const volunteering: Experience[] = [
     highlights: [
       "Led development of a new website for F&LS focused on user experience, showcasing past fall/winter shows, news articles and magazine issues (React, Vite, TypeScript).",
       "Set up communication channels for 100+ members to collaborate on the fashion shows.",
-    ],
-  },
-  {
-    id: "bgc",
-    title: "Team Lead",
-    company: "Boys & Girls Club",
-    location: "London, ON",
-    period: "Sept 2024 – Jan 2025",
-    highlights: [
-      "Worked with the club to address a lack of visibility into user insights and analytics.",
-      "Delivered a web analytics solution that let the organization track and analyze traffic from 1,000+ users for the first time.",
     ],
   },
 ];

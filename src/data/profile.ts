@@ -23,6 +23,24 @@ export const profile: Profile = {
       "Data Engineering",
       "Applications of AI & Software",
     ],
+    awards: [
+      {
+        id: "best-design-in-category",
+        title: "Best Design in Category",
+        issuer: "ES 1050-22 Lab19, Instructor: Jacob Reeves",
+        date: "Apr 2023",
+        description:
+          "Won best in category for the best chair project, aimed at helping patients and elderly people move safely from sitting to standing without relying on their legs for support. Also placed 3rd overall across all 144+ ES1050 teams for best presentation.",
+      },
+      {
+        id: "best-in-class-semi-automation",
+        title: "Best-in-Class Semi-Automation",
+        issuer: "ES1050-22, Instructor: Jacob Reeves",
+        date: "Dec 2022",
+        description:
+          "Voted best semi-automated device design for my washer-sorting wheel. The project aimed to help people with impairments sort materials like washers, screws, nuts and bolts. My design sorted washers of certain sizes into separate piles.",
+      },
+    ],
   },
   socials: [
     { label: "GitHub", href: "https://github.com/alam389" },
