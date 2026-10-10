@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { crispScale, drawFrame } from "./draw";
+import { clamp } from "./physics";
 import {
   ANIMATIONS,
   SPECIES,
   SPECIES_NAMES,
   SPRITE_SIZE,
+  TRAITS,
   outlinedFrames,
   paletteFor,
   variantsOf,
@@ -20,15 +22,15 @@ const PANEL: Record<Theme, { bg: string; fg: string }> = {
   dark: { bg: "#0a0a0a", fg: "rgba(237,237,237,0.6)" },
 };
 
-// Walk speed in sprite pixels per second; the walk track multiplies by scale.
-const WALK_SPEED: Record<SpeciesName, number> = { cat: 24, dog: 32, bunny: 28 };
-
 const SCALES = [2, 3, 4, 6];
 
+function subscribeDpr(onChange: () => void) {
+  addEventListener("resize", onChange);
+  return () => removeEventListener("resize", onChange);
+}
+
 function useDpr() {
-  const [dpr, setDpr] = useState(1);
-  useEffect(() => setDpr(window.devicePixelRatio || 1), []);
-  return dpr;
+  return useSyncExternalStore(subscribeDpr, () => devicePixelRatio || 1, () => 1);
 }
 
 function Sprite({
@@ -107,9 +109,9 @@ function WalkTrack({
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
       const max = (track.current?.clientWidth ?? 0) - size;
-      x.current += dir.current * WALK_SPEED[species] * scale * dt;
+      x.current += dir.current * TRAITS[species].walk * scale * dt;
       if (x.current >= max || x.current <= 0) {
-        x.current = Math.min(Math.max(x.current, 0), max);
+        x.current = clamp(x.current, 0, max);
         dir.current = -dir.current;
         setFacingLeft(dir.current < 0);
       }

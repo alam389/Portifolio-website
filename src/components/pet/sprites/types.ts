@@ -1,3 +1,7 @@
+import type { Theme } from "@/components/theme";
+
+export type { Theme };
+
 /**
  * Pet sprites are authored as text: each frame is 16 rows of 16 characters,
  * one character per pixel. "." is transparent; every other character is a key
@@ -11,8 +15,6 @@ export type Frame = readonly string[];
 
 /** Character → CSS hex color. */
 export type Palette = Readonly<Record<string, string>>;
-
-export type Theme = "light" | "dark";
 
 /** A coat color. The outline ("o") is per theme: it has to read on both backgrounds. */
 export interface Variant {

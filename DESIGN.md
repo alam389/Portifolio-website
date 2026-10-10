@@ -1,3 +1,9 @@
+> **Status: shelved. Not the current design.** This documents a chat "digital twin"
+> portfolio (Next.js 15, hybrid chatbot, Upstash rate limiting) that was never built.
+> The site shipped as a quiet editorial portfolio instead. The current design context is
+> `.impeccable.md`; architecture is in `CLAUDE.md`. Kept as a decision record in case the
+> chatbot is revived.
+
 # Design Spec — AI Chatbot Portfolio
 
 Resolved decision record for the current build: a Next.js 15 + Tailwind v4 portfolio

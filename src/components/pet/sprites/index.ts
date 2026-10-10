@@ -17,6 +17,8 @@ export function variantsOf(species: SpeciesName) {
   return Object.entries(SPECIES[species].variants);
 }
 
+export const defaultCoat = (species: SpeciesName) => variantsOf(species)[0][0];
+
 export interface Animation {
   frames: readonly string[];
   fps: number;
@@ -39,9 +41,29 @@ export const ANIMATIONS: Record<SpeciesName, Record<string, Animation>> = {
   dog: { ...shared, carry: { frames: ["carry1", "carry2", "carry3", "carry4"], fps: 8 } },
   bunny: {
     ...shared,
-    walk: { frames: ["walk1", "walk2", "walk3", "walk4"], fps: 10 },
+    walk: { ...shared.walk, fps: 10 },
     nudge: { frames: ["nudge1", "nudge2"], fps: 4 },
   },
+};
+
+export interface Traits {
+  /** Walk speed in sprite pixels per second (multiplied by display scale). */
+  walk: number;
+  /** Highest platform it will jump up to, in CSS pixels. */
+  jump: number;
+  /** What it does on reaching the ball. */
+  fetch: "carry" | "swat" | "nudge";
+  /** Chance it goes after a thrown ball at all. */
+  ballInterest: number;
+  /** Body rise per animation frame, in sprite pixels (the bunny's hop). */
+  lift: Readonly<Record<string, number>>;
+}
+
+/** How each species moves and plays; everything species-specific the engine reads. */
+export const TRAITS: Record<SpeciesName, Traits> = {
+  cat: { walk: 22, jump: 190, fetch: "swat", ballInterest: 0.75, lift: {} },
+  dog: { walk: 30, jump: 120, fetch: "carry", ballInterest: 1, lift: {} },
+  bunny: { walk: 26, jump: 160, fetch: "nudge", ballInterest: 1, lift: { walk2: 2, walk3: 4 } },
 };
 
 const cache = new Map<SpeciesSprites, Record<string, Frame>>();
