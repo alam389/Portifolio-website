@@ -1,6 +1,6 @@
 "use client";
 
-import { Bone, Carrot, CircleDot, Eye, EyeOff, Fish, Hand } from "lucide-react";
+import { Bone, Carrot, CircleDot, Eye, EyeOff, Fish, Hand, MessageCircle, MessageCircleOff } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { drawFrame } from "./draw";
 import { FEED_EVENT, PAT_EVENT, THROW_BALL_EVENT } from "./events";
@@ -46,7 +46,7 @@ function Preview({ species, coat }: { species: SpeciesName; coat: string }) {
 }
 
 export default function PawPanel() {
-  const { species, coat, hidden } = usePetSettings();
+  const { species, coat, hidden, talk } = usePetSettings();
   const Treat = TREAT_ICON[species];
 
   return (
@@ -106,6 +106,16 @@ export default function PawPanel() {
           className={action}
         >
           <Hand size={14} aria-hidden /> Pet the {species}
+        </button>
+        <button
+          type="button"
+          disabled={hidden}
+          aria-pressed={talk}
+          onClick={() => updatePet({ talk: !talk })}
+          className={action}
+        >
+          {talk ? <MessageCircle size={14} aria-hidden /> : <MessageCircleOff size={14} aria-hidden />}
+          {talk ? "Mute the chatter" : "Let it talk"}
         </button>
         <button type="button" onClick={() => updatePet({ hidden: !hidden })} className={action}>
           {hidden ? <Eye size={14} aria-hidden /> : <EyeOff size={14} aria-hidden />}

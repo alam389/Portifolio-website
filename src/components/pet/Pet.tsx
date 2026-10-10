@@ -1,9 +1,11 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { crispScale, drawFrame } from "./draw";
 import { PetEngine, type Surface } from "./engine";
 import { FEED_EVENT, PAT_EVENT, THROW_BALL_EVENT } from "./events";
+import { hourLine, perchLine, routeLine, themeLine } from "./speech";
 import {
   BALL,
   BALL_COLORS,
@@ -36,6 +38,13 @@ const RECOLLECT_MS = 500;
 const DRAG_PX = 4;
 /** Throw velocity is measured over the last stretch of the drag. */
 const THROW_WINDOW_MS = 80;
+
+/** Pause between remarks about the page, so it comments rather than narrates. */
+const REMARK_GAP_MS = 14000;
+/** How long it stands on something before it has an opinion of it. */
+const PERCH_SECONDS = 2.5;
+/** Said once per visit, however often the pet is swapped. */
+let greeted = false;
 
 const currentTheme = (): Theme =>
   document.documentElement.dataset.theme === "light" ? "light" : "dark";
@@ -100,7 +109,26 @@ function draggable(target: HTMLElement, on: DragHandlers) {
   };
 }
 
-export default function Pet({ species, coat }: { species: SpeciesName; coat: string }) {
+export default function Pet({
+  species,
+  coat,
+  talk,
+}: {
+  species: SpeciesName;
+  coat: string;
+  talk: boolean;
+}) {
+  const path = usePathname();
+  const pathRef = useRef(path);
+  const talkRef = useRef(talk);
+  useEffect(() => {
+    talkRef.current = talk;
+  }, [talk]);
+  // Set by the effect below; called when the route changes.
+  const onRoute = useRef<(path: string) => void>(null);
+  const bubble = useRef<HTMLDivElement>(null);
+  const bubbleText = useRef<HTMLSpanElement>(null);
+  const bubbleTail = useRef<HTMLSpanElement>(null);
   const box = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const ballBox = useRef<HTMLDivElement>(null);
@@ -122,6 +150,42 @@ export default function Pet({ species, coat }: { species: SpeciesName; coat: str
     const frames = outlinedFrames(species);
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const engine = new PetEngine(species, 0, 0, reduced);
+    engine.talk = talkRef.current;
+
+    // Page-aware remarks: what it's standing on, the route, the theme.
+    let lastRemark = -Infinity;
+    const remarked = new WeakSet<Element>();
+    let pending: { text: string; at: number } | null = null;
+    const remark = (text: string, urgent = false) => {
+      if (!engine.remark(text, urgent)) return false;
+      lastRemark = performance.now();
+      return true;
+    };
+    onRoute.current = (to) => {
+      const text = routeLine(species, to);
+      if (text) pending = { text, at: performance.now() + 1800 };
+    };
+    if (!greeted) {
+      greeted = true;
+      const text = hourLine(species, new Date().getHours());
+      if (text) pending = { text, at: performance.now() + 3500 };
+    }
+    const wonder = (now: number) => {
+      if (pending) {
+        if (now >= pending.at && remark(pending.text)) pending = null;
+        return;
+      }
+      if (now - lastRemark < REMARK_GAP_MS) return;
+      const perch = engine.perch();
+      if (!perch || perch.seconds < PERCH_SECONDS || remarked.has(perch.el)) return;
+      const text = perchLine(species, {
+        tag: perch.el.tagName.toLowerCase(),
+        text: perch.el.textContent ?? "",
+      });
+      if (text && Math.random() < 0.7) remark(text);
+      // Either way, once is enough for this element.
+      remarked.add(perch.el);
+    };
 
     let dpr = 1;
     const measure = () => {
@@ -163,13 +227,49 @@ export default function Pet({ species, coat }: { species: SpeciesName; coat: str
     let foodDrawn = "";
     const snap = (v: number) => Math.round(v * dpr) / dpr;
 
+    // The speech bubble: follows the pet's head, flipping below it near the top.
+    let shownId = 0;
+    let bubbleW = 0;
+    let bubbleH = 0;
+    const place = (lift: number) => {
+      const box = bubble.current;
+      const text = bubbleText.current;
+      const tail = bubbleTail.current;
+      if (!box || !text || !tail) return;
+      const say = engine.talk ? engine.speech : null;
+      if (!say) {
+        box.style.opacity = "0";
+        shownId = 0;
+        return;
+      }
+      if (say.id !== shownId) {
+        shownId = say.id;
+        text.textContent = say.text;
+        bubbleW = box.offsetWidth;
+        bubbleH = box.offsetHeight;
+      }
+      const pad = 8;
+      const gap = 6;
+      const centre = engine.x + engine.size / 2;
+      const left = Math.min(Math.max(centre - bubbleW / 2, pad), innerWidth - bubbleW - pad);
+      const above = engine.y - engine.size - lift - bubbleH - gap;
+      const below = above < pad;
+      const top = below ? engine.y + gap : above;
+      tail.style.left = `${Math.min(Math.max(centre - left, 10), bubbleW - 10)}px`;
+      tail.dataset.side = below ? "top" : "bottom";
+      box.style.transform = `translate(${snap(left)}px, ${snap(top)}px)`;
+      box.style.opacity = "1";
+    };
+
     let raf = 0;
     let last = performance.now();
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick);
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
+      engine.talk = talkRef.current;
       engine.step(dt, surfaces(now), floor());
+      wonder(now);
 
       const { name, lift, sx, sy, face } = engine.frame();
       const key = `${name}|${face}|${theme}`;
@@ -181,6 +281,8 @@ export default function Pet({ species, coat }: { species: SpeciesName; coat: str
         box.current.style.transformOrigin = "50% 100%";
         box.current.style.transform = `translate(${snap(engine.x)}px, ${snap(engine.y - engine.size - lift)}px) scale(${sx.toFixed(3)}, ${sy.toFixed(3)})`;
       }
+
+      place(lift);
 
       const ball = engine.ball;
       if (ballBox.current) {
@@ -259,7 +361,9 @@ export default function Pet({ species, coat }: { species: SpeciesName; coat: str
       }
     };
     const themeWatch = new MutationObserver(() => {
+      const before = theme;
       theme = currentTheme();
+      if (theme !== before) remark(themeLine(species, theme), true);
     });
     themeWatch.observe(document.documentElement, { attributeFilter: ["data-theme"] });
     addEventListener("pointermove", onMove);
@@ -273,6 +377,7 @@ export default function Pet({ species, coat }: { species: SpeciesName; coat: str
 
     return () => {
       cancelAnimationFrame(raf);
+      onRoute.current = null;
       themeWatch.disconnect();
       undragPet();
       undragBall();
@@ -287,8 +392,28 @@ export default function Pet({ species, coat }: { species: SpeciesName; coat: str
     };
   }, [species, coat, food]);
 
+  // A new page: it has something to say about it, after a moment.
+  useEffect(() => {
+    if (pathRef.current === path) return;
+    pathRef.current = path;
+    onRoute.current?.(path);
+  }, [path]);
+
   return (
     <>
+      <div
+        ref={bubble}
+        aria-hidden
+        className="pointer-events-none fixed top-0 left-0 z-40 rounded-md border border-foreground/25 bg-surface px-2 py-1 font-mono text-[11px] leading-none whitespace-nowrap text-foreground opacity-0 shadow-sm shadow-black/30 transition-opacity duration-150 motion-reduce:transition-none light:shadow-black/10"
+        style={{ willChange: "transform" }}
+      >
+        <span ref={bubbleText} />
+        {/* The tail: a rotated square on the edge facing the pet. */}
+        <span
+          ref={bubbleTail}
+          className="absolute size-1.5 -translate-x-1/2 rotate-45 border-foreground/25 bg-surface data-[side=bottom]:-bottom-[4px] data-[side=bottom]:border-r data-[side=bottom]:border-b data-[side=top]:-top-[4px] data-[side=top]:border-t data-[side=top]:border-l"
+        />
+      </div>
       <div
         ref={foodBox}
         aria-hidden

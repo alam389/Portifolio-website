@@ -2,17 +2,19 @@ import { useSyncExternalStore } from "react";
 import { SPECIES, SPECIES_NAMES, variantsOf, type SpeciesName } from "./sprites";
 
 /**
- * The visitor's pet choice: species, coat and whether it's hidden. Remembered
+ * The visitor's pet choice: species, coat, whether it's hidden and whether it talks. Remembered
  * in localStorage (best effort) and shared by the pet and the paw menu.
  */
 export interface PetSettings {
   species: SpeciesName;
   coat: string;
   hidden: boolean;
+  /** Whether it speaks in bubbles. */
+  talk: boolean;
 }
 
 const KEY = "pet";
-const DEFAULT: PetSettings = { species: "cat", coat: variantsOf("cat")[0][0], hidden: false };
+const DEFAULT: PetSettings = { species: "cat", coat: variantsOf("cat")[0][0], hidden: false, talk: true };
 
 const listeners = new Set<() => void>();
 let current: PetSettings | null = null;
@@ -21,7 +23,7 @@ function valid(s: Partial<PetSettings> | null): PetSettings {
   const species = SPECIES_NAMES.find((n) => n === s?.species) ?? DEFAULT.species;
   const coat =
     s?.coat && s.coat in SPECIES[species].variants ? s.coat : variantsOf(species)[0][0];
-  return { species, coat, hidden: s?.hidden === true };
+  return { species, coat, hidden: s?.hidden === true, talk: s?.talk !== false };
 }
 
 function read(): PetSettings {

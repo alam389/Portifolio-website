@@ -1,5 +1,6 @@
 import { Ball } from "./ball";
 import { GRAVITY, fall, landing, type Surface } from "./physics";
+import { line, lingerFor, type Moment } from "./speech";
 import { ANIMATIONS, type SpeciesName } from "./sprites";
 
 export type { Surface } from "./physics";
@@ -84,6 +85,10 @@ export class PetEngine {
   facing = 1;
   ball: Ball | null = null;
   food: Ball | null = null;
+  /** What it's saying right now, if anything (drawn as a bubble). */
+  speech: { text: string; until: number; id: number } | null = null;
+  /** Whether it talks at all (the visitor can mute it). */
+  talk = true;
   /** Share of the food eaten so far, 0 to 1 (drawn as bites). */
   foodEaten = 0;
   /** The visitor's cursor: what the pet follows, and where the dog brings the ball. */
@@ -119,6 +124,12 @@ export class PetEngine {
   /** `foodEaten` when the current meal started (it can be interrupted). */
   private eatFrom = 0;
   private reduced: boolean;
+  /** Ambient chatter waits until this `time`, so it never turns into a stream. */
+  private quietUntil = 0;
+  private spoken = 0;
+  /** The platform it's standing on and since when, for remarks about the page. */
+  private perchEl: Element | null = null;
+  private perchSince = 0;
 
   constructor(species: SpeciesName, size: number, scale: number, reduced: boolean) {
     this.species = species;
@@ -137,11 +148,45 @@ export class PetEngine {
   }
 
   pet() {
-    if (this.on && !this.reduced && FREE.has(this.mode)) this.set("happy", 1.2);
+    if (this.on && !this.reduced && FREE.has(this.mode)) {
+      this.set("happy", 1.2);
+      this.say("pat");
+    }
+  }
+
+  /** Show a line in a bubble. `ambient` lines hold back if it just spoke. */
+  private say(moment: Moment, ambient = false) {
+    this.show(line(this.species, moment), ambient);
+  }
+
+  private show(text: string, ambient: boolean) {
+    if (!this.talk || this.reduced) return false;
+    if (ambient && (this.speech || this.time < this.quietUntil)) return false;
+    this.speech = { text, until: this.time + lingerFor(text), id: ++this.spoken };
+    this.quietUntil = this.speech.until + 4;
+    return true;
+  }
+
+  /**
+   * A remark about the page, from outside. Returns whether it was said, so the
+   * caller knows to try again later if the pet was busy. `urgent` ones (the
+   * theme just changed) cut in; the rest wait for a calm moment.
+   */
+  remark(text: string, urgent = false) {
+    if (this.mode === "held" || this.mode === "air") return false;
+    return this.show(text, !urgent);
+  }
+
+  /** The element it's standing on and for how long (seconds), or null in the air. */
+  perch() {
+    const el = this.on?.el ?? null;
+    if (!el || this.mode === "air" || this.mode === "held") return null;
+    return { el, seconds: this.time - this.perchSince };
   }
 
   /** Picked up: dangle from the pointer until released. */
   grab() {
+    this.say("grabbed");
     this.dropBall();
     this.on = null;
     this.leaving = false;
@@ -210,6 +255,7 @@ export class PetEngine {
     if (this.mode === "carry") this.set("idle", 0.2);
     this.ball = new Ball(size, rand(0.25, 0.75) * floor.right, -size, rand(-250, 250), 0);
     this.play();
+    this.say("ball");
   }
 
   /** The visitor picks the ball up. Returns false if there's none to take. */
@@ -269,11 +315,18 @@ export class PetEngine {
     this.clock += dt;
     this.time += dt;
     const s = this.size;
+    if (this.speech && this.time > this.speech.until) this.speech = null;
+    const standing = this.on?.el ?? null;
+    if (standing !== this.perchEl) {
+      this.perchEl = standing;
+      this.perchSince = this.time;
+    }
 
     if (this.ball) {
       this.ball.step(dt, surfaces, floor);
       if (this.ball.gone) {
         this.ball = null;
+        if (this.fetching) this.say("ballGone");
         this.fetching = false;
         if (this.timer === Infinity) this.timer = rand(1, 3);
         if (this.mode === "carry") this.set("idle", 0.5);
@@ -305,6 +358,7 @@ export class PetEngine {
           this.vx = 0;
           this.vy = 0;
           this.set("air");
+          this.say("tumble");
         }
       } else {
         this.on = cur;
@@ -402,6 +456,7 @@ export class PetEngine {
           this.ball.place(on, Math.min(Math.max(bx, on.left), on.right - bs));
         }
         this.fresh = false;
+        this.say("bring");
         this.breather("happy", rand(2.5, 4));
         break;
       case "sleep":
@@ -411,6 +466,7 @@ export class PetEngine {
         // All gone: pleased with itself for a bit.
         this.food = null;
         this.foodEaten = 0;
+        this.say("eatDone");
         this.breather("happy", rand(1.5, 2.5));
         break;
       default:
@@ -421,6 +477,7 @@ export class PetEngine {
   /** Always busy: mostly exploring on foot, with jumps, antics and the odd nap. */
   private decide(surfaces: Surface[]) {
     const r = Math.random();
+    if (Math.random() < 0.12) this.say("idle", true);
     if (r < 0.22 && this.tryJump(surfaces)) return;
     if (r < 0.3) return this.set(Math.random() < 0.5 ? "sit" : "idle", rand(0.5, 1.5));
     if (r < 0.36) return this.set("stretch", 1.1);
@@ -428,7 +485,10 @@ export class PetEngine {
     if (r < 0.46) return this.set("shake", 0.7);
     if (r < 0.52) return this.set("happy", rand(1, 1.6));
     if (r < 0.58) return this.set("zoom", rand(1.2, 2.2));
-    if (r < 0.63) return this.set("sleep", rand(5, 9));
+    if (r < 0.63) {
+      this.say("sleep", true);
+      return this.set("sleep", rand(5, 9));
+    }
     if (Math.random() < 0.4) this.facing = -this.facing;
     this.set("walk", rand(3, 7));
   }
@@ -529,6 +589,7 @@ export class PetEngine {
     if (!this.attention || this.time > this.attention.until) {
       const on = Math.random() < traits.notice;
       this.attention = { on, until: this.time + rand(4, 8) };
+      if (on) this.say("notice", true);
       if (!on && this.timer === Infinity && !this.leaving) this.timer = rand(0.5, 2);
     }
     if (!this.attention.on) return;
@@ -592,6 +653,7 @@ export class PetEngine {
         // Hops over and keeps a polite distance; bolts if it rushes in.
         if (!still && p.speed > STARTLE_SPEED && dist < s * 2.5) {
           this.facing = -dir;
+          this.say("startle");
           return this.breather("zoom", rand(0.8, 1.2));
         }
         // A slow, gentle hover over it is welcome.
@@ -604,6 +666,7 @@ export class PetEngine {
   /** At the food: eat it. At the ball: each species plays differently. */
   private reach(prop: Ball) {
     if (prop === this.food) {
+      if (this.foodEaten === 0) this.say("eat");
       this.eatFrom = this.foodEaten;
       this.set("eat", (1 - this.foodEaten) * EAT_SECONDS);
       return;
