@@ -2,17 +2,18 @@
 
 import { useEffect, useRef } from "react";
 import { crispScale, drawFrame } from "./draw";
-import { PetEngine, type Surface } from "./engine";
+import { PetEngine } from "./engine";
+import type { Surface } from "./physics";
 import { THROW_BALL_EVENT } from "./events";
 import {
   BALL,
   BALL_COLORS,
   SPECIES,
   SPECIES_NAMES,
+  defaultCoat,
   SPRITE_SIZE,
   outlinedFrames,
   paletteFor,
-  variantsOf,
   type SpeciesName,
   type Theme,
 } from "./sprites";
@@ -43,7 +44,7 @@ function choose(): { species: SpeciesName; coat: string } {
   const pet = params.get("pet");
   const species = SPECIES_NAMES.find((s) => s === pet) ?? "cat";
   const coat = params.get("coat");
-  return { species, coat: coat && coat in SPECIES[species].variants ? coat : variantsOf(species)[0][0] };
+  return { species, coat: coat && coat in SPECIES[species].variants ? coat : defaultCoat(species) };
 }
 
 const currentTheme = (): Theme =>
@@ -74,12 +75,15 @@ export default function Pet() {
       engine.scale = crispScale(innerWidth >= 768 ? 3 : 2, dpr);
       engine.size = SPRITE_SIZE * engine.scale;
       el.style.width = el.style.height = `${engine.size}px`;
+      floorSurface.right = innerWidth;
+      floorSurface.top = innerHeight;
       const ballSize = BALL.length * engine.scale;
       ballEl.style.width = ballEl.style.height = `${ballSize}px`;
     };
     measure();
 
-    const floor = (): Surface => ({ el: null, left: 0, right: innerWidth, top: innerHeight });
+    const floorSurface: Surface = { el: null, left: 0, right: innerWidth, top: innerHeight };
+    const floor = () => floorSurface;
     let platforms: Element[] = [];
     let collectedAt = -Infinity;
     let latest: Surface[] = [];
@@ -101,7 +105,9 @@ export default function Pet() {
     };
 
     let theme = currentTheme();
+    let palette = paletteFor(variant, theme);
     let drawn = "";
+    let placed = "";
     let ballDrawn = "";
     const snap = (v: number) => Math.round(v * dpr) / dpr;
 
@@ -116,11 +122,15 @@ export default function Pet() {
       const { name, lift } = engine.frame();
       const key = `${name}|${engine.facing}|${theme}`;
       if (key !== drawn) {
-        drawFrame(ctx, frames[name], paletteFor(variant, theme), engine.facing < 0);
+        drawFrame(ctx, frames[name], palette, engine.facing < 0);
         drawn = key;
       }
       if (box.current) {
-        box.current.style.transform = `translate(${snap(engine.x)}px, ${snap(engine.y - engine.size - lift)}px)`;
+        const at = `translate(${snap(engine.x)}px, ${snap(engine.y - engine.size - lift)}px)`;
+        if (at !== placed) {
+          box.current.style.transform = at;
+          placed = at;
+        }
       }
 
       const ball = engine.ball;
@@ -178,7 +188,7 @@ export default function Pet() {
     // Dev shortcut until the paw menu exists: B throws a ball.
     const onKey = (e: KeyboardEvent) => {
       const typing = (e.target as HTMLElement | null)?.closest("input, textarea, [contenteditable]");
-      if (e.key === "b" && !typing && !e.metaKey && !e.ctrlKey && process.env.NODE_ENV !== "production") {
+      if (e.key === "b" && !typing && !e.metaKey && !e.ctrlKey) {
         throwBall();
       }
     };
@@ -192,13 +202,14 @@ export default function Pet() {
     };
     const themeWatch = new MutationObserver(() => {
       theme = currentTheme();
+      palette = paletteFor(variant, theme);
     });
     themeWatch.observe(document.documentElement, { attributeFilter: ["data-theme"] });
     el.addEventListener("pointerdown", onDown);
     addEventListener("pointermove", onMove);
     addEventListener("pointerup", onUp);
     addEventListener("pointercancel", onUp);
-    addEventListener("keydown", onKey);
+    if (process.env.NODE_ENV !== "production") addEventListener("keydown", onKey);
     addEventListener(THROW_BALL_EVENT, throwBall);
     document.addEventListener("visibilitychange", onVisibility);
     addEventListener("resize", measure);

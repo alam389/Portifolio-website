@@ -17,6 +17,8 @@ export function variantsOf(species: SpeciesName) {
   return Object.entries(SPECIES[species].variants);
 }
 
+export const defaultCoat = (species: SpeciesName) => variantsOf(species)[0][0];
+
 export interface Animation {
   frames: readonly string[];
   fps: number;
@@ -39,7 +41,7 @@ export const ANIMATIONS: Record<SpeciesName, Record<string, Animation>> = {
   dog: { ...shared, carry: { frames: ["carry1", "carry2", "carry3", "carry4"], fps: 8 } },
   bunny: {
     ...shared,
-    walk: { frames: ["walk1", "walk2", "walk3", "walk4"], fps: 10 },
+    walk: { ...shared.walk, fps: 10 },
     nudge: { frames: ["nudge1", "nudge2"], fps: 4 },
   },
 };

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { crispScale, drawFrame } from "./draw";
+import { TRAITS } from "./engine";
+import { clamp } from "./physics";
 import {
   ANIMATIONS,
   SPECIES,
@@ -19,9 +21,6 @@ const PANEL: Record<Theme, { bg: string; fg: string }> = {
   light: { bg: "#fafafa", fg: "rgba(23,23,23,0.6)" },
   dark: { bg: "#0a0a0a", fg: "rgba(237,237,237,0.6)" },
 };
-
-// Walk speed in sprite pixels per second; the walk track multiplies by scale.
-const WALK_SPEED: Record<SpeciesName, number> = { cat: 24, dog: 32, bunny: 28 };
 
 const SCALES = [2, 3, 4, 6];
 
@@ -107,9 +106,9 @@ function WalkTrack({
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
       const max = (track.current?.clientWidth ?? 0) - size;
-      x.current += dir.current * WALK_SPEED[species] * scale * dt;
+      x.current += dir.current * TRAITS[species].walk * scale * dt;
       if (x.current >= max || x.current <= 0) {
-        x.current = Math.min(Math.max(x.current, 0), max);
+        x.current = clamp(x.current, 0, max);
         dir.current = -dir.current;
         setFacingLeft(dir.current < 0);
       }

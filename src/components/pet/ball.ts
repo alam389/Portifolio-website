@@ -1,4 +1,4 @@
-import { fall, landing, type Surface } from "./physics";
+import { clamp, fall, landing, type Surface } from "./physics";
 
 const BOUNCE = 0.45;
 /** Slower landings than this stop bouncing and settle. */
@@ -85,7 +85,7 @@ export class Ball {
         if (cx < cur.left || cx > cur.right) {
           if (!cur.el) {
             // The floor's ends are the window edges: bounce back.
-            this.x = Math.min(Math.max(this.x, 0), cur.right - s);
+            this.x = clamp(this.x, 0, cur.right - s);
             this.rel = this.x - cur.left;
             this.vx = -this.vx * 0.5;
           } else {
@@ -101,7 +101,7 @@ export class Ball {
     ({ y: this.y, vy: this.vy } = fall(this.y, this.vy, dt));
     this.x += this.vx * dt;
     if (this.x < 0 || this.x > floor.right - s) {
-      this.x = Math.min(Math.max(this.x, 0), floor.right - s);
+      this.x = clamp(this.x, 0, floor.right - s);
       this.vx = -this.vx * 0.6;
     }
     if (this.vy <= 0) return;
