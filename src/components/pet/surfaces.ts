@@ -1,4 +1,4 @@
-import type { Surface } from "./physics";
+import type { Surface, World } from "./physics";
 
 // Page elements whose top edge the pet can stand on. Opt an element in with
 // data-pet-platform, or out (with everything inside it) with data-pet-ignore.
@@ -16,16 +16,17 @@ const PLATFORMS = [
 /** The platform list and geometry are refreshed at least this often (route changes, layout shifts). */
 const REFRESH_MS = 500;
 
-export interface PageSurfaces {
+/** The live page as the pet's world. */
+export interface PageSurfaces extends World {
   /** The viewport floor; mutated in place when the window resizes. */
-  floor: Surface;
+  readonly floor: Surface;
   /**
    * What the pet can stand on now. Geometry is measured again only after a
    * scroll or resize, or once REFRESH_MS has passed, so a pet idling on a
    * still page costs no layout reads. The returned array and its surfaces are
    * never mutated; a fresh measurement returns new ones.
    */
-  at(now: number): Surface[];
+  surfaces(): Surface[];
   dispose(): void;
 }
 
@@ -51,7 +52,8 @@ export function trackSurfaces(minWidth: () => number): PageSurfaces {
 
   return {
     floor,
-    at(now) {
+    surfaces() {
+      const now = performance.now();
       const stale = now - measuredAt > REFRESH_MS;
       if (!dirty && !stale) return list;
       if (stale) {

@@ -51,10 +51,11 @@ It is always doing something: walking, jumping, sitting, stretching, glancing ab
 PetMount.tsx     reads preferences, lazy-loads Pet (next/dynamic, ssr:false)
 Pet.tsx          DOM glue: rAF loop, transform writes, canvases, events
 gestures.ts      pat, drag and throw for the pet and the ball; cursor tracking
-surfaces.ts      finds the page elements the pet can stand on, caches their geometry
+surfaces.ts      the page as the pet's World: finds the elements it can stand on, caches their geometry
 engine.ts        the brain and physics, plain TypeScript with no DOM
 ball.ts          Ball class, used for both the ball and the food
-physics.ts       gravity, fall(), landing(), Surface
+physics.ts       gravity, fall(), landing(), Surface, World
+stage.ts         an in-memory World for tests, with platforms that scroll, move and vanish
 PawMenu.tsx      the sidebar button and popover
 PawPanel.tsx     the panel: previews, coats, actions (lazy-loaded)
 preferences.ts   localStorage-backed store (useSyncExternalStore): species, coat, on/off, talk
@@ -67,7 +68,7 @@ sprites/         art as text grids (see below)
 
 ### Engine and DOM split
 
-`PetEngine` never touches the DOM. Each frame `Pet.tsx` gives it the **surfaces** currently on screen (`{ el, left, right, top }` for each platform, plus the viewport floor) and the engine moves the pet, returning a `Pose` (frame name, lift, squash and stretch, facing) from `frame()`. Because it's pure, it can be simulated in Node at 60 steps per second with a fake page. That is how the behaviour was tuned: a browser tab in the background doesn't run `requestAnimationFrame`.
+`PetEngine` never touches the DOM. It is built with a **World**: the viewport `floor` plus `surfaces()`, the platforms currently on screen (`{ el, left, right, top }` each, matched by `el`). It reads the world once per `step(dt)` and moves the pet, returning a `Pose` (frame name, lift, squash and stretch, facing) from `frame()`. On the site the world is `trackSurfaces()`; in tests it's a `Stage`. Because the engine is pure, it can be simulated in Node at 60 steps per second. That is how the behaviour was tuned: a browser tab in the background doesn't run `requestAnimationFrame`.
 
 Coordinates are viewport pixels; `y` is the pet's **feet**.
 
@@ -101,10 +102,9 @@ Animations are named lists of frames with an fps, in `sprites/index.ts` (`ANIMAT
 
 ## Testing
 
-There is no automated test runner. The checks used so far:
+`npm test` runs Vitest. `engine.test.ts` drives `PetEngine` on a `Stage` with `Math.random` pinned: landing on, riding, tumbling off and dropping from platforms, walking off edges, jumping up, chasing the ball onto a higher platform, and each species' fetch. `ball.test.ts`, `physics.test.ts` and `sprites/sprites.test.ts` cover the rest. Beyond that:
 
 - `npx tsc --noEmit`.
-- Node simulations of `PetEngine` against a fake page (with a small TypeScript loader). They check that each species reaches the ball and keeps playing until it vanishes, finishes a meal, and reacts to the cursor only when close.
 - Headless Chromium with Playwright for the real thing: feeding from the paw menu, dragging the ball, cursor proximity, no console errors.
 
 ## Known gaps

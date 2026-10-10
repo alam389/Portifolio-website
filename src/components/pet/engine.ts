@@ -1,9 +1,9 @@
 import { Ball } from "./ball";
-import { GRAVITY, clamp, fall, landing, type Surface } from "./physics";
+import { GRAVITY, clamp, fall, landing, type Surface, type World } from "./physics";
 import { line, lingerFor, type Moment } from "./speech";
 import { ANIMATIONS, BALL, TRAITS, type SpeciesName } from "./sprites";
 
-export type { Surface } from "./physics";
+export type { Surface, World } from "./physics";
 
 /** How to draw the pet this frame. */
 export interface Pose {
@@ -19,9 +19,10 @@ export interface Pose {
 
 /**
  * The pet's brain and physics, free of DOM so it stays testable. Coordinates
- * are viewport pixels; `y` is the pet's feet. Each frame the caller passes the
- * surfaces on screen (top edges of page elements, plus the viewport floor) and
- * the engine walks, rides, falls and jumps between them, and plays fetch.
+ * are viewport pixels; `y` is the pet's feet. It lives in a `World`: the
+ * viewport floor plus the surfaces on screen (top edges of page elements),
+ * read once per step. The engine walks, rides, falls and jumps between them,
+ * and plays fetch.
  */
 
 const MAX_THROW = 2200;
@@ -111,8 +112,10 @@ export class PetEngine {
   /** The platform it's standing on and since when, for remarks about the page. */
   private perchEl: Element | null = null;
   private perchSince = 0;
+  private world: World;
 
-  constructor(species: SpeciesName, size: number, scale: number, reduced: boolean) {
+  constructor(world: World, species: SpeciesName, size: number, scale: number, reduced: boolean) {
+    this.world = world;
     this.species = species;
     this.size = size;
     this.scale = scale;
@@ -120,7 +123,8 @@ export class PetEngine {
   }
 
   /** Drop in from above the viewport, somewhere around the middle. */
-  spawn(floor: Surface) {
+  spawn() {
+    const floor = this.world.floor;
     this.x = rand(floor.right * 0.3, floor.right * 0.7 - this.size);
     this.y = -this.size;
     this.set("air");
@@ -182,14 +186,15 @@ export class PetEngine {
   }
 
   /** Let go with the pointer's velocity; under reduced motion, set down gently. */
-  release(vx: number, vy: number, surfaces: Surface[], floor: Surface) {
+  release(vx: number, vy: number) {
     if (this.mode !== "held") return;
     if (this.reduced) {
       const cx = this.x + this.size / 2;
-      const below = surfaces
+      const below = this.world
+        .surfaces()
         .filter((o) => o.top >= this.y - 4 && cx >= o.left && cx <= o.right)
         .sort((a, b) => a.top - b.top)[0];
-      return this.stand(below ?? floor, this.x);
+      return this.stand(below ?? this.world.floor, this.x);
     }
     this.vx = clamp(vx, -MAX_THROW, MAX_THROW);
     this.vy = clamp(vy, -MAX_THROW, MAX_THROW);
@@ -198,7 +203,8 @@ export class PetEngine {
   }
 
   /** A treat drops in near the pet, which goes and eats it before anything else. */
-  feed(floor: Surface, width: number) {
+  feed(width: number) {
+    const floor = this.world.floor;
     const size = width * this.scale;
     // Dropped a little way in front of it, onto the platform it's on, so it
     // can always get there. In midair, it falls from the top instead.
@@ -231,10 +237,10 @@ export class PetEngine {
   }
 
   /** A ball drops into the page and the pet goes after it. */
-  throwBall(floor: Surface) {
+  throwBall() {
     const size = BALL.length * this.scale;
     if (this.mode === "carry") this.set("idle", 0.2);
-    this.ball = new Ball(size, rand(0.25, 0.75) * floor.right, -size, rand(-250, 250), 0);
+    this.ball = new Ball(size, rand(0.25, 0.75) * this.world.floor.right, -size, rand(-250, 250), 0);
     this.play();
     // Not every pet cares about every ball.
     if (Math.random() >= TRAITS[this.species].ballInterest) this.fetching = 0;
@@ -294,7 +300,10 @@ export class PetEngine {
     this.fresh = true;
   }
 
-  step(dt: number, surfaces: Surface[], floor: Surface) {
+  step(dt: number) {
+    // One look at the page per frame; everything below works from it.
+    const surfaces = this.world.surfaces();
+    const floor = this.world.floor;
     this.clock += dt;
     this.time += dt;
     const s = this.size;

@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { journey, type JourneyKind } from "@/data";
+import { FlightPath, pagingDuration } from "@/lib/flightPath";
 import JourneySteps from "./JourneySteps";
 import PhotoCarousel from "./PhotoCarousel";
 import { scrollToY } from "./SmoothScroll";
@@ -12,6 +13,8 @@ import { useStepKeys } from "./useStepKeys";
 
 // three.js only loads on this page, and only in the browser.
 const JourneyGlobe = dynamic(() => import("./JourneyGlobe"), { ssr: false });
+
+const path = new FlightPath(journey);
 
 const kindLabel: Record<JourneyKind, string> = {
   life: "Life",
@@ -59,8 +62,7 @@ export default function Journey() {
   const [active, setActive] = useState(-1);
   useEffect(() => {
     const update = () => {
-      const p = getProgress();
-      const i = p < -0.5 ? -1 : Math.min(journey.length - 1, Math.round(p));
+      const i = path.activeStop(getProgress());
       setActive(i);
       if (performance.now() > busyUntil.current) target.current = i;
     };
@@ -73,12 +75,9 @@ export default function Journey() {
     };
   }, [getProgress]);
 
-  // Scroll so stop i's card fills the screen (i = n: the page's end). Longer
-  // jumps take a little longer so the globe can fly the path in between
-  // without whipping.
+  // Scroll so stop i's card fills the screen (i = n: the page's end).
   const goTo = (i: number) => {
-    const hops = Math.abs(i - Math.max(target.current, 0));
-    const duration = Math.min(3, 1 + 0.25 * hops);
+    const duration = pagingDuration(target.current, i);
     const y =
       i >= journey.length
         ? document.documentElement.scrollHeight - window.innerHeight

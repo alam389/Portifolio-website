@@ -8,6 +8,18 @@ export interface Surface {
   top: number;
 }
 
+/**
+ * Where the pet lives: the viewport floor, plus the platforms on screen now.
+ * The page adapter is `trackSurfaces` (surfaces.ts); tests use `Stage`
+ * (stage.ts).
+ */
+export interface World {
+  /** The bottom of the viewport; its `right` is the window width. */
+  readonly floor: Surface;
+  /** The platforms on screen now. */
+  surfaces(): Surface[];
+}
+
 export const GRAVITY = 2000;
 const MAX_FALL = 1400;
 

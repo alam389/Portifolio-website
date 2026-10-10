@@ -73,10 +73,11 @@ export default function Pet({
 
     const variant = SPECIES[species].variants[coat];
     const frames = outlinedFrames(species);
-    const engine = new PetEngine(species, 0, 0, reduced);
-    engine.talk = talkRef.current;
+    // Platforms narrower than 1.5 pet widths are skipped; read lazily, as the
+    // size is only known once measured below.
     const page = trackSurfaces(() => engine.size * 1.5);
-    const floor = page.floor;
+    const engine = new PetEngine(page, species, 0, 0, reduced);
+    engine.talk = talkRef.current;
 
     // Page-aware remarks: what it's standing on, the route, the theme.
     let lastRemark = -Infinity;
@@ -174,7 +175,7 @@ export default function Pet({
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
       engine.talk = talkRef.current;
-      engine.step(dt, page.at(now), floor);
+      engine.step(dt);
       wonder(now);
 
       const { name, lift, sx, sy, face } = engine.frame();
@@ -224,13 +225,13 @@ export default function Pet({
       }
     };
 
-    engine.spawn(floor);
+    engine.spawn();
     raf = requestAnimationFrame(tick);
 
-    const detachGestures = attachGestures(el, ballEl, engine, () => page.at(performance.now()), floor);
-    const throwBall = () => engine.throwBall(floor);
+    const detachGestures = attachGestures(el, ballEl, engine);
+    const throwBall = () => engine.throwBall();
     const pat = () => engine.pet();
-    const feed = () => engine.feed(floor, food.frame[0].length);
+    const feed = () => engine.feed(food.frame[0].length);
     // Dev shortcuts: B throws a ball, F feeds.
     const onKey = (e: KeyboardEvent) => {
       const typing = (e.target as HTMLElement | null)?.closest("input, textarea, [contenteditable]");

@@ -1,5 +1,4 @@
 import type { PetEngine } from "./engine";
-import type { Surface } from "./physics";
 
 /** Pointer travel before a press becomes a drag instead of a pat. */
 const DRAG_PX = 4;
@@ -71,18 +70,12 @@ function draggable(target: HTMLElement, on: DragHandlers) {
  * drag to fling it. Also tracks the cursor so the pet can follow it. Returns
  * the cleanup.
  */
-export function attachGestures(
-  pet: HTMLElement,
-  ball: HTMLElement,
-  engine: PetEngine,
-  surfaces: () => Surface[],
-  floor: Surface,
-) {
+export function attachGestures(pet: HTMLElement, ball: HTMLElement, engine: PetEngine) {
   const undragPet = draggable(pet, {
     tap: () => engine.pet(),
     grab: () => (engine.grab(), true),
     hold: (x, y) => engine.holdAt(x, y),
-    release: (vx, vy) => engine.release(vx, vy, surfaces(), floor),
+    release: (vx, vy) => engine.release(vx, vy),
   });
   const undragBall = draggable(ball, {
     tap: () => {

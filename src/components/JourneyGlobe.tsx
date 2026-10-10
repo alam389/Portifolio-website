@@ -18,12 +18,11 @@ import {
   type PerspectiveCamera,
 } from "three";
 import type { JourneyStop } from "@/data";
+import { FlightPath, WIDE, regionPatches } from "@/lib/flightPath";
 import {
   EARTH_RADIUS_M,
   ELEVATION_MAX_M,
   WORLD,
-  angularDistance,
-  hopEase,
   loadPixels,
   scatterLand,
   slerp,
@@ -35,9 +34,6 @@ import {
 } from "@/lib/globe";
 
 const FOV = 40;
-const WIDE = 3.4; // camera distance (globe radius = 1) for the intro shot
-const CLOSE = 1.2; // camera distance while holding on a stop
-const MAX_TILT = 0.95; // radians; tilts close shots so the horizon shows
 const ARC_SEGMENTS = 96;
 
 // Terrain relief. Elevation is exaggerated so it reads at globe scale, and
@@ -95,7 +91,7 @@ class View {
   /** Record where the camera is looking and how close it is. */
   look(lat: number, lng: number, closeness: number, altitude: number) {
     this.lat = lat;
-    this.lng = ((lng + 540) % 360) - 180;
+    this.lng = lng;
     this.closeness = closeness;
     this.altitude = altitude;
     this.exaggeration =
@@ -139,6 +135,7 @@ function Scene({ stops, getProgress, reducedMotion }: Props) {
       : "low",
   );
   const view = useMemo(() => new View(), []);
+  const path = useMemo(() => new FlightPath(stops), [stops]);
 
   useEffect(() => {
     let cancelled = false;
@@ -173,16 +170,17 @@ function Scene({ stops, getProgress, reducedMotion }: Props) {
 
   return (
     <>
-      <CameraRig stops={stops} dirs={dirs} getProgress={getProgress} view={view} />
+      <CameraRig path={path} getProgress={getProgress} view={view} />
       <PerformanceGovernor view={view} />
       <Ocean />
       <Atmosphere />
       <GlobalTerrain tier={tier} view={view} />
       {manifest && <RegionPatches regions={manifest.regions} tier={tier} view={view} />}
-      <Arcs dirs={dirs} surface={surface} getProgress={getProgress} />
+      <Arcs dirs={dirs} surface={surface} path={path} getProgress={getProgress} />
       <Pins
         dirs={dirs}
         surface={surface}
+        path={path}
         getProgress={getProgress}
         reducedMotion={reducedMotion}
       />
@@ -193,13 +191,11 @@ function Scene({ stops, getProgress, reducedMotion }: Props) {
 /* ---------- Camera ---------- */
 
 function CameraRig({
-  stops,
-  dirs,
+  path,
   getProgress,
   view,
 }: {
-  stops: JourneyStop[];
-  dirs: Vector3[];
+  path: FlightPath;
   getProgress: () => number;
   view: View;
 }) {
@@ -210,41 +206,12 @@ function CameraRig({
   );
 
   useFrame(() => {
-    const last = stops.length - 1;
-    const p = Math.min(Math.max(getProgress(), -1), last);
-    let lat: number;
-    let lng: number;
-    let dist: number;
-
-    // The camera path interpolates lat/lng rather than following the great
-    // circle, so north stays up. Great circles between Ontario and Asia pass
-    // near the pole, where a north-up camera would roll sideways.
-    if (p < 0) {
-      // Intro: start 50° east of the first stop so the globe turns into place.
-      const e = hopEase(p + 1, 0.1);
-      lat = stops[0].lat;
-      lng = stops[0].lng + 50 * (1 - e);
-      dist = WIDE + (CLOSE - WIDE) * e;
-    } else {
-      const i = Math.min(Math.floor(p), Math.max(last - 1, 0));
-      const e = last === 0 ? 0 : hopEase(p - i);
-      const a = stops[i];
-      const b = stops[Math.min(i + 1, last)];
-      const dLng = ((((b.lng - a.lng) % 360) + 540) % 360) - 180; // shortest way round
-      lat = a.lat + (b.lat - a.lat) * e;
-      lng = a.lng + dLng * e;
-      // Pull out mid-flight in proportion to the hop, so long hops show the
-      // whole globe and short Ontario hops barely lift.
-      const angle = dirs[i].angleTo(dirs[Math.min(i + 1, last)]);
-      dist = CLOSE + Math.sin(Math.PI * e) * Math.min(2.2, angle * 1.6);
-    }
+    const { lat, lng, distance, closeness, tilt } = path.camera(getProgress());
     toVec3(lat, lng, 1, tmp.dir);
 
     // Tilt toward the horizon when close: offset the camera south of the
     // stop along the surface tangent and look at the stop.
-    const closeness = Math.min(1, Math.max(0, (WIDE - dist) / (WIDE - CLOSE)));
-    const tilt = MAX_TILT * closeness;
-    const alt = dist - 1;
+    const alt = distance - 1;
     tmp.south.set(0, -1, 0).addScaledVector(tmp.dir, tmp.dir.y).normalize();
     camera.position
       .copy(tmp.dir)
@@ -601,10 +568,6 @@ function GlobalTerrain({ tier, view }: { tier: Tier; view: View }) {
 
 /* ---------- Region patches ---------- */
 
-// A patch starts loading when the camera heads within this many degrees of
-// its region, and fades in as the camera settles into a close-up inside it.
-const PATCH_LOAD_DEG = 30;
-
 function RegionPatches({
   regions,
   tier,
@@ -621,32 +584,14 @@ function RegionPatches({
   const [ready] = useState(() => new Set<string>());
 
   useFrame(() => {
-    let best: { region: Region; fade: number } | null = null;
-    for (const region of regions) {
-      const center = {
-        lat: (region.south + region.north) / 2,
-        lng: (region.west + region.east) / 2,
-      };
-      if (
-        !wanted.includes(region.id) &&
-        angularDistance(view, center) < PATCH_LOAD_DEG
-      ) {
-        setWanted((w) => (w.includes(region.id) ? w : [...w, region.id]));
-      }
-      // How far the camera's target is outside the region's inner area.
-      const m = 2;
-      const dx = Math.max(region.west + m - view.lng, 0, view.lng - (region.east - m));
-      const dy = Math.max(region.south + m - view.lat, 0, view.lat - (region.north - m));
-      const inside = 1 - smoothstep(0, 3, Math.hypot(dx, dy));
-      const fade = ready.has(region.id)
-        ? inside * smoothstep(0.55, 0.9, view.closeness)
-        : 0;
-      fades.set(region.id, fade);
-      if (fade > (best?.fade ?? 0)) best = { region, fade };
+    const patches = regionPatches(regions, ready, view);
+    for (const id of patches.near) {
+      if (!wanted.includes(id)) setWanted((w) => (w.includes(id) ? w : [...w, id]));
     }
-    if (best) {
-      const { west, south, east, north } = best.region;
-      view.hideUnder(west, south, east, north, best.fade);
+    for (const [id, fade] of patches.fades) fades.set(id, fade);
+    if (patches.hole) {
+      const { west, south, east, north } = patches.hole.region;
+      view.hideUnder(west, south, east, north, patches.hole.fade);
     } else {
       view.showAll();
     }
@@ -727,20 +672,17 @@ function RegionPatch({
   return <points geometry={layer.geometry} material={layer.material} frustumCulled={false} />;
 }
 
-function smoothstep(e0: number, e1: number, x: number) {
-  const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)));
-  return t * t * (3 - 2 * t);
-}
-
 /* ---------- Arcs ---------- */
 
 function Arcs({
   dirs,
   surface,
+  path,
   getProgress,
 }: {
   dirs: Vector3[];
   surface: number[];
+  path: FlightPath;
   getProgress: () => number;
 }) {
   // One dashed great-circle arc per hop, lifted in proportion to its length.
@@ -788,7 +730,7 @@ function Arcs({
     const p = getProgress();
     for (const arc of arcs) {
       if (!arc) continue;
-      const t = hopEase(Math.min(1, Math.max(0, p - arc.index)));
+      const t = path.arcDrawn(arc.index, p);
       arc.line.geometry.setDrawRange(0, t === 0 ? 0 : Math.ceil(t * ARC_SEGMENTS) + 1);
     }
   });
@@ -805,11 +747,13 @@ function Arcs({
 function Pins({
   dirs,
   surface,
+  path,
   getProgress,
   reducedMotion,
 }: {
   dirs: Vector3[];
   surface: number[];
+  path: FlightPath;
   getProgress: () => number;
   reducedMotion: boolean;
 }) {
@@ -833,17 +777,17 @@ function Pins({
     () =>
       new ShaderMaterial({
         uniforms: {
-          uProgress: { value: -1 },
+          uActive: { value: -1 }, // the active stop, -1 on the intro
           uTime: { value: 0 },
           uPx: { value: 72 },
         },
         vertexShader: /* glsl */ `
           attribute float aIndex;
-          uniform float uProgress;
+          uniform float uActive;
           uniform float uPx;
           varying float vState; // 0 future, 1 visited, 2 active
           void main() {
-            float d = aIndex - uProgress;
+            float d = aIndex - uActive;
             vState = abs(d) < 0.5 ? 2.0 : (d < 0.0 ? 1.0 : 0.0);
             gl_PointSize = uPx;
             gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
@@ -898,7 +842,7 @@ function Pins({
   useEffect(() => () => material.dispose(), [material]);
 
   useFrame(({ clock }) => {
-    setUniform(material, "uProgress", getProgress());
+    setUniform(material, "uActive", path.activeStop(getProgress()));
     // Reduced motion: freeze the ring mid-expansion instead of pulsing.
     setUniform(material, "uTime", reducedMotion ? 0.35 : clock.elapsedTime);
   });

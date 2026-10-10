@@ -27,17 +27,6 @@ export function slerp(a: Vector3, b: Vector3, t: number, out = new Vector3()) {
   );
 }
 
-const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
-
-/**
- * Eases a 0..1 hop with flat ends, so the camera holds on each stop while its
- * card is centered and only travels in the middle of the scroll between cards.
- */
-export function hopEase(t: number, hold = 0.2) {
-  const x = clamp01((t - hold) / (1 - 2 * hold));
-  return x * x * x * (x * (x * 6 - 15) + 10); // smootherstep
-}
-
 /* ---------- Terrain data ---------- */
 
 export const EARTH_RADIUS_M = 6_371_000;
@@ -152,15 +141,4 @@ export async function scatterLand(
   }
 
   return { lngLat: lngLat.subarray(0, n * 2), rand: rand.subarray(0, n * 2), count: n };
-}
-
-/** Angular distance in degrees between two lat/lng points. */
-export function angularDistance(
-  a: { lat: number; lng: number },
-  b: { lat: number; lng: number },
-) {
-  const cos =
-    Math.sin(a.lat * DEG) * Math.sin(b.lat * DEG) +
-    Math.cos(a.lat * DEG) * Math.cos(b.lat * DEG) * Math.cos((b.lng - a.lng) * DEG);
-  return Math.acos(Math.min(1, Math.max(-1, cos))) / DEG;
 }
