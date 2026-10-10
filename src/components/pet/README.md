@@ -48,14 +48,16 @@ It is always doing something: walking, jumping, sitting, stretching, glancing ab
 ## How it's put together
 
 ```
-PetMount.tsx     reads settings, lazy-loads Pet (next/dynamic, ssr:false)
-Pet.tsx          DOM glue: rAF loop, transform writes, canvases, pointer drag/throw, events
+PetMount.tsx     reads preferences, lazy-loads Pet (next/dynamic, ssr:false)
+Pet.tsx          DOM glue: rAF loop, transform writes, canvases, events
+gestures.ts      pat, drag and throw for the pet and the ball; cursor tracking
+surfaces.ts      finds the page elements the pet can stand on, caches their geometry
 engine.ts        the brain and physics, plain TypeScript with no DOM
 ball.ts          Ball class, used for both the ball and the food
 physics.ts       gravity, fall(), landing(), Surface
 PawMenu.tsx      the sidebar button and popover
 PawPanel.tsx     the panel: previews, coats, actions (lazy-loaded)
-settings.ts      localStorage-backed store (useSyncExternalStore)
+preferences.ts   localStorage-backed store (useSyncExternalStore): species, coat, on/off, talk
 events.ts        window events from the menu to the pet
 speech.ts        what the pet says, per species, moment and page
 draw.ts          drawFrame() and crispScale()
@@ -73,7 +75,7 @@ Rendering writes `style.transform` directly with no React re-render per frame. T
 
 ### Platforms
 
-`PLATFORMS` in `Pet.tsx` is a CSS selector list (the sidebar, nav, `main h1`, `main h2`, `main img`, `main figure`, `main > footer`, and so on). Opt an element **in** with `data-pet-platform`, or **out** (with everything inside it) with `data-pet-ignore`. Anything narrower than 1.5 pet widths is skipped. The list is re-queried every 500 ms so route changes and new content are picked up.
+`PLATFORMS` in `surfaces.ts` is a CSS selector list (the sidebar, nav, `main h1`, `main h2`, `main img`, `main figure`, `main > footer`, and so on). Opt an element **in** with `data-pet-platform`, or **out** (with everything inside it) with `data-pet-ignore`. Anything narrower than 1.5 pet widths is skipped. The list is re-queried every 500 ms and re-measured after scroll or resize so route changes and new content are picked up.
 
 ### Movement
 

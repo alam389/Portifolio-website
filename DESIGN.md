@@ -1,7 +1,8 @@
-> **Retired.** This describes an AI-chatbot ("digital twin") concept that was
-> never shipped. The site is now a quiet editorial portfolio; see `CLAUDE.md`
-> for the architecture and `.impeccable.md` for the design context. Kept for
-> history only.
+> **Status: shelved. Not the current design.** This documents a chat "digital twin"
+> portfolio (Next.js 15, hybrid chatbot, Upstash rate limiting) that was never built.
+> The site shipped as a quiet editorial portfolio instead. The current design context is
+> `.impeccable.md`; architecture is in `CLAUDE.md`. Kept as a decision record in case the
+> chatbot is revived.
 
 # Design Spec — AI Chatbot Portfolio
 

@@ -2,9 +2,11 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { useReducedMotion } from "../useReducedMotion";
 import { crispScale, drawFrame } from "./draw";
-import { PetEngine, type Surface } from "./engine";
+import { PetEngine } from "./engine";
 import { FEED_EVENT, PAT_EVENT, THROW_BALL_EVENT } from "./events";
+import { attachGestures } from "./gestures";
 import { hourLine, perchLine, routeLine, themeLine } from "./speech";
 import {
   BALL,
@@ -18,26 +20,7 @@ import {
   type SpeciesName,
   type Theme,
 } from "./sprites";
-
-// Page elements whose top edge the pet can stand on. Opt an element in with
-// data-pet-platform, or out (with everything inside it) with data-pet-ignore.
-const PLATFORMS = [
-  "body > aside",
-  "body > nav",
-  "main h1",
-  "main h2",
-  "main img",
-  "main figure",
-  "main > footer",
-  "[data-pet-platform]",
-].join(", ");
-
-// How often the platform list is re-queried (route changes, new content).
-const RECOLLECT_MS = 500;
-/** Pointer travel before a press becomes a drag instead of a pat. */
-const DRAG_PX = 4;
-/** Throw velocity is measured over the last stretch of the drag. */
-const THROW_WINDOW_MS = 80;
+import { trackSurfaces } from "./surfaces";
 
 /** Pause between remarks about the page, so it comments rather than narrates. */
 const REMARK_GAP_MS = 14000;
@@ -49,66 +32,6 @@ let greeted = false;
 const currentTheme = (): Theme =>
   document.documentElement.dataset.theme === "light" ? "light" : "dark";
 
-interface DragHandlers {
-  tap(): void;
-  /** Return false to refuse the pick-up. */
-  grab(): boolean;
-  hold(x: number, y: number): void;
-  /** Velocity in px/s over the last stretch of the drag. */
-  release(vx: number, vy: number): void;
-}
-
-/**
- * Press and release = a tap; press and drag = pick up, then throw on release.
- * Returns the cleanup.
- */
-function draggable(target: HTMLElement, on: DragHandlers) {
-  let press: { id: number; x: number; y: number } | null = null;
-  let dragging = false;
-  let trail: { x: number; y: number; t: number }[] = [];
-
-  const down = (e: PointerEvent) => {
-    press = { id: e.pointerId, x: e.clientX, y: e.clientY };
-    dragging = false;
-    trail = [{ x: e.clientX, y: e.clientY, t: e.timeStamp }];
-    target.setPointerCapture(e.pointerId);
-    e.preventDefault();
-  };
-  const move = (e: PointerEvent) => {
-    if (!press || e.pointerId !== press.id) return;
-    if (!dragging && Math.hypot(e.clientX - press.x, e.clientY - press.y) > DRAG_PX) {
-      if (!on.grab()) return void (press = null);
-      dragging = true;
-      target.style.cursor = "grabbing";
-    }
-    if (!dragging) return;
-    on.hold(e.clientX, e.clientY);
-    trail.push({ x: e.clientX, y: e.clientY, t: e.timeStamp });
-    while (trail.length > 2 && e.timeStamp - trail[0].t > THROW_WINDOW_MS) trail.shift();
-  };
-  const up = (e: PointerEvent) => {
-    if (!press || e.pointerId !== press.id) return;
-    press = null;
-    target.style.cursor = "";
-    if (!dragging) return on.tap();
-    const a = trail[0];
-    const b = trail[trail.length - 1];
-    const secs = Math.max((b.t - a.t) / 1000, 0.016);
-    on.release((b.x - a.x) / secs, (b.y - a.y) / secs);
-  };
-
-  target.addEventListener("pointerdown", down);
-  target.addEventListener("pointermove", move);
-  target.addEventListener("pointerup", up);
-  target.addEventListener("pointercancel", up);
-  return () => {
-    target.removeEventListener("pointerdown", down);
-    target.removeEventListener("pointermove", move);
-    target.removeEventListener("pointerup", up);
-    target.removeEventListener("pointercancel", up);
-  };
-}
-
 export default function Pet({
   species,
   coat,
@@ -118,6 +41,7 @@ export default function Pet({
   coat: string;
   talk: boolean;
 }) {
+  const reduced = useReducedMotion();
   const path = usePathname();
   const pathRef = useRef(path);
   const talkRef = useRef(talk);
@@ -137,6 +61,7 @@ export default function Pet({
   const foodCanvas = useRef<HTMLCanvasElement>(null);
   const food = FOOD[species];
 
+  // Picking another pet (or toggling reduced motion) rebuilds the whole thing.
   useEffect(() => {
     const el = canvas.current;
     const ctx = el?.getContext("2d");
@@ -148,9 +73,10 @@ export default function Pet({
 
     const variant = SPECIES[species].variants[coat];
     const frames = outlinedFrames(species);
-    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const engine = new PetEngine(species, 0, 0, reduced);
     engine.talk = talkRef.current;
+    const page = trackSurfaces(() => engine.size * 1.5);
+    const floor = page.floor;
 
     // Page-aware remarks: what it's standing on, the route, the theme.
     let lastRemark = -Infinity;
@@ -200,28 +126,8 @@ export default function Pet({
     };
     measure();
 
-    const floor = (): Surface => ({ el: null, left: 0, right: innerWidth, top: innerHeight });
-    let platforms: Element[] = [];
-    let collectedAt = -Infinity;
-    let latest: Surface[] = [];
-    const surfaces = (now: number): Surface[] => {
-      if (now - collectedAt > RECOLLECT_MS) {
-        platforms = [...document.querySelectorAll(PLATFORMS)].filter(
-          (p) => !p.closest("[data-pet-ignore]"),
-        );
-        collectedAt = now;
-      }
-      latest = platforms.flatMap((p) => {
-        const r = p.getBoundingClientRect();
-        // Too narrow to walk on (or hidden): skip.
-        return r.width >= engine.size * 1.5
-          ? [{ el: p, left: r.left, right: r.right, top: r.top }]
-          : [];
-      });
-      return latest;
-    };
-
     let theme = currentTheme();
+    let palette = paletteFor(variant, theme);
     let drawn = "";
     let ballDrawn = "";
     let foodDrawn = "";
@@ -268,13 +174,13 @@ export default function Pet({
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
       engine.talk = talkRef.current;
-      engine.step(dt, surfaces(now), floor());
+      engine.step(dt, page.at(now), floor);
       wonder(now);
 
       const { name, lift, sx, sy, face } = engine.frame();
       const key = `${name}|${face}|${theme}`;
       if (key !== drawn) {
-        drawFrame(ctx, frames[name], paletteFor(variant, theme), face < 0);
+        drawFrame(ctx, frames[name], palette, face < 0);
         drawn = key;
       }
       if (box.current) {
@@ -318,33 +224,13 @@ export default function Pet({
       }
     };
 
-    engine.spawn(floor());
+    engine.spawn(floor);
     raf = requestAnimationFrame(tick);
 
-    // The pet: tap to pat, drag to pick up and throw.
-    const undragPet = draggable(el, {
-      tap: () => engine.pet(),
-      grab: () => (engine.grab(), true),
-      hold: (x, y) => engine.holdAt(x, y),
-      release: (vx, vy) => engine.release(vx, vy, latest, floor()),
-    });
-    // The ball: tap to pop it up, drag to fling it.
-    const undragBall = draggable(ballEl, {
-      tap: () => {
-        if (engine.grabBall()) engine.releaseBall((Math.random() - 0.5) * 240, -380);
-      },
-      grab: () => engine.grabBall(),
-      hold: (x, y) => engine.holdBall(x, y),
-      release: (vx, vy) => engine.releaseBall(vx, vy),
-    });
-    // Touch has no hovering cursor to follow.
-    const onMove = (e: PointerEvent) => {
-      if (e.pointerType !== "touch") engine.point(e.clientX, e.clientY, e.timeStamp);
-    };
-    const onLeave = () => engine.unpoint();
-    const throwBall = () => engine.throwBall(floor());
+    const detachGestures = attachGestures(el, ballEl, engine, () => page.at(performance.now()), floor);
+    const throwBall = () => engine.throwBall(floor);
     const pat = () => engine.pet();
-    const feed = () => engine.feed(floor(), food.frame[0].length);
+    const feed = () => engine.feed(floor, food.frame[0].length);
     // Dev shortcuts: B throws a ball, F feeds.
     const onKey = (e: KeyboardEvent) => {
       const typing = (e.target as HTMLElement | null)?.closest("input, textarea, [contenteditable]");
@@ -363,11 +249,10 @@ export default function Pet({
     const themeWatch = new MutationObserver(() => {
       const before = theme;
       theme = currentTheme();
+      palette = paletteFor(variant, theme);
       if (theme !== before) remark(themeLine(species, theme), true);
     });
     themeWatch.observe(document.documentElement, { attributeFilter: ["data-theme"] });
-    addEventListener("pointermove", onMove);
-    document.documentElement.addEventListener("mouseleave", onLeave);
     addEventListener("keydown", onKey);
     addEventListener(THROW_BALL_EVENT, throwBall);
     addEventListener(PAT_EVENT, pat);
@@ -379,10 +264,8 @@ export default function Pet({
       cancelAnimationFrame(raf);
       onRoute.current = null;
       themeWatch.disconnect();
-      undragPet();
-      undragBall();
-      removeEventListener("pointermove", onMove);
-      document.documentElement.removeEventListener("mouseleave", onLeave);
+      detachGestures();
+      page.dispose();
       removeEventListener("keydown", onKey);
       removeEventListener(THROW_BALL_EVENT, throwBall);
       removeEventListener(PAT_EVENT, pat);
@@ -390,7 +273,7 @@ export default function Pet({
       document.removeEventListener("visibilitychange", onVisibility);
       removeEventListener("resize", measure);
     };
-  }, [species, coat, food]);
+  }, [species, coat, food, reduced]);
 
   // A new page: it has something to say about it, after a moment.
   useEffect(() => {

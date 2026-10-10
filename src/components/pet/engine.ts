@@ -1,7 +1,7 @@
 import { Ball } from "./ball";
-import { GRAVITY, fall, landing, type Surface } from "./physics";
+import { GRAVITY, clamp, fall, landing, type Surface } from "./physics";
 import { line, lingerFor, type Moment } from "./speech";
-import { ANIMATIONS, type SpeciesName } from "./sprites";
+import { ANIMATIONS, BALL, TRAITS, type SpeciesName } from "./sprites";
 
 export type { Surface } from "./physics";
 
@@ -24,27 +24,9 @@ export interface Pose {
  * the engine walks, rides, falls and jumps between them, and plays fetch.
  */
 
-interface Traits {
-  /** Walk speed in sprite pixels per second (multiplied by display scale). */
-  walk: number;
-  /** Highest platform it will jump up to, in CSS pixels. */
-  jump: number;
-  /** What it does on reaching the ball. */
-  fetch: "carry" | "swat" | "nudge";
-  /** How it reacts to the cursor, and the odds it cares at all. */
-  cursor: "eager" | "stalk" | "skittish";
-  notice: number;
-}
-
-const TRAITS: Record<SpeciesName, Traits> = {
-  cat: { walk: 22, jump: 190, fetch: "swat", cursor: "stalk", notice: 0.6 },
-  dog: { walk: 30, jump: 120, fetch: "carry", cursor: "eager", notice: 1 },
-  bunny: { walk: 26, jump: 160, fetch: "nudge", cursor: "skittish", notice: 0.8 },
-};
-
 const MAX_THROW = 2200;
-/** The ball sprite is 6x6. */
-const BALL_PX = 6;
+/** Seconds a pet chases the ball before giving up. */
+const FETCH_PATIENCE = 20;
 /** Seconds to eat a whole treat. */
 const EAT_SECONDS = 2.4;
 /** How close (in sprite widths) the cursor must come before the pet notices. */
@@ -77,7 +59,6 @@ type Mode =
 const FREE: ReadonlySet<Mode> = new Set(["idle", "walk", "sit", "sleep", "land", "happy", "zoom"]);
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
-const clampThrow = (v: number) => Math.min(Math.max(v, -MAX_THROW), MAX_THROW);
 
 export class PetEngine {
   x = 0;
@@ -114,8 +95,8 @@ export class PetEngine {
   /** Walking off the edge: no clamping until the pet's middle is past it. */
   private leaving = false;
   private launch: { vx: number; vy: number } | null = null;
-  /** Playing with the ball: true for as long as the ball exists. */
-  private fetching = false;
+  /** Seconds of chasing left; 0 when not fetching. */
+  private fetching = 0;
   /** Seconds of breather between rounds of play. */
   private rest = 0;
   /** The visitor threw it since the dog last brought it back. */
@@ -188,6 +169,7 @@ export class PetEngine {
   grab() {
     this.say("grabbed");
     this.dropBall();
+    this.endFetch();
     this.on = null;
     this.leaving = false;
     this.launch = null;
@@ -210,8 +192,8 @@ export class PetEngine {
         .sort((a, b) => a.top - b.top)[0];
       return this.stand(below ?? floor, this.x);
     }
-    this.vx = clampThrow(vx);
-    this.vy = clampThrow(vy);
+    this.vx = clamp(vx, -MAX_THROW, MAX_THROW);
+    this.vy = clamp(vy, -MAX_THROW, MAX_THROW);
     if (Math.abs(this.vx) > 40) this.facing = Math.sign(this.vx);
     this.set("air");
   }
@@ -251,10 +233,12 @@ export class PetEngine {
 
   /** A ball drops into the page and the pet goes after it. */
   throwBall(floor: Surface) {
-    const size = BALL_PX * this.scale;
+    const size = BALL.length * this.scale;
     if (this.mode === "carry") this.set("idle", 0.2);
     this.ball = new Ball(size, rand(0.25, 0.75) * floor.right, -size, rand(-250, 250), 0);
     this.play();
+    // Not every pet cares about every ball.
+    if (Math.random() >= TRAITS[this.species].ballInterest) this.fetching = 0;
     this.say("ball");
   }
 
@@ -283,7 +267,7 @@ export class PetEngine {
     if (!ball?.held) return;
     ball.held = false;
     ball.refresh();
-    ball.kick(clampThrow(vx), clampThrow(vy));
+    ball.kick(clamp(vx, -MAX_THROW, MAX_THROW), clamp(vy, -MAX_THROW, MAX_THROW));
   }
 
   /** The cursor moved to (x, y); `ms` is the event's timestamp. */
@@ -305,7 +289,7 @@ export class PetEngine {
 
   /** A new round: chase straight away, and the dog will bring this one back. */
   private play() {
-    this.fetching = true;
+    this.fetching = FETCH_PATIENCE;
     this.rest = 0;
     this.nudges = 0;
     this.fresh = true;
@@ -326,8 +310,8 @@ export class PetEngine {
       this.ball.step(dt, surfaces, floor);
       if (this.ball.gone) {
         this.ball = null;
-        if (this.fetching) this.say("ballGone");
-        this.fetching = false;
+        if (this.fetching > 0) this.say("ballGone");
+        this.fetching = 0;
         if (this.timer === Infinity) this.timer = rand(1, 3);
         if (this.mode === "carry") this.set("idle", 0.5);
       }
@@ -342,6 +326,12 @@ export class PetEngine {
     }
 
     if (this.mode === "held") return;
+
+    // Out of patience: the ball is left to fade.
+    if (this.fetching > 0) {
+      this.fetching -= dt;
+      if (this.fetching <= 0) this.endFetch();
+    }
 
     if (this.on) {
       const cur = this.on.el ? surfaces.find((o) => o.el === this.on!.el) : floor;
@@ -365,7 +355,7 @@ export class PetEngine {
         this.y = cur.top;
         this.x = this.leaving
           ? cur.left + this.rel
-          : Math.min(Math.max(cur.left + this.rel, cur.left), cur.right - s);
+          : clamp(cur.left + this.rel, cur.left, cur.right - s);
       }
     }
 
@@ -374,7 +364,7 @@ export class PetEngine {
       ({ y: this.y, vy: this.vy } = fall(this.y, this.vy, dt));
       this.x += this.vx * dt;
       if (this.x < 0 || this.x > floor.right - s) {
-        this.x = Math.min(Math.max(this.x, 0), floor.right - s);
+        this.x = clamp(this.x, 0, floor.right - s);
         this.vx = -this.vx * 0.3;
       }
       if (this.vy > 0) {
@@ -418,7 +408,7 @@ export class PetEngine {
         return;
       }
       if (this.x <= on.left || this.x >= on.right - s) {
-        this.x = Math.min(Math.max(this.x, on.left), on.right - s);
+        this.x = clamp(this.x, on.left, on.right - s);
         if (this.edge(surfaces)) return;
       }
       this.rel = this.x - on.left;
@@ -453,7 +443,7 @@ export class PetEngine {
         if (this.ball) {
           const bs = this.ball.size;
           const bx = this.facing > 0 ? this.x + s * 0.8 : this.x + s * 0.2 - bs;
-          this.ball.place(on, Math.min(Math.max(bx, on.left), on.right - bs));
+          this.ball.place(on, clamp(bx, on.left, on.right - bs));
         }
         this.fresh = false;
         this.say("bring");
@@ -686,6 +676,13 @@ export class PetEngine {
     }
   }
 
+  private endFetch() {
+    this.ball?.expireIn(10);
+    this.fetching = 0;
+    if (this.mode === "carry") this.set("idle", 0.5);
+    if (this.timer === Infinity) this.timer = rand(1, 3);
+  }
+
   /** Pause play for a moment in `mode`; it goes back to the ball after. */
   private breather(mode: Mode, seconds: number) {
     this.rest = seconds;
@@ -701,7 +698,7 @@ export class PetEngine {
     const reach = TRAITS[this.species].jump;
     const reachable = (o: Surface) =>
       o.el !== this.on?.el && o.top < this.y - 8 && o.top > this.y - reach + 12 && o.top > s + 4;
-    const landX = (o: Surface, x: number) => Math.min(Math.max(x, o.left), o.right - s);
+    const landX = (o: Surface, x: number) => clamp(x, o.left, o.right - s);
 
     if (toward) {
       const live = surfaces.find((o) => o.el === toward.surface.el);
@@ -724,7 +721,7 @@ export class PetEngine {
     const dx = tx - this.x;
     // Aim a little above the edge so it lands on top rather than clipping it.
     const dy = target.top - this.y - 12;
-    const t = Math.min(Math.max(0.4 + Math.abs(dx) / 700, 0.42), 0.75);
+    const t = clamp(0.4 + Math.abs(dx) / 700, 0.42, 0.75);
     this.launch = { vx: dx / t, vy: (dy - 0.5 * GRAVITY * t * t) / t };
     if (dx) this.facing = Math.sign(dx);
     this.set("crouch", 0.18);
@@ -734,7 +731,7 @@ export class PetEngine {
     this.on = surface;
     this.leaving = false;
     this.y = surface.top;
-    this.x = Math.min(Math.max(x, surface.left), surface.right - this.size);
+    this.x = clamp(x, surface.left, surface.right - this.size);
     this.rel = this.x - surface.left;
     this.vx = 0;
     this.vy = 0;
@@ -771,7 +768,6 @@ export class PetEngine {
     });
     // Settles from 1 + amount back to 1 over `over` seconds.
     const settle = (amount: number, over: number) => 1 + amount * Math.max(0, 1 - t / over);
-    const bunny = this.species === "bunny";
     switch (this.mode) {
       case "air": {
         // Stretches along its fall, a little more the faster it goes.
@@ -787,8 +783,7 @@ export class PetEngine {
       case "zoom": {
         const fast = this.mode === "zoom";
         const name = play("walk", fast ? 2 : 1);
-        const step = { walk2: 1, walk4: 1 }[name] ?? 0;
-        const hop = bunny ? ({ walk2: 2, walk3: 4 }[name] ?? 0) : step;
+        const hop = TRAITS[this.species].lift[name] ?? 0;
         // Zoomies lean into the run.
         return pose(name, { lift: hop * sc, sx: fast ? 1.06 : 1, sy: fast ? 0.96 : 1 });
       }

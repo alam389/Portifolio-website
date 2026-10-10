@@ -9,7 +9,9 @@ export interface Surface {
 }
 
 export const GRAVITY = 2000;
-export const MAX_FALL = 1400;
+const MAX_FALL = 1400;
+
+export const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
 
 /** One gravity step, exact for constant acceleration so arcs reach their aim. */
 export function fall(y: number, vy: number, dt: number) {
@@ -19,8 +21,8 @@ export function fall(y: number, vy: number, dt: number) {
 
 /** The surface a body moving down from `prev` to `y` lands on this frame, if any. */
 export function landing(surfaces: Surface[], floor: Surface, prev: number, y: number, cx: number, minTop: number) {
-  return (
-    surfaces.find((o) => prev <= o.top + 2 && y >= o.top && cx >= o.left && cx <= o.right && o.top > minTop) ??
-    (y >= floor.top ? floor : null)
-  );
+  for (const o of surfaces) {
+    if (prev <= o.top + 2 && y >= o.top && cx >= o.left && cx <= o.right && o.top > minTop) return o;
+  }
+  return y >= floor.top ? floor : null;
 }

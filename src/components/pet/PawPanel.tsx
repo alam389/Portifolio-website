@@ -4,7 +4,7 @@ import { Bone, Carrot, CircleDot, Eye, EyeOff, Fish, Hand, MessageCircle, Messag
 import { useEffect, useRef } from "react";
 import { drawFrame } from "./draw";
 import { FEED_EVENT, PAT_EVENT, THROW_BALL_EVENT } from "./events";
-import { updatePet, usePetSettings } from "./settings";
+import { setPetPreference, usePetPreference } from "./preferences";
 import {
   SPECIES,
   SPECIES_NAMES,
@@ -46,7 +46,7 @@ function Preview({ species, coat }: { species: SpeciesName; coat: string }) {
 }
 
 export default function PawPanel() {
-  const { species, coat, hidden, talk } = usePetSettings();
+  const { species, coat, enabled, talk } = usePetPreference();
   const Treat = TREAT_ICON[species];
 
   return (
@@ -58,7 +58,7 @@ export default function PawPanel() {
             type="button"
             aria-label={name}
             aria-pressed={species === name}
-            onClick={() => updatePet({ species: name, hidden: false })}
+            onClick={() => setPetPreference({ species: name, enabled: true })}
             className={`${chip} ${species === name ? on : off} flex-1 py-1`}
           >
             <Preview species={name} coat={species === name ? coat : variantsOf(name)[0][0]} />
@@ -74,7 +74,7 @@ export default function PawPanel() {
             aria-label={label}
             title={label}
             aria-pressed={coat === key}
-            onClick={() => updatePet({ coat: key, hidden: false })}
+            onClick={() => setPetPreference({ coat: key, enabled: true })}
             className={`${chip} ${coat === key ? on : off} size-7 rounded-full`}
           >
             <span className="size-3.5 rounded-full" style={{ background: colors.b }} />
@@ -85,7 +85,7 @@ export default function PawPanel() {
       <div className="flex flex-col border-t border-foreground/10 pt-1.5">
         <button
           type="button"
-          disabled={hidden}
+          disabled={!enabled}
           onClick={() => dispatchEvent(new Event(THROW_BALL_EVENT))}
           className={action}
         >
@@ -93,7 +93,7 @@ export default function PawPanel() {
         </button>
         <button
           type="button"
-          disabled={hidden}
+          disabled={!enabled}
           onClick={() => dispatchEvent(new Event(FEED_EVENT))}
           className={action}
         >
@@ -101,7 +101,7 @@ export default function PawPanel() {
         </button>
         <button
           type="button"
-          disabled={hidden}
+          disabled={!enabled}
           onClick={() => dispatchEvent(new Event(PAT_EVENT))}
           className={action}
         >
@@ -109,17 +109,17 @@ export default function PawPanel() {
         </button>
         <button
           type="button"
-          disabled={hidden}
+          disabled={!enabled}
           aria-pressed={talk}
-          onClick={() => updatePet({ talk: !talk })}
+          onClick={() => setPetPreference({ talk: !talk })}
           className={action}
         >
           {talk ? <MessageCircle size={14} aria-hidden /> : <MessageCircleOff size={14} aria-hidden />}
           {talk ? "Mute the chatter" : "Let it talk"}
         </button>
-        <button type="button" onClick={() => updatePet({ hidden: !hidden })} className={action}>
-          {hidden ? <Eye size={14} aria-hidden /> : <EyeOff size={14} aria-hidden />}
-          {hidden ? "Show pet" : "Hide pet"}
+        <button type="button" onClick={() => setPetPreference({ enabled: !enabled })} className={action}>
+          {!enabled ? <Eye size={14} aria-hidden /> : <EyeOff size={14} aria-hidden />}
+          {!enabled ? "Show pet" : "Hide pet"}
         </button>
       </div>
     </div>

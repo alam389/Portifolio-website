@@ -7,6 +7,7 @@ import { journey, type JourneyKind } from "@/data";
 import JourneySteps from "./JourneySteps";
 import PhotoCarousel from "./PhotoCarousel";
 import { scrollToY } from "./SmoothScroll";
+import { useReducedMotion } from "./useReducedMotion";
 import { useStepKeys } from "./useStepKeys";
 
 // three.js only loads on this page, and only in the browser.
@@ -25,7 +26,7 @@ export default function Journey() {
   const containerRef = useRef<HTMLDivElement>(null);
   const top = useRef(0);
   const sectionHeight = useRef(1);
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   // Each section is one viewport tall, so progress is how many viewports
   // the reader has scrolled past the intro: 0 = first stop's card fills
@@ -41,14 +42,7 @@ export default function Journey() {
     };
     measure();
     window.addEventListener("resize", measure);
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mq.matches);
-    const onChange = () => setReducedMotion(mq.matches);
-    mq.addEventListener("change", onChange);
-    return () => {
-      window.removeEventListener("resize", measure);
-      mq.removeEventListener("change", onChange);
-    };
+    return () => window.removeEventListener("resize", measure);
   }, []);
 
   const getProgress = useCallback(

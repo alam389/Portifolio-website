@@ -9,7 +9,7 @@ npm install
 npm run dev      # http://localhost:3000
 ```
 
-Other commands: `npm run build`, `npm run start`, `npm run lint`, `npx tsc --noEmit`.
+Other commands: `npm run build`, `npm run start`, `npm run lint`, `npm run typecheck`, `npm test`.
 
 ## Pages
 
