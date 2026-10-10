@@ -19,6 +19,8 @@ export interface Profile {
   role: string;
   location: string;
   email: string;
+  /** GitHub username, used for the contribution graph. */
+  githubUser: string;
   summary: string[];
   education: {
     school: string;

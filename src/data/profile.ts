@@ -5,6 +5,7 @@ export const profile: Profile = {
   role: "Software Engineer",
   location: "London, ON",
   email: "lamanthony167@gmail.com",
+  githubUser: "alam389",
   summary: [
     "I'm a software engineering student at Western University with a focus on applied AI development. I bring a new perspective on how we can solve problems with new emerging technology and I thrive in fast-paced iterative environments.",
     "Right now I'm a software engineering intern at Kiyoko Beauty, an online store for Asian beauty products, from September to April. I work on the AI side: I helped launch a beauty assistant on Kiyoko's Shopify store that recommends products based on a shopper's skin concerns, and I build the retrieval pipelines behind it with Vertex AI Vector Search and Gemini embeddings. I'm also building a mobile app with React Native and Supabase that helps people put together a skincare routine from any products, including ones Kiyoko doesn't sell.",

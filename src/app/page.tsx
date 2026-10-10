@@ -1,3 +1,4 @@
+import GithubContributions from "@/components/GithubContributions";
 import ResumeLink from "@/components/ResumeLink";
 import { profile, skills } from "@/data";
 
@@ -51,6 +52,8 @@ export default function About() {
           ))}
         </ul>
       </section>
+
+      <GithubContributions user={profile.githubUser} />
 
       <section>
         <h2 className="text-xl font-semibold">Education</h2>
