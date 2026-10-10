@@ -1,7 +1,7 @@
-import { SPRITE_SIZE, type Frame, type Palette } from "./sprites";
+import type { Frame, Palette } from "./sprites";
 
 /**
- * Paints one frame onto a SPRITE_SIZE canvas, one fillRect per pixel. The
+ * Paints one frame onto a canvas the frame's size, one fillRect per pixel. The
  * canvas is scaled up by CSS with `image-rendering: pixelated`, so it stays
  * tiny and repainting (frame change, theme swap) is cheap.
  */
@@ -11,13 +11,13 @@ export function drawFrame(
   palette: Palette,
   flip = false,
 ) {
-  ctx.clearRect(0, 0, SPRITE_SIZE, SPRITE_SIZE);
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   frame.forEach((row, y) => {
-    for (let x = 0; x < SPRITE_SIZE; x++) {
+    for (let x = 0; x < row.length; x++) {
       const ch = row[x];
       if (ch === ".") continue;
       ctx.fillStyle = palette[ch];
-      ctx.fillRect(flip ? SPRITE_SIZE - 1 - x : x, y, 1, 1);
+      ctx.fillRect(flip ? row.length - 1 - x : x, y, 1, 1);
     }
   });
 }

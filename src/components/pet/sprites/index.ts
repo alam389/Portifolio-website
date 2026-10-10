@@ -4,6 +4,7 @@ import { dog } from "./dog";
 import { outline } from "./outline";
 import type { Frame, SpeciesSprites } from "./types";
 
+export { BALL, BALL_COLORS } from "./ball";
 export { SPRITE_SIZE, paletteFor } from "./types";
 export type { Frame, Palette, Theme, Variant } from "./types";
 
