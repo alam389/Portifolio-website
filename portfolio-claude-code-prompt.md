@@ -1,3 +1,7 @@
+> **Retired.** This was the original prompt for an IDE-style portfolio, which
+> was dropped. It does not describe the shipped site; see `CLAUDE.md`. Kept
+> for history only.
+
 # Build Prompt: IDE-Style Portfolio Website
 
 Paste everything below into Claude Code as your initial prompt.

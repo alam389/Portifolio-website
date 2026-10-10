@@ -1,3 +1,8 @@
+> **Retired.** This describes an AI-chatbot ("digital twin") concept that was
+> never shipped. The site is now a quiet editorial portfolio; see `CLAUDE.md`
+> for the architecture and `.impeccable.md` for the design context. Kept for
+> history only.
+
 # Design Spec — AI Chatbot Portfolio
 
 Resolved decision record for the current build: a Next.js 15 + Tailwind v4 portfolio
