@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run typecheck` — `tsc --noEmit`
 - `npm test` — Vitest (pet physics/engine unit tests)
 
-CI (`.github/workflows/ci.yml`) runs lint, typecheck, tests and build on every push and PR.
+CI (`.github/workflows/ci.yml`) runs `npm ci`, lint, typecheck, tests and build on pushes to `main` and on every PR. Keep all four green.
 
 ## Architecture
 
@@ -41,13 +41,13 @@ A canvas pixel-art pet (cat, dog or bunny) that walks on page elements, jumps be
 - `surfaces.ts` — collects the page elements the pet can stand on (`data-pet-platform` opts in, `data-pet-ignore` opts out) and caches their geometry.
 - `Pet.tsx` — render loop and input. `preferences.ts` — `usePetPreference()` store (species, coat, on/off) persisted in `localStorage`; `?pet=dog&coat=black` overrides it.
 - `sprites/` — sprite frames authored as 16×16 text, one file per species; `sprites/index.ts` holds each species' animations and traits (walk speed, jump height, fetch move). Per-species behaviour belongs in those traits, not in `if (species === …)` checks.
-- `PetLab.tsx` (+ `/pet-lab`) — review page for sprites, dev only. `scripts/pet-sheet.mjs <species>` renders a contact sheet and validates frames (size, palette, and that every animation's frames exist).
+- `PetLab.tsx` (+ `/pet-lab`) — review page for sprites, dev only. `scripts/pet-sheet.mjs <species>` renders a contact sheet and validates frame size and palette. `sprites/sprites.test.ts` checks that every animation's frames exist and every frame is 16×16 with valid palette characters, so keep it passing when adding a species.
 - Nothing in the UI dispatches `THROW_BALL_EVENT` yet; the dev-only `B` key does. The paw menu / picker UI is not built.
 
 ### Conventions worth knowing
 
 - **Tailwind v4, CSS-first config.** No `tailwind.config.js`. Tokens are CSS variables plus `@theme inline` in `src/app/globals.css` (`bg-background`, `text-foreground`, `bg-surface`; `light:` variant for the few spots tokens can't cover).
-- **React Compiler lint rules are on.** No setState synchronously in an effect, no mutation or ref reads during render. For browser state (media queries, devicePixelRatio, localStorage) use `useSyncExternalStore`.
+- **React Compiler lint rules are on** (the compiler itself isn't enabled). No setState synchronously in an effect, no assigning to props or memoized values, no ref reads during render. For browser state (media queries, devicePixelRatio, localStorage) use `useSyncExternalStore`. For per-frame mutable state in the globe, use a small class with methods (`View`) and the `setUniform` helper in `JourneyGlobe.tsx`, not direct assignment.
 - **Accessibility:** honour `prefers-reduced-motion` everywhere that animates.
 - **No fabricated content.** Pages only say what `src/data` contains.
 - **`DESIGN.md` is a historical record** of a chat "digital twin" design that was never built. It is not the current design; `.impeccable.md` is.

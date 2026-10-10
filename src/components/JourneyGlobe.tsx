@@ -69,20 +69,54 @@ type Props = {
   reducedMotion: boolean;
 };
 
-/** Per-frame state shared between the camera, terrain layers and pins. */
-type View = {
-  lat: number;
-  lng: number;
+/** Write a shader uniform. three.js materials are updated imperatively, every frame. */
+function setUniform(material: ShaderMaterial, name: string, value: number) {
+  material.uniforms[name].value = value;
+}
+
+/**
+ * Per-frame state shared between the camera, terrain layers and pins. It is
+ * written many times a second from useFrame, so it is a plain object with
+ * methods rather than React state.
+ */
+class View {
+  lat = 0;
+  lng = 0;
   /** 0 in the wide intro shot, 1 when holding on a stop. */
-  closeness: number;
-  exaggeration: number;
+  closeness = 0;
+  exaggeration = EXAGGERATION_WIDE / EARTH_RADIUS_M;
   /** Camera distance to the point it looks at; scales the distance haze. */
-  altitude: number;
-  density: number;
+  altitude = WIDE - 1;
+  density = 1;
   /** The region patch currently fading in; the global layer hides under it. */
-  hole: Vector4;
-  holeFade: number;
-};
+  hole = new Vector4();
+  holeFade = 0;
+
+  /** Record where the camera is looking and how close it is. */
+  look(lat: number, lng: number, closeness: number, altitude: number) {
+    this.lat = lat;
+    this.lng = ((lng + 540) % 360) - 180;
+    this.closeness = closeness;
+    this.altitude = altitude;
+    this.exaggeration =
+      (EXAGGERATION_WIDE + (EXAGGERATION_CLOSE - EXAGGERATION_WIDE) * closeness) /
+      EARTH_RADIUS_M;
+  }
+
+  /** Hide the global layer under a region patch, fading with `fade`. */
+  hideUnder(west: number, south: number, east: number, north: number, fade: number) {
+    this.hole.set(west, south, east, north);
+    this.holeFade = fade;
+  }
+
+  showAll() {
+    this.holeFade = 0;
+  }
+
+  setDensity(density: number) {
+    this.density = density;
+  }
+}
 
 export default function JourneyGlobe(props: Props) {
   return (
@@ -104,19 +138,7 @@ function Scene({ stops, getProgress, reducedMotion }: Props) {
       ? "high"
       : "low",
   );
-  const view = useMemo<View>(
-    () => ({
-      lat: 0,
-      lng: 0,
-      closeness: 0,
-      exaggeration: EXAGGERATION_WIDE / EARTH_RADIUS_M,
-      altitude: WIDE - 1,
-      density: 1,
-      hole: new Vector4(),
-      holeFade: 0,
-    }),
-    [],
-  );
+  const view = useMemo(() => new View(), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -230,13 +252,7 @@ function CameraRig({
       .addScaledVector(tmp.south, alt * Math.sin(tilt));
     camera.lookAt(tmp.dir);
 
-    view.lat = lat;
-    view.lng = ((lng + 540) % 360) - 180;
-    view.closeness = closeness;
-    view.altitude = alt;
-    view.exaggeration =
-      (EXAGGERATION_WIDE + (EXAGGERATION_CLOSE - EXAGGERATION_WIDE) * closeness) /
-      EARTH_RADIUS_M;
+    view.look(lat, lng, closeness, alt);
   });
 
   return null;
@@ -262,7 +278,7 @@ function PerformanceGovernor({ view }: { view: View }) {
     if (s.frames < 90 + 120) return;
     if (s.total / 120 > 1 / 38) {
       s.step++;
-      view.density = DENSITY_STEPS[s.step];
+      view.setDensity(DENSITY_STEPS[s.step]);
     }
     s.frames = 90;
     s.total = 0;
@@ -529,9 +545,8 @@ function useTerrainLayer(data: TerrainData | null, patch: boolean) {
 
   useEffect(() => {
     if (!layer) return;
-    layer.material.uniforms.uScale.value =
-      (height * dpr) / (2 * Math.tan((FOV * Math.PI) / 360));
-    layer.material.uniforms.uMaxPx.value = (patch ? 10 : 6) * dpr;
+    setUniform(layer.material, "uScale", (height * dpr) / (2 * Math.tan((FOV * Math.PI) / 360)));
+    setUniform(layer.material, "uMaxPx", (patch ? 10 : 6) * dpr);
   }, [layer, height, dpr, patch]);
 
   useEffect(
@@ -571,12 +586,12 @@ function GlobalTerrain({ tier, view }: { tier: Tier; view: View }) {
 
   useFrame(() => {
     if (!layer) return;
-    const u = layer.material.uniforms;
-    u.uExaggeration.value = view.exaggeration;
-    u.uAltitude.value = view.altitude;
-    u.uHole.value.copy(view.hole);
-    u.uHoleFade.value = view.holeFade;
-    u.uSizeMul.value = 1 / Math.sqrt(view.density);
+    const { material } = layer;
+    setUniform(material, "uExaggeration", view.exaggeration);
+    setUniform(material, "uAltitude", view.altitude);
+    material.uniforms.uHole.value.copy(view.hole);
+    setUniform(material, "uHoleFade", view.holeFade);
+    setUniform(material, "uSizeMul", 1 / Math.sqrt(view.density));
     layer.geometry.setDrawRange(0, Math.floor(layer.count * view.density));
   });
 
@@ -600,10 +615,10 @@ function RegionPatches({
   view: View;
 }) {
   const [wanted, setWanted] = useState<string[]>([]);
-  const fades = useRef(new Map<string, number>());
+  const [fades] = useState(() => new Map<string, number>());
   // Patches whose particles are on the GPU; only these may hide the global
   // layer, so a region never goes sparse while its patch is still loading.
-  const ready = useRef(new Set<string>());
+  const [ready] = useState(() => new Set<string>());
 
   useFrame(() => {
     let best: { region: Region; fade: number } | null = null;
@@ -623,18 +638,17 @@ function RegionPatches({
       const dx = Math.max(region.west + m - view.lng, 0, view.lng - (region.east - m));
       const dy = Math.max(region.south + m - view.lat, 0, view.lat - (region.north - m));
       const inside = 1 - smoothstep(0, 3, Math.hypot(dx, dy));
-      const fade = ready.current.has(region.id)
+      const fade = ready.has(region.id)
         ? inside * smoothstep(0.55, 0.9, view.closeness)
         : 0;
-      fades.current.set(region.id, fade);
+      fades.set(region.id, fade);
       if (fade > (best?.fade ?? 0)) best = { region, fade };
     }
     if (best) {
       const { west, south, east, north } = best.region;
-      view.hole.set(west, south, east, north);
-      view.holeFade = best.fade;
+      view.hideUnder(west, south, east, north, best.fade);
     } else {
-      view.holeFade = 0;
+      view.showAll();
     }
   });
 
@@ -648,8 +662,8 @@ function RegionPatches({
             region={r}
             tier={tier}
             view={view}
-            fades={fades.current}
-            ready={ready.current}
+            fades={fades}
+            ready={ready}
           />
         ))}
     </>
@@ -701,11 +715,11 @@ function RegionPatch({
   useFrame(() => {
     if (!layer) return;
     const fade = fades.get(region.id) ?? 0;
-    const u = layer.material.uniforms;
-    u.uFade.value = fade;
-    u.uExaggeration.value = view.exaggeration;
-    u.uAltitude.value = view.altitude;
-    u.uSizeMul.value = 1 / Math.sqrt(view.density);
+    const { material } = layer;
+    setUniform(material, "uFade", fade);
+    setUniform(material, "uExaggeration", view.exaggeration);
+    setUniform(material, "uAltitude", view.altitude);
+    setUniform(material, "uSizeMul", 1 / Math.sqrt(view.density));
     layer.geometry.setDrawRange(0, fade > 0 ? Math.floor(layer.count * view.density) : 0);
   });
 
@@ -877,16 +891,16 @@ function Pins({
   );
 
   useEffect(() => {
-    material.uniforms.uPx.value = 72 * dpr;
+    setUniform(material, "uPx", 72 * dpr);
   }, [material, dpr]);
 
   useEffect(() => () => geometry.dispose(), [geometry]);
   useEffect(() => () => material.dispose(), [material]);
 
   useFrame(({ clock }) => {
-    material.uniforms.uProgress.value = getProgress();
+    setUniform(material, "uProgress", getProgress());
     // Reduced motion: freeze the ring mid-expansion instead of pulsing.
-    material.uniforms.uTime.value = reducedMotion ? 0.35 : clock.elapsedTime;
+    setUniform(material, "uTime", reducedMotion ? 0.35 : clock.elapsedTime);
   });
 
   return <points geometry={geometry} material={material} renderOrder={2} />;
