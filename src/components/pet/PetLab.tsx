@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { crispScale, drawFrame } from "./draw";
-import { TRAITS } from "./engine";
 import { clamp } from "./physics";
 import {
   ANIMATIONS,
   SPECIES,
   SPECIES_NAMES,
   SPRITE_SIZE,
+  TRAITS,
   outlinedFrames,
   paletteFor,
   variantsOf,

@@ -1,6 +1,6 @@
 import { Ball } from "./ball";
 import { GRAVITY, clamp, fall, landing, type Surface } from "./physics";
-import { ANIMATIONS, BALL, type SpeciesName } from "./sprites";
+import { ANIMATIONS, BALL, TRAITS, type SpeciesName } from "./sprites";
 
 /**
  * The pet's brain and physics, free of DOM so it stays testable. Coordinates
@@ -8,21 +8,6 @@ import { ANIMATIONS, BALL, type SpeciesName } from "./sprites";
  * surfaces on screen (top edges of page elements, plus the viewport floor) and
  * the engine walks, rides, falls and jumps between them, and plays fetch.
  */
-
-interface Traits {
-  /** Walk speed in sprite pixels per second (multiplied by display scale). */
-  walk: number;
-  /** Highest platform it will jump up to, in CSS pixels. */
-  jump: number;
-  /** What it does on reaching the ball. */
-  fetch: "carry" | "swat" | "nudge";
-}
-
-export const TRAITS: Record<SpeciesName, Traits> = {
-  cat: { walk: 22, jump: 190, fetch: "swat" },
-  dog: { walk: 30, jump: 120, fetch: "carry" },
-  bunny: { walk: 26, jump: 160, fetch: "nudge" },
-};
 
 const MAX_THROW = 2200;
 /** Seconds a pet chases the ball before giving up. */
@@ -45,9 +30,6 @@ type Mode =
 
 /** Modes the pet can be pulled out of to go chase the ball. */
 const FREE: ReadonlySet<Mode> = new Set(["idle", "walk", "sit", "land", "happy"]);
-
-/** The bunny's body rises through the hop, in sprite pixels, by walk frame. */
-const BUNNY_HOP: Record<string, number> = { walk2: 2, walk3: 4 };
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 
@@ -137,7 +119,7 @@ export class PetEngine {
   throwBall(floor: Surface) {
     const size = BALL.length * this.scale;
     this.ball = new Ball(size, rand(0.25, 0.75) * floor.right, -size, rand(-250, 250), 0);
-    this.fetching = this.species === "cat" && Math.random() < 0.25 ? 0 : FETCH_PATIENCE;
+    this.fetching = Math.random() < TRAITS[this.species].ballInterest ? FETCH_PATIENCE : 0;
     this.nudges = 0;
   }
 
@@ -418,14 +400,14 @@ export class PetEngine {
     this.timer = timer;
   }
 
-  /** The sprite frame to show now, plus a vertical offset (the bunny's hop). */
+  /** The sprite frame to show now, plus a vertical offset (a hop, per species). */
   frame(): { name: string; lift: number } {
     const anims = ANIMATIONS[this.species];
     const play = (key: string, speed = 1) => {
       const { frames, fps } = anims[key];
       return frames[Math.floor(this.clock * fps * speed) % frames.length];
     };
-    const hop = (name: string) => (this.species === "bunny" ? (BUNNY_HOP[name] ?? 0) * this.scale : 0);
+    const hop = (name: string) => (TRAITS[this.species].lift[name] ?? 0) * this.scale;
     switch (this.mode) {
       case "air":
         return { name: this.vy < 0 ? "jump" : "fall", lift: 0 };

@@ -70,6 +70,16 @@ describe("PetEngine", () => {
     expect(engine.frame().name).toBe("happy");
   });
 
+  it("can ignore a thrown ball according to its species' interest", () => {
+    const engine = make("cat");
+    run(engine, 3);
+    vi.spyOn(Math, "random").mockReturnValue(0.9); // above the cat's 0.75 interest
+    engine.throwBall(floor);
+    const seen = new Set<string>();
+    run(engine, 20, () => seen.add(engine.frame().name));
+    expect([...seen].some((n) => n.startsWith("swat"))).toBe(false);
+  });
+
   describe("fetch", () => {
     const fetchFrames = (species: "cat" | "dog" | "bunny", prefix: string) => {
       vi.spyOn(Math, "random").mockReturnValue(0.5);

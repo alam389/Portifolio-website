@@ -1,73 +1,48 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useReducedMotion } from "../useReducedMotion";
 import { crispScale, drawFrame } from "./draw";
 import { PetEngine } from "./engine";
-import type { Surface } from "./physics";
 import { THROW_BALL_EVENT } from "./events";
+import { attachGestures } from "./gestures";
 import {
   BALL,
   BALL_COLORS,
   SPECIES,
-  SPECIES_NAMES,
-  defaultCoat,
   SPRITE_SIZE,
   outlinedFrames,
   paletteFor,
   type SpeciesName,
   type Theme,
 } from "./sprites";
-
-// Page elements whose top edge the pet can stand on. Opt an element in with
-// data-pet-platform, or out (with everything inside it) with data-pet-ignore.
-const PLATFORMS = [
-  "body > aside",
-  "body > nav",
-  "main h1",
-  "main h2",
-  "main img",
-  "main figure",
-  "main > footer",
-  "[data-pet-platform]",
-].join(", ");
-
-// How often the platform list is re-queried (route changes, new content).
-const RECOLLECT_MS = 500;
-/** Pointer travel before a press becomes a drag instead of a pat. */
-const DRAG_PX = 4;
-/** Throw velocity is measured over the last stretch of the drag. */
-const THROW_WINDOW_MS = 80;
-
-/** Which pet to show. Until the picker exists: ?pet=dog&coat=black, else the cat. */
-function choose(): { species: SpeciesName; coat: string } {
-  const params = new URLSearchParams(location.search);
-  const pet = params.get("pet");
-  const species = SPECIES_NAMES.find((s) => s === pet) ?? "cat";
-  const coat = params.get("coat");
-  return { species, coat: coat && coat in SPECIES[species].variants ? coat : defaultCoat(species) };
-}
+import { trackSurfaces } from "./surfaces";
 
 const currentTheme = (): Theme =>
   document.documentElement.dataset.theme === "light" ? "light" : "dark";
 
-export default function Pet() {
+export default function Pet({ species, coat }: { species: SpeciesName; coat: string }) {
+  const reduced = useReducedMotion();
   const box = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const ballBox = useRef<HTMLDivElement>(null);
   const ballCanvas = useRef<HTMLCanvasElement>(null);
 
+  // Picking another pet (or toggling reduced motion) rebuilds the whole thing.
   useEffect(() => {
     const el = canvas.current;
     const ctx = el?.getContext("2d");
     const ballEl = ballCanvas.current;
     const ballCtx = ballEl?.getContext("2d");
-    if (!el || !ctx || !ballEl || !ballCtx) return;
+    const petBox = box.current;
+    const ballWrap = ballBox.current;
+    if (!el || !ctx || !ballEl || !ballCtx || !petBox || !ballWrap) return;
 
-    const { species, coat } = choose();
     const variant = SPECIES[species].variants[coat];
     const frames = outlinedFrames(species);
-    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const engine = new PetEngine(species, 0, 0, reduced);
+    const page = trackSurfaces(() => engine.size * 1.5);
+    const floor = page.floor;
 
     let dpr = 1;
     const measure = () => {
@@ -75,40 +50,18 @@ export default function Pet() {
       engine.scale = crispScale(innerWidth >= 768 ? 3 : 2, dpr);
       engine.size = SPRITE_SIZE * engine.scale;
       el.style.width = el.style.height = `${engine.size}px`;
-      floorSurface.right = innerWidth;
-      floorSurface.top = innerHeight;
       const ballSize = BALL.length * engine.scale;
       ballEl.style.width = ballEl.style.height = `${ballSize}px`;
     };
     measure();
 
-    const floorSurface: Surface = { el: null, left: 0, right: innerWidth, top: innerHeight };
-    const floor = () => floorSurface;
-    let platforms: Element[] = [];
-    let collectedAt = -Infinity;
-    let latest: Surface[] = [];
-    const surfaces = (now: number): Surface[] => {
-      if (now - collectedAt > RECOLLECT_MS) {
-        platforms = [...document.querySelectorAll(PLATFORMS)].filter(
-          (p) => !p.closest("[data-pet-ignore]"),
-        );
-        collectedAt = now;
-      }
-      latest = platforms.flatMap((p) => {
-        const r = p.getBoundingClientRect();
-        // Too narrow to walk on (or hidden): skip.
-        return r.width >= engine.size * 1.5
-          ? [{ el: p, left: r.left, right: r.right, top: r.top }]
-          : [];
-      });
-      return latest;
-    };
-
     let theme = currentTheme();
     let palette = paletteFor(variant, theme);
     let drawn = "";
     let placed = "";
-    let ballDrawn = "";
+    let ballTheme: Theme | null = null;
+    let ballShown = false;
+    ballWrap.style.visibility = "hidden";
     const snap = (v: number) => Math.round(v * dpr) / dpr;
 
     let raf = 0;
@@ -117,7 +70,7 @@ export default function Pet() {
       raf = requestAnimationFrame(tick);
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
-      engine.step(dt, surfaces(now), floor());
+      engine.step(dt, page.at(now), floor);
 
       const { name, lift } = engine.frame();
       const key = `${name}|${engine.facing}|${theme}`;
@@ -125,72 +78,36 @@ export default function Pet() {
         drawFrame(ctx, frames[name], palette, engine.facing < 0);
         drawn = key;
       }
-      if (box.current) {
-        const at = `translate(${snap(engine.x)}px, ${snap(engine.y - engine.size - lift)}px)`;
-        if (at !== placed) {
-          box.current.style.transform = at;
-          placed = at;
-        }
+      const at = `translate(${snap(engine.x)}px, ${snap(engine.y - engine.size - lift)}px)`;
+      if (at !== placed) {
+        petBox.style.transform = at;
+        placed = at;
       }
 
       const ball = engine.ball;
-      if (ballBox.current) {
-        const show = !!ball && !ball.carried;
-        ballBox.current.style.visibility = show ? "visible" : "hidden";
-        if (show) {
-          if (ballDrawn !== theme) {
-            drawFrame(ballCtx, BALL, paletteFor(BALL_COLORS, theme));
-            ballDrawn = theme;
-          }
-          ballBox.current.style.transform = `translate(${snap(ball.x)}px, ${snap(ball.y - ball.size)}px)`;
+      const show = !!ball && !ball.carried;
+      if (show !== ballShown) {
+        ballWrap.style.visibility = show ? "visible" : "hidden";
+        ballShown = show;
+      }
+      if (show) {
+        if (ballTheme !== theme) {
+          drawFrame(ballCtx, BALL, paletteFor(BALL_COLORS, theme));
+          ballTheme = theme;
         }
+        ballWrap.style.transform = `translate(${snap(ball.x)}px, ${snap(ball.y - ball.size)}px)`;
       }
     };
 
-    engine.spawn(floor());
+    engine.spawn(floor);
     raf = requestAnimationFrame(tick);
 
-    // Press and release = a pat; press and drag = pick up, then throw on release.
-    let press: { id: number; x: number; y: number } | null = null;
-    let dragging = false;
-    let trail: { x: number; y: number; t: number }[] = [];
-    const onDown = (e: PointerEvent) => {
-      press = { id: e.pointerId, x: e.clientX, y: e.clientY };
-      dragging = false;
-      trail = [{ x: e.clientX, y: e.clientY, t: e.timeStamp }];
-      el.setPointerCapture(e.pointerId);
-      e.preventDefault();
-    };
-    const onMove = (e: PointerEvent) => {
-      engine.pointerX = e.clientX;
-      if (!press || e.pointerId !== press.id) return;
-      if (!dragging && Math.hypot(e.clientX - press.x, e.clientY - press.y) > DRAG_PX) {
-        dragging = true;
-        engine.grab();
-        el.style.cursor = "grabbing";
-      }
-      if (!dragging) return;
-      engine.holdAt(e.clientX, e.clientY);
-      trail.push({ x: e.clientX, y: e.clientY, t: e.timeStamp });
-      while (trail.length > 2 && e.timeStamp - trail[0].t > THROW_WINDOW_MS) trail.shift();
-    };
-    const onUp = (e: PointerEvent) => {
-      if (!press || e.pointerId !== press.id) return;
-      press = null;
-      el.style.cursor = "";
-      if (!dragging) return engine.pet();
-      const a = trail[0];
-      const b = trail[trail.length - 1];
-      const secs = Math.max((b.t - a.t) / 1000, 0.016);
-      engine.release((b.x - a.x) / secs, (b.y - a.y) / secs, latest, floor());
-    };
-    const throwBall = () => engine.throwBall(floor());
+    const detachGestures = attachGestures(el, engine, () => page.at(performance.now()), floor);
+    const throwBall = () => engine.throwBall(floor);
     // Dev shortcut until the paw menu exists: B throws a ball.
     const onKey = (e: KeyboardEvent) => {
       const typing = (e.target as HTMLElement | null)?.closest("input, textarea, [contenteditable]");
-      if (e.key === "b" && !typing && !e.metaKey && !e.ctrlKey) {
-        throwBall();
-      }
+      if (e.key === "b" && !typing && !e.metaKey && !e.ctrlKey) throwBall();
     };
 
     const onVisibility = () => {
@@ -205,10 +122,6 @@ export default function Pet() {
       palette = paletteFor(variant, theme);
     });
     themeWatch.observe(document.documentElement, { attributeFilter: ["data-theme"] });
-    el.addEventListener("pointerdown", onDown);
-    addEventListener("pointermove", onMove);
-    addEventListener("pointerup", onUp);
-    addEventListener("pointercancel", onUp);
     if (process.env.NODE_ENV !== "production") addEventListener("keydown", onKey);
     addEventListener(THROW_BALL_EVENT, throwBall);
     document.addEventListener("visibilitychange", onVisibility);
@@ -216,17 +129,15 @@ export default function Pet() {
 
     return () => {
       cancelAnimationFrame(raf);
+      detachGestures();
+      page.dispose();
       themeWatch.disconnect();
-      el.removeEventListener("pointerdown", onDown);
-      removeEventListener("pointermove", onMove);
-      removeEventListener("pointerup", onUp);
-      removeEventListener("pointercancel", onUp);
       removeEventListener("keydown", onKey);
       removeEventListener(THROW_BALL_EVENT, throwBall);
       document.removeEventListener("visibilitychange", onVisibility);
       removeEventListener("resize", measure);
     };
-  }, []);
+  }, [species, coat, reduced]);
 
   return (
     <>
