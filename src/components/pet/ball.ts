@@ -5,12 +5,15 @@ const BOUNCE = 0.45;
 const SETTLE = 260;
 /** Rolling friction: speed decays by this factor per second. */
 const ROLL = 0.08;
-/** Seconds before an unclaimed ball disappears. */
+/** Seconds a ball lasts after it was last thrown. */
 const LIFETIME = 30;
+/** It blinks for this long before vanishing. */
+const FADE = 2;
 
 /**
- * The fetch ball: bounces, rolls, rides platforms as the page scrolls and rolls
- * off their ends. `y` is the ball's bottom, like the pet's feet.
+ * The fetch ball (and, bouncing less, the pet's food): bounces, rolls, rides
+ * platforms as the page scrolls and rolls off their ends. `y` is its bottom,
+ * like the pet's feet, and `size` its width.
  */
 export class Ball {
   x: number;
@@ -21,11 +24,15 @@ export class Ball {
   on: Surface | null = null;
   /** In the dog's mouth: not simulated, not drawn. */
   carried = false;
+  /** Under the visitor's pointer: frozen in place, and not ageing. */
+  held = false;
   private rel = 0;
   private ttl = LIFETIME;
+  private bounce: number;
 
-  constructor(size: number, x: number, y: number, vx: number, vy: number) {
+  constructor(size: number, x: number, y: number, vx: number, vy: number, bounce = BOUNCE) {
     this.size = size;
+    this.bounce = bounce;
     this.x = x;
     this.y = y;
     this.vx = vx;
@@ -40,9 +47,13 @@ export class Ball {
     return !!this.on && Math.abs(this.vx) < 8;
   }
 
-  /** Let it linger a little longer once play is over, then vanish. */
-  expireIn(seconds: number) {
-    this.ttl = Math.min(this.ttl, seconds);
+  get fading() {
+    return this.ttl < FADE;
+  }
+
+  /** A fresh throw from the visitor: the clock starts over. */
+  refresh() {
+    this.ttl = LIFETIME;
   }
 
   kick(vx: number, vy: number) {
@@ -64,6 +75,7 @@ export class Ball {
   }
 
   step(dt: number, surfaces: Surface[], floor: Surface) {
+    if (this.held) return;
     this.ttl -= dt;
     if (this.carried) return;
     const s = this.size;
@@ -109,7 +121,7 @@ export class Ball {
     if (!hit) return;
     this.y = hit.top;
     if (this.vy > SETTLE) {
-      this.vy = -this.vy * BOUNCE;
+      this.vy = -this.vy * this.bounce;
       this.vx *= 0.8;
     } else {
       this.on = hit;

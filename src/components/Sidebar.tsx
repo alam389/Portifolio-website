@@ -15,6 +15,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
+import PawMenu from "@/components/pet/PawMenu";
 import { THEME_STORAGE_KEY, type Theme } from "@/components/theme";
 import { profile } from "@/data";
 
@@ -144,8 +145,9 @@ export default function Sidebar() {
           </ul>
         </nav>
 
-        <div className="mt-3 mb-2 border-t border-foreground/10 pt-2">
+        <div className="mt-3 mb-2 flex flex-col gap-1 border-t border-foreground/10 pt-2">
           <ThemeToggle size={18} tip />
+          <PawMenu size={18} side="right" className={`${item} ${idle}`} />
         </div>
 
         <ul aria-label="Links" className="flex flex-col gap-1 border-t border-foreground/10 pt-2">
@@ -190,8 +192,9 @@ export default function Sidebar() {
               </li>
             );
           })}
-          <li className="ml-0.5 border-l border-foreground/10 pl-2">
+          <li className="ml-0.5 flex gap-1.5 border-l border-foreground/10 pl-2">
             <ThemeToggle size={20} />
+            <PawMenu size={20} side="top" className={`${item} ${idle}`} />
           </li>
         </ul>
       </nav>

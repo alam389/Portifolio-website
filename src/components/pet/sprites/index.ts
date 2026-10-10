@@ -5,6 +5,7 @@ import { outline } from "./outline";
 import type { Frame, SpeciesSprites } from "./types";
 
 export { BALL, BALL_COLORS } from "./ball";
+export { FOOD, bitten } from "./food";
 export { SPRITE_SIZE, paletteFor } from "./types";
 export type { Frame, Palette, Theme, Variant } from "./types";
 
@@ -31,6 +32,8 @@ const shared: Record<string, Animation> = {
   sleep: { frames: ["sleep1", "sleep2"], fps: 1.5 },
   held: { frames: ["held"], fps: 1 },
   happy: { frames: ["happy"], fps: 1 },
+  // Head down in the bowl, bobbing as it chews.
+  eat: { frames: ["eat1", "eat2"], fps: 4 },
 };
 
 /** Every animation a species can play: the shared set plus its fetch move. */

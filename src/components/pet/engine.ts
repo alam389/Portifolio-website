@@ -4,6 +4,18 @@ import { ANIMATIONS, type SpeciesName } from "./sprites";
 
 export type { Surface } from "./physics";
 
+/** How to draw the pet this frame. */
+export interface Pose {
+  name: string;
+  /** Vertical lift in CSS pixels. */
+  lift: number;
+  /** Squash and stretch about the feet. */
+  sx: number;
+  sy: number;
+  /** Direction it's drawn facing (the sign of the flip). */
+  face: number;
+}
+
 /**
  * The pet's brain and physics, free of DOM so it stays testable. Coordinates
  * are viewport pixels; `y` is the pet's feet. Each frame the caller passes the
@@ -18,19 +30,28 @@ interface Traits {
   jump: number;
   /** What it does on reaching the ball. */
   fetch: "carry" | "swat" | "nudge";
+  /** How it reacts to the cursor, and the odds it cares at all. */
+  cursor: "eager" | "stalk" | "skittish";
+  notice: number;
 }
 
 const TRAITS: Record<SpeciesName, Traits> = {
-  cat: { walk: 22, jump: 190, fetch: "swat" },
-  dog: { walk: 30, jump: 120, fetch: "carry" },
-  bunny: { walk: 26, jump: 160, fetch: "nudge" },
+  cat: { walk: 22, jump: 190, fetch: "swat", cursor: "stalk", notice: 0.6 },
+  dog: { walk: 30, jump: 120, fetch: "carry", cursor: "eager", notice: 1 },
+  bunny: { walk: 26, jump: 160, fetch: "nudge", cursor: "skittish", notice: 0.8 },
 };
 
 const MAX_THROW = 2200;
-/** Seconds a pet chases the ball before giving up. */
-const FETCH_PATIENCE = 20;
 /** The ball sprite is 6x6. */
 const BALL_PX = 6;
+/** Seconds to eat a whole treat. */
+const EAT_SECONDS = 2.4;
+/** How close (in sprite widths) the cursor must come before the pet notices. */
+const SENSE = 3;
+/** Seconds after the cursor last moved that the pet still cares about it. */
+const CURSOR_MEMORY = 4;
+/** Cursor speed (px/s) that startles the bunny when it's close. */
+const STARTLE_SPEED = 900;
 
 type Mode =
   | "air"
@@ -45,20 +66,28 @@ type Mode =
   | "swat"
   | "nudge"
   | "carry"
-  | "zoom";
+  | "zoom"
+  | "eat"
+  | "stretch"
+  | "look"
+  | "shake";
 
-/** Modes the pet can be pulled out of to go chase the ball. */
-const FREE: ReadonlySet<Mode> = new Set(["idle", "walk", "sit", "land", "happy"]);
+/** Modes the pet can be pulled out of to go after the ball or the cursor. */
+const FREE: ReadonlySet<Mode> = new Set(["idle", "walk", "sit", "sleep", "land", "happy", "zoom"]);
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
+const clampThrow = (v: number) => Math.min(Math.max(v, -MAX_THROW), MAX_THROW);
 
 export class PetEngine {
   x = 0;
   y = 0;
   facing = 1;
   ball: Ball | null = null;
-  /** Last pointer x: where the dog brings the ball back to. */
-  pointerX: number | null = null;
+  food: Ball | null = null;
+  /** Share of the food eaten so far, 0 to 1 (drawn as bites). */
+  foodEaten = 0;
+  /** The visitor's cursor: what the pet follows, and where the dog brings the ball. */
+  pointer: { x: number; y: number; at: number; speed: number } | null = null;
   species: SpeciesName;
   /** Sprite box in CSS pixels, and the display scale it was derived from. */
   size: number;
@@ -67,15 +96,28 @@ export class PetEngine {
   private vy = 0;
   private mode: Mode = "air";
   private timer = 0;
+  /** Seconds in the current mode (drives animation). */
   private clock = 0;
+  /** Seconds since spawn. */
+  private time = 0;
+  /** Whether it's paying the cursor any mind, re-decided every few seconds. */
+  private attention: { on: boolean; until: number } | null = null;
+  /** `time` when the cursor last moved. */
+  private pointerSeen = -Infinity;
   private on: Surface | null = null;
   private rel = 0;
   /** Walking off the edge: no clamping until the pet's middle is past it. */
   private leaving = false;
   private launch: { vx: number; vy: number } | null = null;
-  /** Seconds of chasing left; 0 when not fetching. */
-  private fetching = 0;
+  /** Playing with the ball: true for as long as the ball exists. */
+  private fetching = false;
+  /** Seconds of breather between rounds of play. */
+  private rest = 0;
+  /** The visitor threw it since the dog last brought it back. */
+  private fresh = false;
   private nudges = 0;
+  /** `foodEaten` when the current meal started (it can be interrupted). */
+  private eatFrom = 0;
   private reduced: boolean;
 
   constructor(species: SpeciesName, size: number, scale: number, reduced: boolean) {
@@ -100,12 +142,7 @@ export class PetEngine {
 
   /** Picked up: dangle from the pointer until released. */
   grab() {
-    if (this.ball?.carried) {
-      this.ball.x = this.x + this.size / 2;
-      this.ball.y = this.y - this.size * 0.3;
-      this.ball.kick(0, 0);
-    }
-    this.endFetch();
+    this.dropBall();
     this.on = null;
     this.leaving = false;
     this.launch = null;
@@ -128,31 +165,126 @@ export class PetEngine {
         .sort((a, b) => a.top - b.top)[0];
       return this.stand(below ?? floor, this.x);
     }
-    const clamp = (v: number) => Math.min(Math.max(v, -MAX_THROW), MAX_THROW);
-    this.vx = clamp(vx);
-    this.vy = clamp(vy);
+    this.vx = clampThrow(vx);
+    this.vy = clampThrow(vy);
     if (Math.abs(this.vx) > 40) this.facing = Math.sign(this.vx);
     this.set("air");
   }
 
-  /** A ball drops into the page and the pet goes after it (cats, not always). */
+  /** A treat drops in near the pet, which goes and eats it before anything else. */
+  feed(floor: Surface, width: number) {
+    const size = width * this.scale;
+    // Dropped a little way in front of it, onto the platform it's on, so it
+    // can always get there. In midair, it falls from the top instead.
+    const on = this.on ?? floor;
+    const ahead = this.x + this.size / 2 + this.facing * rand(1.5, 3.5) * this.size - size / 2;
+    const x = Math.min(Math.max(ahead, on.left), on.right - size);
+    const y = this.on ? this.on.top - this.size * 1.5 : -size;
+    this.food = new Ball(size, x, y, 0, 0, 0.25);
+    this.foodEaten = 0;
+    // Under reduced motion it just appears beside the sleeping pet.
+    if (this.reduced) return this.food.place(this.on ?? floor, x);
+    if (this.mode === "carry" || this.mode === "eat") {
+      this.dropBall();
+      this.set("idle", 0.2);
+    }
+    this.rest = 0;
+  }
+
+  /** If the dog has the ball in its mouth, let it fall. */
+  private dropBall() {
+    if (!this.ball?.carried) return;
+    this.ball.x = this.x + this.size / 2;
+    this.ball.y = this.y - this.size * 0.3;
+    this.ball.kick(0, 0);
+  }
+
+  /** What it's going after: food first, then the ball while playing. */
+  private target() {
+    return this.food ?? (this.fetching ? this.ball : null);
+  }
+
+  /** A ball drops into the page and the pet goes after it. */
   throwBall(floor: Surface) {
     const size = BALL_PX * this.scale;
+    if (this.mode === "carry") this.set("idle", 0.2);
     this.ball = new Ball(size, rand(0.25, 0.75) * floor.right, -size, rand(-250, 250), 0);
-    this.fetching = this.species === "cat" && Math.random() < 0.25 ? 0 : FETCH_PATIENCE;
+    this.play();
+  }
+
+  /** The visitor picks the ball up. Returns false if there's none to take. */
+  grabBall() {
+    const ball = this.ball;
+    if (!ball || ball.carried) return false;
+    ball.held = true;
+    ball.on = null;
+    ball.vx = ball.vy = 0;
+    // Mid-swat or mid-nudge: the ball's gone from under its paw.
+    if (this.mode === "swat" || this.mode === "nudge") this.set("idle", 0.3);
+    this.play();
+    return true;
+  }
+
+  holdBall(px: number, py: number) {
+    const ball = this.ball;
+    if (!ball?.held) return;
+    ball.x = px - ball.size / 2;
+    ball.y = py + ball.size / 2;
+  }
+
+  releaseBall(vx: number, vy: number) {
+    const ball = this.ball;
+    if (!ball?.held) return;
+    ball.held = false;
+    ball.refresh();
+    ball.kick(clampThrow(vx), clampThrow(vy));
+  }
+
+  /** The cursor moved to (x, y); `ms` is the event's timestamp. */
+  point(x: number, y: number, ms: number) {
+    const p = this.pointer;
+    let speed = 0;
+    if (p && ms > p.at) {
+      const inst = Math.hypot(x - p.x, y - p.y) / ((ms - p.at) / 1000);
+      speed = p.speed * 0.6 + inst * 0.4;
+    }
+    this.pointer = { x, y, at: ms, speed };
+    this.pointerSeen = this.time;
+  }
+
+  /** The cursor left the window. */
+  unpoint() {
+    this.pointer = null;
+  }
+
+  /** A new round: chase straight away, and the dog will bring this one back. */
+  private play() {
+    this.fetching = true;
+    this.rest = 0;
     this.nudges = 0;
+    this.fresh = true;
   }
 
   step(dt: number, surfaces: Surface[], floor: Surface) {
     this.clock += dt;
+    this.time += dt;
     const s = this.size;
 
     if (this.ball) {
       this.ball.step(dt, surfaces, floor);
       if (this.ball.gone) {
         this.ball = null;
-        this.endFetch();
+        this.fetching = false;
+        if (this.timer === Infinity) this.timer = rand(1, 3);
         if (this.mode === "carry") this.set("idle", 0.5);
+      }
+    }
+    if (this.food) {
+      this.food.step(dt, surfaces, floor);
+      if (this.food.gone) {
+        this.food = null;
+        if (this.timer === Infinity) this.timer = rand(1, 3);
+        if (this.mode === "eat") this.set("idle", 0.5);
       }
     }
 
@@ -202,17 +334,19 @@ export class PetEngine {
     this.timer -= dt;
     const on = this.on!;
 
-    if (this.fetching > 0) {
-      this.fetching -= dt;
-      if (this.fetching <= 0 || !this.ball) this.endFetch();
-      else if (FREE.has(this.mode)) this.chase(surfaces);
-    }
+    if (this.rest > 0) this.rest -= dt;
+    if (this.mode === "eat") this.foodEaten = Math.min(this.eatFrom + this.clock / EAT_SECONDS, 1);
+    // Food, then the ball; otherwise, maybe the cursor.
+    const target = this.target();
+    if (target) {
+      if (this.rest <= 0 && FREE.has(this.mode)) this.chase(surfaces, target);
+    } else if (this.rest <= 0 && FREE.has(this.mode)) this.follow(surfaces);
 
     if (this.mode === "walk" || this.mode === "zoom" || this.mode === "carry") {
       const boost = this.mode === "zoom" ? 2.5 : 1;
       const speed = TRAITS[this.species].walk * this.scale * boost;
-      if (this.mode === "carry" && this.pointerX !== null) {
-        const dx = this.pointerX - (this.x + s / 2);
+      if (this.mode === "carry" && this.pointer) {
+        const dx = this.pointer.x - (this.x + s / 2);
         if (Math.abs(dx) < s * 0.6) this.timer = 0;
         else this.facing = Math.sign(dx);
       }
@@ -249,38 +383,52 @@ export class PetEngine {
         } else this.set("idle", 0.5);
         break;
       case "swat":
-        // Knock it off the ledge, then sit and watch it go.
+        // Knock the ball (or bat at the cursor), sit and watch, then go again.
         this.ball?.kick(this.facing * rand(380, 520), -rand(220, 320));
-        this.endFetch();
-        this.set("sit", 1.5);
+        this.breather("sit", rand(1, 2));
         break;
       case "nudge":
         this.ball?.kick(this.facing * rand(140, 200), -80);
         if (++this.nudges >= 3) {
-          this.endFetch();
-          this.set("zoom", 2.2);
+          this.nudges = 0;
+          this.breather("zoom", 2.2);
         } else this.set("idle", 0.2);
         break;
       case "carry":
-        // Drop it at the pointer, pleased with itself.
+        // Drop it at the pointer and wag, waiting for another throw.
         if (this.ball) {
           const bs = this.ball.size;
           const bx = this.facing > 0 ? this.x + s * 0.8 : this.x + s * 0.2 - bs;
           this.ball.place(on, Math.min(Math.max(bx, on.left), on.right - bs));
         }
-        this.endFetch();
-        this.set("happy", 1);
+        this.fresh = false;
+        this.breather("happy", rand(2.5, 4));
+        break;
+      case "sleep":
+        this.set("stretch", 1.1);
+        break;
+      case "eat":
+        // All gone: pleased with itself for a bit.
+        this.food = null;
+        this.foodEaten = 0;
+        this.breather("happy", rand(1.5, 2.5));
         break;
       default:
         this.decide(surfaces);
     }
   }
 
-  /** Always busy: mostly exploring on foot, often jumping, with brief pauses. */
+  /** Always busy: mostly exploring on foot, with jumps, antics and the odd nap. */
   private decide(surfaces: Surface[]) {
     const r = Math.random();
-    if (r < 0.3 && this.tryJump(surfaces)) return;
-    if (r < 0.42) return this.set(Math.random() < 0.5 ? "sit" : "idle", rand(0.5, 1.5));
+    if (r < 0.22 && this.tryJump(surfaces)) return;
+    if (r < 0.3) return this.set(Math.random() < 0.5 ? "sit" : "idle", rand(0.5, 1.5));
+    if (r < 0.36) return this.set("stretch", 1.1);
+    if (r < 0.42) return this.set("look", rand(1.4, 2.2));
+    if (r < 0.46) return this.set("shake", 0.7);
+    if (r < 0.52) return this.set("happy", rand(1, 1.6));
+    if (r < 0.58) return this.set("zoom", rand(1.2, 2.2));
+    if (r < 0.63) return this.set("sleep", rand(5, 9));
     if (Math.random() < 0.4) this.facing = -this.facing;
     this.set("walk", rand(3, 7));
   }
@@ -288,14 +436,19 @@ export class PetEngine {
   /** Reached the end of the platform. Returns true if it left the ground. */
   private edge(surfaces: Surface[]) {
     const on = this.on!;
-    if (!on.el || this.mode !== "walk") {
+    if (!on.el || (this.mode !== "walk" && this.mode !== "zoom")) {
       this.facing = -this.facing;
       return false;
     }
-    if (this.fetching > 0 && this.ball?.on) {
-      const ball = this.ball.on;
-      if (ball.top > this.y + 8) return this.stepOff();
-      if (ball.top < this.y - 8 && this.tryJump(surfaces, { surface: ball, x: this.ball.x })) return true;
+    // Following the cursor down off this platform.
+    if (this.attention?.on && this.pointer && this.pointer.y > this.y - this.size) {
+      return this.stepOff();
+    }
+    const target = this.target();
+    if (target?.on && this.rest <= 0) {
+      const at = target.on;
+      if (at.top > this.y + 8) return this.stepOff();
+      if (at.top < this.y - 8 && this.tryJump(surfaces, { surface: at, x: target.x })) return true;
       this.facing = -this.facing;
       return false;
     }
@@ -315,9 +468,8 @@ export class PetEngine {
     return true;
   }
 
-  /** One frame of going after the ball: head for it across platforms. */
-  private chase(surfaces: Surface[]) {
-    const ball = this.ball!;
+  /** One frame of going after the ball or food: head for it across platforms. */
+  private chase(surfaces: Surface[], ball: Ball) {
     const on = this.on!;
     const s = this.size;
     const bx = ball.x + ball.size / 2;
@@ -335,12 +487,22 @@ export class PetEngine {
       return;
     }
     if (ball.on.el === on.el) {
-      if (Math.abs(dx) < s * 0.45 && ball.resting) return this.reach();
+      if (Math.abs(dx) < s * 0.45 && ball.resting) return this.reach(ball);
       return walkTo(Math.sign(dx));
     }
     if (ball.on.top < this.y - 8) {
-      if (this.tryJump(surfaces, { surface: ball.on, x: ball.x })) return;
-      return walkTo(Math.sign(dx));
+      const target = ball.on;
+      if (this.tryJump(surfaces, { surface: target, x: ball.x })) return;
+      // Too high to reach in one go: climb via a platform in between.
+      const steps = surfaces
+        .filter((o) => o.top > target.top + 8 && o.top < this.y - 8)
+        .sort((a, b) => b.top - a.top);
+      for (const o of steps) if (this.tryJump(surfaces, { surface: o, x: ball.x })) return;
+      // No way up: wait underneath, watching it.
+      if (Math.abs(dx) > s) return walkTo(Math.sign(dx));
+      this.facing = Math.sign(dx) || this.facing;
+      if (this.mode !== "sit") this.set("sit", Infinity);
+      return;
     }
     // Ball is lower: make for the nearer edge on the ball's side and drop.
     const under = bx > on.left && bx < on.right;
@@ -348,12 +510,112 @@ export class PetEngine {
     walkTo(dir);
   }
 
-  /** At the ball: each species plays differently. */
-  private reach() {
+  /** One frame of minding the cursor, in the species' own way. */
+  private follow(surfaces: Surface[]) {
+    const p = this.pointer;
+    const s = this.size;
+    const traits = TRAITS[this.species];
+    // Only notices a cursor that comes near; once interested, it follows a bit further.
+    const range = SENSE * s * (this.attention?.on ? 1.5 : 1);
+    const gap = p ? Math.hypot(p.x - (this.x + s / 2), p.y - (this.y - s / 2)) : Infinity;
+    if (!p || gap > range || this.time - this.pointerSeen > CURSOR_MEMORY) {
+      // Out of range or gone still: back to its own business.
+      if (this.attention) {
+        this.attention = null;
+        if (this.timer === Infinity && !this.leaving) this.timer = rand(0.5, 2);
+      }
+      return;
+    }
+    if (!this.attention || this.time > this.attention.until) {
+      const on = Math.random() < traits.notice;
+      this.attention = { on, until: this.time + rand(4, 8) };
+      if (!on && this.timer === Infinity && !this.leaving) this.timer = rand(0.5, 2);
+    }
+    if (!this.attention.on) return;
+
+    const on = this.on!;
+    const dx = p.x - (this.x + s / 2);
+    const dist = Math.abs(dx);
+    const dir = Math.sign(dx) || this.facing;
+    const moving = this.mode === "walk" || this.mode === "zoom";
+    // Already settled beside it: let it drift a bit further before getting up.
+    const near = (d: number) => dist < (moving ? d : d * 1.8);
+    // Walk/zoom toward it, or sit/wag facing it, until something changes.
+    const act = (mode: Mode, face = dir) => {
+      this.facing = face;
+      if (this.mode !== mode) this.set(mode, Infinity);
+      this.timer = Infinity;
+    };
+
+    // Cursor up over another platform: jump up to it if it can.
+    if (p.y < this.y - s) {
+      const under = surfaces
+        .filter((o) => o.el !== on.el && o.top >= p.y && p.x >= o.left && p.x <= o.right)
+        .sort((a, b) => a.top - b.top)[0];
+      if (under && this.tryJump(surfaces, { surface: under, x: p.x - s / 2 })) return;
+      // Out of reach past the edge: wait there, looking.
+      const atEdge = dir > 0 ? this.x >= on.right - s - 1 : this.x <= on.left + 1;
+      if (atEdge) return act("sit");
+    }
+    // Cursor well below: make for the platform edge nearest it and drop.
+    if (p.y > this.y + s * 2 && on.el) {
+      const edgeX = p.x - on.left < on.right - p.x ? on.left : on.right;
+      const pace = traits.cursor === "eager" && dist > s * 2 ? "zoom" : "walk";
+      return act(pace, Math.sign(edgeX - (this.x + s / 2)) || dir);
+    }
+
+    const still = this.time - this.pointerSeen > 0.35;
+    // Right on top of it.
+    const touching = gap < s * 0.9;
+    switch (traits.cursor) {
+      case "eager":
+        // Runs over and wags at it.
+        if (touching || near(s * 0.6)) return act("happy");
+        return act(dist > (this.mode === "zoom" ? s * 1.5 : s * 2) ? "zoom" : "walk");
+      case "stalk":
+        // Bats at it up close; otherwise creeps up, watches it move, and
+        // pounces once it stops.
+        if (touching) {
+          this.facing = dir;
+          this.set("swat", 4 / 6);
+          return;
+        }
+        if (near(s * 0.5)) return act("sit");
+        if (dist < s * 2 && still && Math.abs(p.y - this.y) < s * 1.5) {
+          this.jumpTo(on, Math.min(Math.max(p.x - s / 2, on.left), on.right - s));
+          this.rest = rand(2, 3.5);
+          return;
+        }
+        if (dist < s * 2) return act("sit");
+        return act("walk");
+      case "skittish":
+        // Hops over and keeps a polite distance; bolts if it rushes in.
+        if (!still && p.speed > STARTLE_SPEED && dist < s * 2.5) {
+          this.facing = -dir;
+          return this.breather("zoom", rand(0.8, 1.2));
+        }
+        // A slow, gentle hover over it is welcome.
+        if (touching) return act("happy");
+        if (near(s * 1.2)) return act("sit");
+        return act("walk");
+    }
+  }
+
+  /** At the food: eat it. At the ball: each species plays differently. */
+  private reach(prop: Ball) {
+    if (prop === this.food) {
+      this.eatFrom = this.foodEaten;
+      this.set("eat", (1 - this.foodEaten) * EAT_SECONDS);
+      return;
+    }
     const how = TRAITS[this.species].fetch;
-    if (how === "carry") {
+    if (how === "carry" && this.fresh) {
       this.ball!.carried = true;
       this.set("carry", 4);
+    } else if (how === "carry") {
+      // Nobody threw it back: toss it for itself.
+      this.ball!.kick(this.facing * rand(200, 320), -rand(260, 360));
+      this.breather("happy", 0.8);
     } else if (how === "swat") {
       this.set("swat", 4 / 6);
     } else {
@@ -361,10 +623,10 @@ export class PetEngine {
     }
   }
 
-  private endFetch() {
-    if (this.fetching > 0 || this.mode === "carry") this.ball?.expireIn(10);
-    this.fetching = 0;
-    if (this.timer === Infinity) this.timer = rand(1, 3);
+  /** Pause play for a moment in `mode`; it goes back to the ball after. */
+  private breather(mode: Mode, seconds: number) {
+    this.rest = seconds;
+    this.set(mode, seconds);
   }
 
   /**
@@ -424,35 +686,86 @@ export class PetEngine {
     this.timer = timer;
   }
 
-  /** The sprite frame to show now, plus a vertical offset (the bunny's hop). */
-  frame(): { name: string; lift: number } {
+  /**
+   * The sprite frame to show now, plus how to pose it: a vertical lift (hops,
+   * bobs), squash and stretch about the feet, and which way it faces.
+   */
+  frame(): Pose {
     const anims = ANIMATIONS[this.species];
+    const sc = this.scale;
+    const t = this.clock;
     const play = (key: string, speed = 1) => {
       const { frames, fps } = anims[key];
-      return frames[Math.floor(this.clock * fps * speed) % frames.length];
+      return frames[Math.floor(t * fps * speed) % frames.length];
     };
-    const hop = (name: string) =>
-      this.species === "bunny" ? ({ walk2: 2, walk3: 4 }[name] ?? 0) * this.scale : 0;
+    const pose = (name: string, p: Partial<Pose> = {}): Pose => ({
+      name,
+      lift: 0,
+      sx: 1,
+      sy: 1,
+      face: this.facing,
+      ...p,
+    });
+    // Settles from 1 + amount back to 1 over `over` seconds.
+    const settle = (amount: number, over: number) => 1 + amount * Math.max(0, 1 - t / over);
+    const bunny = this.species === "bunny";
     switch (this.mode) {
-      case "air":
-        return { name: this.vy < 0 ? "jump" : "fall", lift: 0 };
+      case "air": {
+        // Stretches along its fall, a little more the faster it goes.
+        const k = Math.min(Math.abs(this.vy) / 1400, 0.18);
+        return pose(this.vy < 0 ? "jump" : "fall", { sx: 1 - k * 0.6, sy: 1 + k });
+      }
       case "crouch":
+        return pose("crouch", { sx: 1.1, sy: 0.88 });
       case "land":
-        return { name: "crouch", lift: 0 };
+        // Squashes on impact and springs back.
+        return pose("crouch", { sx: settle(0.18, 0.12), sy: 1 / settle(0.18, 0.12) });
       case "walk":
       case "zoom": {
-        const name = play("walk", this.mode === "zoom" ? 2 : 1);
-        return { name, lift: hop(name) };
+        const fast = this.mode === "zoom";
+        const name = play("walk", fast ? 2 : 1);
+        const step = { walk2: 1, walk4: 1 }[name] ?? 0;
+        const hop = bunny ? ({ walk2: 2, walk3: 4 }[name] ?? 0) : step;
+        // Zoomies lean into the run.
+        return pose(name, { lift: hop * sc, sx: fast ? 1.06 : 1, sy: fast ? 0.96 : 1 });
+      }
+      case "happy": {
+        // Bounces on the spot, squashing on each landing.
+        const b = Math.abs(Math.sin(t * 9));
+        return pose("happy", { lift: b * 3 * sc, sx: 1 + (1 - b) * 0.06, sy: 1 - (1 - b) * 0.06 });
+      }
+      case "stretch": {
+        // Play-bow: front down, then up on tiptoe for a big yawn-stretch.
+        const u = Math.min(t / 1.1, 1);
+        if (u < 0.55) return pose("crouch", { sx: 1 + 0.14 * Math.sin((u / 0.55) * Math.PI), sy: 0.9 });
+        const v = Math.sin(((u - 0.55) / 0.45) * Math.PI);
+        return pose("idle1", { sx: 1 - 0.06 * v, sy: 1 + 0.14 * v });
+      }
+      case "look":
+        // Glances one way, then the other.
+        return pose("idle1", { face: Math.floor(t / 0.55) % 2 ? -this.facing : this.facing });
+      case "shake":
+        // Quick shimmy, flipping side to side.
+        return pose("idle1", {
+          face: Math.floor(t * 18) % 2 ? -this.facing : this.facing,
+          sx: 1 + 0.05 * Math.sin(t * 60),
+        });
+      case "sleep": {
+        // Breathes: the whole body swells a hair on each slow exhale.
+        const breath = this.reduced ? 0 : Math.sin(t * 2.2) * 0.03;
+        return pose(play("sleep"), { sy: 1 + breath, sx: 1 - breath * 0.5 });
+      }
+      case "eat": {
+        const chew = Math.abs(Math.sin(t * 10));
+        return pose(play("eat"), { sy: 1 - chew * 0.03 });
       }
       case "swat":
       case "nudge":
       case "carry":
       case "held":
       case "sit":
-      case "sleep":
       case "idle":
-      case "happy":
-        return { name: play(this.mode), lift: 0 };
+        return pose(play(this.mode));
     }
   }
 }
