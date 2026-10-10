@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { crispScale, drawFrame } from "./draw";
 import { TRAITS } from "./engine";
 import { clamp } from "./physics";
@@ -24,10 +24,13 @@ const PANEL: Record<Theme, { bg: string; fg: string }> = {
 
 const SCALES = [2, 3, 4, 6];
 
+function subscribeDpr(onChange: () => void) {
+  addEventListener("resize", onChange);
+  return () => removeEventListener("resize", onChange);
+}
+
 function useDpr() {
-  const [dpr, setDpr] = useState(1);
-  useEffect(() => setDpr(window.devicePixelRatio || 1), []);
-  return dpr;
+  return useSyncExternalStore(subscribeDpr, () => devicePixelRatio || 1, () => 1);
 }
 
 function Sprite({

@@ -1,8 +1,6 @@
 import { media } from "./media";
 import type { JourneyStop } from "./types";
 
-const MOCK = "Placeholder trip. Replace with a real one or delete.";
-
 // Array order is the journey's order: the cards scroll and the globe flies
 // from stop to stop exactly as listed here, and dates are display-only. Career
 // and education come from the current resume; the travel stops are mocks
