@@ -25,7 +25,7 @@ export interface Pose {
  */
 
 const MAX_THROW = 2200;
-/** Seconds a pet chases the ball before giving up. */
+/** Seconds a pet chases a ball it can't reach before giving up. */
 const FETCH_PATIENCE = 20;
 /** Seconds to eat a whole treat. */
 const EAT_SECONDS = 2.4;
@@ -169,7 +169,6 @@ export class PetEngine {
   grab() {
     this.say("grabbed");
     this.dropBall();
-    this.endFetch();
     this.on = null;
     this.leaving = false;
     this.launch = null;
@@ -327,7 +326,7 @@ export class PetEngine {
 
     if (this.mode === "held") return;
 
-    // Out of patience: the ball is left to fade.
+    // Couldn't get to the ball in time: it's left to fade.
     if (this.fetching > 0) {
       this.fetching -= dt;
       if (this.fetching <= 0) this.endFetch();
@@ -661,6 +660,8 @@ export class PetEngine {
       this.set("eat", (1 - this.foodEaten) * EAT_SECONDS);
       return;
     }
+    // Got to it: the game's still on.
+    this.fetching = FETCH_PATIENCE;
     const how = TRAITS[this.species].fetch;
     if (how === "carry" && this.fresh) {
       this.ball!.carried = true;

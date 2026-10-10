@@ -62,6 +62,8 @@ describe("PetEngine", () => {
   });
 
   it("gets pulled out of a pat only when standing", () => {
+    // Pinned: some idle moods (stretch, look, shake) can't be interrupted.
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
     const engine = make("cat");
     engine.pet(); // mid-air: ignored
     expect(engine.frame().name).not.toBe("happy");
@@ -107,6 +109,29 @@ describe("PetEngine", () => {
 
     it("the bunny nudges the ball", () => {
       expect(fetchFrames("bunny", "nudge").played).toBe(true);
+    });
+
+    it("keeps playing until the ball expires, then misses it", () => {
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+      const engine = make("dog");
+      const say = vi.spyOn(engine as unknown as { say: (m: string) => void }, "say");
+      run(engine, 3);
+      engine.throwBall(floor);
+      run(engine, 35);
+      expect(engine.ball).toBeNull();
+      expect(say).toHaveBeenCalledWith("ballGone");
+    });
+
+    it("picking the pet up doesn't end the game", () => {
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+      const engine = make("dog");
+      run(engine, 3);
+      engine.throwBall(floor);
+      run(engine, 2);
+      engine.grab();
+      engine.release(0, 0, [], floor);
+      run(engine, 15);
+      expect(engine.ball).not.toBeNull();
     });
   });
 });

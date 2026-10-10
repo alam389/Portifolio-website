@@ -53,3 +53,4 @@ A canvas pixel-art pet (cat, dog or bunny) that walks on page elements, jumps be
 - **`DESIGN.md` is a historical record** of a chat "digital twin" design that was never built. It is not the current design; `.impeccable.md` is.
 - **`portfolio-claude-code-prompt.md`** is the original prompt for a retired IDE-style design. Ignore it.
 - **Git history:** earlier explorations live on branches (`ide-portfolio-backup`, `redo`, `agent-portfolio-backup`). Don't resurrect without asking.
+- **Git authorship:** commits use Anthony's configured identity only; never add `Co-Authored-By` or "Generated with" lines.
