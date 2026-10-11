@@ -12,12 +12,11 @@ const MOCK = "Placeholder. Replace with a real entry or delete.";
 // Everything here is a placeholder until replaced. Draft entries only render
 // in dev, so production shows nothing that isn't real.
 
-/** One-line intros under each Interests section heading. */
+/** One-line intros: the Interests overview, then each section. */
 export const interestIntros = {
+  overview: "What I read, cook and do for fun.",
   ai: "What I've been reading and listening to.",
   food: "What I cook, and where I eat.",
-  cook: "What I make at home.",
-  eat: "Where I eat, and what to order.",
   active: "How I get away from the screen.",
 };
 

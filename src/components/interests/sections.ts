@@ -1,4 +1,3 @@
-import { Brain, ChefHat, Dumbbell, type LucideIcon } from "lucide-react";
 import {
   activities,
   books,
@@ -18,16 +17,17 @@ export type Preview = {
   kind?: string;
   title: string;
   meta?: string;
+  /** Anthony's one-line take, when the entry has one. */
+  takeaway?: string;
   href?: string;
-  /** Square thumbnail; "placeholder" draws an icon tile instead of a photo. */
-  thumb?: Photo | "placeholder";
+  /** Square thumbnail, for entries with a photo. */
+  thumb?: Photo;
   draft?: string;
 };
 
 export type InterestSection = {
   id: string;
   title: string;
-  icon: LucideIcon;
   intro: string;
   /** Preview rows per subsection, in display order. Array order is curation. */
   previews: () => Preview[][];
@@ -54,7 +54,6 @@ export const interestSections: InterestSection[] = [
   {
     id: "ai",
     title: "AI",
-    icon: Brain,
     intro: interestIntros.ai,
     previews: () => [
       live(papers).map((p) => ({
@@ -62,6 +61,7 @@ export const interestSections: InterestSection[] = [
         kind: "Paper",
         title: p.title,
         meta: `${p.authors} · ${p.year}`,
+        takeaway: p.takeaway,
         href: paperHref(p),
         draft: p.draft,
       })),
@@ -70,6 +70,7 @@ export const interestSections: InterestSection[] = [
         kind: "Book",
         title: b.title,
         meta: `${b.authors} · ${b.year}`,
+        takeaway: b.takeaway,
         href: b.url,
         draft: b.draft,
       })),
@@ -78,6 +79,7 @@ export const interestSections: InterestSection[] = [
         kind: "Podcast",
         title: p.episode,
         meta: `${p.show} · ${p.date}`,
+        takeaway: p.takeaway,
         href: p.url,
         draft: p.draft,
       })),
@@ -86,20 +88,19 @@ export const interestSections: InterestSection[] = [
   {
     id: "food",
     title: "Food",
-    icon: ChefHat,
     intro: interestIntros.food,
     previews: () => [
       live(dishes).map((d) => ({
         key: d.id,
-        kind: "Cooks",
+        kind: "Dish",
         title: d.name,
         meta: [d.cuisine, d.note].filter(Boolean).join(" · ") || undefined,
-        thumb: d.photo ?? "placeholder",
+        thumb: d.photo,
         draft: d.draft,
       })),
       live(restaurants).map((r) => ({
         key: r.id,
-        kind: "Eats",
+        kind: "Restaurant",
         title: r.name,
         meta: `${r.city} · ${r.cuisine}`,
         href: r.mapsUrl,
@@ -110,7 +111,6 @@ export const interestSections: InterestSection[] = [
   {
     id: "active",
     title: "Active",
-    icon: Dumbbell,
     intro: interestIntros.active,
     previews: () => [
       live(activities).map((a) => ({

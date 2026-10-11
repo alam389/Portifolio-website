@@ -25,7 +25,15 @@ export default function AiPage() {
   return (
     <SectionPage section={section} subsections={subsections}>
       {shownPapers.length > 0 && (
-        <Subsection id="papers" title="Papers">
+        <Subsection
+          id="papers"
+          title="Papers"
+          intro={
+            shownPapers.some((p) => p.summary)
+              ? "Titles with → open a summary; Paper ↗ goes to the original."
+              : undefined
+          }
+        >
           <ul className={list}>
             {shownPapers.map((p) => (
               <PaperItem key={p.id} paper={p} />

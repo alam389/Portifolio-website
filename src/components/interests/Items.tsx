@@ -1,7 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { ReactNode } from "react";
-import { ChefHat } from "lucide-react";
 import type { Activity, Book, Dish, Paper, Podcast, Restaurant } from "@/data";
 
 // Drafts are visible while editing locally but never ship.
@@ -22,6 +20,26 @@ export function paperHref(paper: Paper) {
   return paper.summary ? `/interests/ai/papers/${paper.id}` : paper.url;
 }
 
+/**
+ * A link title with its arrow (→ to a page here, ↗ off-site). The arrow is
+ * glued to the last word so a long title never wraps it onto a line alone.
+ */
+export function ArrowTitle({ title, external }: { title: string; external: boolean }) {
+  const cut = title.lastIndexOf(" ") + 1;
+  return (
+    <>
+      {title.slice(0, cut)}
+      <span className="whitespace-nowrap">
+        {title.slice(cut)}{" "}
+        <span aria-hidden className="text-muted">
+          {external ? "↗" : "→"}
+        </span>
+      </span>
+      {external && <span className="sr-only"> (opens in a new tab)</span>}
+    </>
+  );
+}
+
 export function DraftBadge({ note }: { note: string }) {
   return (
     <span
@@ -33,32 +51,29 @@ export function DraftBadge({ note }: { note: string }) {
   );
 }
 
-function Tags({ tags }: { tags: string[] }) {
+/** Plain-text metadata (topics, facts). Not pills: pills here are links. */
+export function MetaList({ label, items }: { label: string; items: string[] }) {
+  if (items.length === 0) return null;
   return (
-    <ul aria-label="Topics" className="mt-2.5 flex flex-wrap gap-1.5">
-      {tags.map((tag) => (
-        <li
-          key={tag}
-          className="rounded-full border border-foreground/15 px-2.5 py-0.5 text-xs text-foreground/70"
-        >
-          {tag}
-        </li>
-      ))}
-    </ul>
+    <p className="mt-1.5 font-mono text-xs text-muted">
+      <span className="sr-only">{label}: </span>
+      {items.join(" · ")}
+    </p>
   );
 }
 
-function OutLink({ href, children }: { href: string; children: ReactNode }) {
+const titleLink = "font-semibold underline-offset-4 hover:underline";
+
+function OutLink({ href, title }: { href: string; title: string }) {
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="font-semibold underline-offset-4 hover:underline"
-    >
-      {children} <span aria-hidden className="text-foreground/40">↗</span>
+    <a href={href} target="_blank" rel="noopener noreferrer" className={titleLink}>
+      <ArrowTitle title={title} external />
     </a>
   );
+}
+
+function Takeaway({ text }: { text?: string }) {
+  return text ? <p className="mt-2 text-sm text-foreground/80">{text}</p> : null;
 }
 
 export function PaperItem({ paper }: { paper: Paper }) {
@@ -66,35 +81,34 @@ export function PaperItem({ paper }: { paper: Paper }) {
     <li className="py-5 first:pt-0">
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         {paper.summary ? (
+          <Link href={paperHref(paper)} className={titleLink}>
+            <ArrowTitle title={paper.title} external={false} />
+          </Link>
+        ) : (
+          <OutLink href={paper.url} title={paper.title} />
+        )}
+        {paper.draft && <DraftBadge note={paper.draft} />}
+      </div>
+      <p className="mt-1 font-mono text-xs text-muted">
+        {paper.authors} · {paper.venue ? `${paper.venue} ` : ""}
+        {paper.year}
+        {paper.summary && (
           <>
-            <Link
-              href={paperHref(paper)}
-              className="font-semibold underline-offset-4 hover:underline"
-            >
-              {paper.title} <span aria-hidden className="text-foreground/40">→</span>
-            </Link>
+            {" · "}
             <a
               href={paper.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-foreground/50 transition-colors hover:text-foreground"
+              aria-label={`${paper.title}, the paper (opens in a new tab)`}
+              className="whitespace-nowrap underline-offset-4 transition-colors hover:text-foreground hover:underline"
             >
               Paper <span aria-hidden>↗</span>
             </a>
           </>
-        ) : (
-          <OutLink href={paper.url}>{paper.title}</OutLink>
         )}
-        {paper.draft && <DraftBadge note={paper.draft} />}
-      </div>
-      <p className="mt-0.5 font-mono text-xs text-foreground/50">
-        {paper.authors} · {paper.venue ? `${paper.venue} ` : ""}
-        {paper.year}
       </p>
-      {paper.takeaway && (
-        <p className="mt-2 text-sm text-foreground/80">{paper.takeaway}</p>
-      )}
-      <Tags tags={paper.tags} />
+      <Takeaway text={paper.takeaway} />
+      <MetaList label="Topics" items={paper.tags} />
     </li>
   );
 }
@@ -103,17 +117,15 @@ export function BookItem({ book }: { book: Book }) {
   return (
     <li className="py-5 first:pt-0">
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <OutLink href={book.url}>{book.title}</OutLink>
+        <OutLink href={book.url} title={book.title} />
         {book.draft && <DraftBadge note={book.draft} />}
       </div>
-      <p className="mt-0.5 font-mono text-xs text-foreground/50">
+      <p className="mt-1 font-mono text-xs text-muted">
         {book.authors} · {book.publisher ? `${book.publisher} ` : ""}
         {book.year}
       </p>
-      {book.takeaway && (
-        <p className="mt-2 text-sm text-foreground/80">{book.takeaway}</p>
-      )}
-      <Tags tags={book.tags} />
+      <Takeaway text={book.takeaway} />
+      <MetaList label="Topics" items={book.tags} />
     </li>
   );
 }
@@ -121,20 +133,15 @@ export function BookItem({ book }: { book: Book }) {
 export function PodcastItem({ podcast: p }: { podcast: Podcast }) {
   return (
     <li className="py-5 first:pt-0">
-      <p className="font-mono text-xs tracking-wide text-foreground/50 uppercase">
-        {p.show}
-      </p>
-      <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <OutLink href={p.url}>{p.episode}</OutLink>
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <OutLink href={p.url} title={p.episode} />
         {p.draft && <DraftBadge note={p.draft} />}
       </div>
-      <p className="mt-0.5 font-mono text-xs text-foreground/50">
-        {[p.guest && `with ${p.guest}`, p.date].filter(Boolean).join(" · ")}
+      <p className="mt-1 font-mono text-xs text-muted">
+        {[p.show, p.guest && `with ${p.guest}`, p.date].filter(Boolean).join(" · ")}
       </p>
-      {p.takeaway && (
-        <p className="mt-2 text-sm text-foreground/80">{p.takeaway}</p>
-      )}
-      <Tags tags={p.tags} />
+      <Takeaway text={p.takeaway} />
+      <MetaList label="Topics" items={p.tags} />
     </li>
   );
 }
@@ -142,7 +149,7 @@ export function PodcastItem({ podcast: p }: { podcast: Podcast }) {
 export function DishCard({ dish }: { dish: Dish }) {
   return (
     <li className="relative aspect-square overflow-hidden rounded-lg border border-foreground/10 bg-foreground/5">
-      {dish.photo ? (
+      {dish.photo && (
         <>
           <Image
             src={dish.photo.src}
@@ -153,12 +160,6 @@ export function DishCard({ dish }: { dish: Dish }) {
           />
           <div aria-hidden className="absolute inset-0 bg-linear-to-t from-black/75 via-black/10 to-transparent" />
         </>
-      ) : (
-        <ChefHat
-          size={40}
-          aria-hidden
-          className="absolute top-1/2 left-1/2 -translate-1/2 -mt-4 text-foreground/15"
-        />
       )}
       {dish.draft && (
         <div className="absolute top-2.5 left-2.5">
@@ -168,7 +169,7 @@ export function DishCard({ dish }: { dish: Dish }) {
       <div className={`absolute inset-x-0 bottom-0 p-3 ${dish.photo ? "text-white" : ""}`}>
         <p className="font-semibold leading-tight">{dish.name}</p>
         {(dish.note || dish.cuisine) && (
-          <p className="mt-0.5 text-xs opacity-75">
+          <p className={`mt-0.5 text-xs ${dish.photo ? "opacity-80" : "text-muted"}`}>
             {[dish.cuisine, dish.note].filter(Boolean).join(" · ")}
           </p>
         )}
@@ -179,8 +180,8 @@ export function DishCard({ dish }: { dish: Dish }) {
 
 export function RestaurantRow({ restaurant: r }: { restaurant: Restaurant }) {
   return (
-    <li className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 py-3">
-      <div className="flex flex-wrap items-baseline gap-x-2.5">
+    <li className="py-3">
+      <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
         {r.mapsUrl ? (
           <a
             href={r.mapsUrl}
@@ -188,16 +189,16 @@ export function RestaurantRow({ restaurant: r }: { restaurant: Restaurant }) {
             rel="noopener noreferrer"
             className="font-medium underline-offset-4 hover:underline"
           >
-            {r.name} <span aria-hidden className="text-foreground/40">↗</span>
+            <ArrowTitle title={r.name} external />
           </a>
         ) : (
           <span className="font-medium">{r.name}</span>
         )}
-        <span className="text-sm text-foreground/50">{r.cuisine}</span>
+        <span className="text-sm text-muted">{r.cuisine}</span>
         {r.draft && <DraftBadge note={r.draft} />}
       </div>
-      <p className="text-sm text-foreground/80">
-        <span className="text-foreground/50">Order:</span> {r.order}
+      <p className="mt-0.5 text-sm text-foreground/80">
+        <span className="text-muted">Order:</span> {r.order}
       </p>
     </li>
   );
@@ -223,21 +224,12 @@ export function ActivityCard({ activity: a }: { activity: Activity }) {
           {a.draft && <DraftBadge note={a.draft} />}
         </div>
         <p className="mt-1 text-sm text-foreground/80">{a.description}</p>
-        <ul aria-label="Details" className="mt-3 flex flex-wrap gap-1.5">
-          {a.facts.map((fact) => (
-            <li
-              key={fact}
-              className="rounded-full border border-foreground/15 px-2.5 py-0.5 text-xs text-foreground/70"
-            >
-              {fact}
-            </li>
-          ))}
-        </ul>
+        <MetaList label="Details" items={a.facts} />
         {a.prs && a.prs.length > 0 && (
           <dl className="mt-auto grid grid-cols-3 gap-2 pt-4">
             {a.prs.map((pr) => (
               <div key={pr.label} className="rounded-md bg-foreground/5 px-2.5 py-2">
-                <dt className="text-xs text-foreground/50">{pr.label}</dt>
+                <dt className="text-xs text-muted">{pr.label}</dt>
                 <dd className="font-mono text-sm">{pr.value}</dd>
               </div>
             ))}

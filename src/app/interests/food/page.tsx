@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { byCity, DishCard, live, RestaurantRow } from "@/components/interests/Items";
 import SectionPage, { Subsection } from "@/components/interests/SectionPage";
 import { getSection } from "@/components/interests/sections";
-import { dishes, interestIntros, restaurants } from "@/data";
+import { dishes, restaurants } from "@/data";
 
 export const metadata: Metadata = { title: "Food | Anthony Lam" };
 
@@ -21,7 +21,7 @@ export default function FoodPage() {
   return (
     <SectionPage section={section} subsections={subsections}>
       {shownDishes.length > 0 && (
-        <Subsection id="cook" title="What I cook" intro={interestIntros.cook}>
+        <Subsection id="cook" title="What I cook">
           <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
             {shownDishes.map((d) => (
               <DishCard key={d.id} dish={d} />
@@ -31,10 +31,10 @@ export default function FoodPage() {
       )}
 
       {shownRestaurants.length > 0 && (
-        <Subsection id="eat" title="Where I eat" intro={interestIntros.eat}>
+        <Subsection id="eat" title="Where I eat">
           {byCity(shownRestaurants).map(([city, list]) => (
             <div key={city} className="mt-5">
-              <h3 className="font-mono text-xs tracking-wide text-foreground/50 uppercase">
+              <h3 className="font-mono text-xs tracking-wide text-muted uppercase">
                 {city}
               </h3>
               <ul className="mt-1 divide-y divide-foreground/10">

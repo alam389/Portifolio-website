@@ -7,6 +7,9 @@
   --background: #0a0a0a;
   --foreground: #ededed;
   --surface: #171717; /* floating panels: sidebar, tooltips */
+  /* Secondary text (bylines, labels, meta). Solid rather than an alpha of
+     --foreground so small text keeps AA contrast: 5.7:1 here, 5.1:1 light. */
+  --muted: #8a8a8a;
 }
 
 [data-theme="light"] {
@@ -14,6 +17,7 @@
   --background: #fafafa;
   --foreground: #171717;
   --surface: #ffffff;
+  --muted: #6b6b6b;
 }
 
 /* `light:` utilities for the few spots tokens can't cover (e.g. shadows). */
@@ -23,6 +27,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
+  --color-muted: var(--muted);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-fraunces);
@@ -49,11 +54,14 @@ body {
 }
 
 /* Page and section headings get the display serif; everything else stays
-   Geist. SOFT rounds Fraunces' terminals so it reads warm, not bookish. */
-h1,
-h2 {
-  font-family: var(--font-display), Georgia, serif;
-  font-variation-settings: "SOFT" 50;
+   Geist. SOFT rounds Fraunces' terminals so it reads warm, not bookish.
+   In the base layer so a font utility (e.g. font-mono on a label) still wins. */
+@layer base {
+  h1,
+  h2 {
+    font-family: var(--font-display), Georgia, serif;
+    font-variation-settings: "SOFT" 50;
+  }
 }
 
 /* Pac-Man on the GitHub contribution graph: the mouth opens and closes. */

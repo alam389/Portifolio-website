@@ -10,11 +10,11 @@ export default function SectionPage({
   children,
 }: {
   section: InterestSection;
-  /** Subsections actually shown; jump links appear when there are 2+. */
+  /** Subsections actually shown; jump links appear when there are 3+. */
   subsections: { id: string; label: string }[];
   children: ReactNode;
 }) {
-  const { title, icon: Icon, intro } = section;
+  const { title, intro } = section;
 
   return (
     <div>
@@ -24,12 +24,10 @@ export default function SectionPage({
       >
         ← Interests
       </Link>
-      <h1 className="mt-6 flex items-center gap-3 text-3xl font-semibold tracking-tight">
-        <Icon size={26} aria-hidden className="text-foreground/50" />
-        {title}
-      </h1>
+      <h1 className="mt-6 text-3xl font-semibold tracking-tight">{title}</h1>
       <p className="mt-2 max-w-md text-foreground/60">{intro}</p>
-      {subsections.length > 1 && <JumpLinks links={subsections} />}
+      {/* Two short subsections are a glance apart; links only pay off at 3+. */}
+      {subsections.length > 2 && <JumpLinks links={subsections} />}
       {children}
     </div>
   );
@@ -52,7 +50,7 @@ export function Subsection({
       <h2 id={`${id}-heading`} className="text-xl font-semibold tracking-tight">
         {title}
       </h2>
-      {intro && <p className="mt-1 text-sm text-foreground/60">{intro}</p>}
+      {intro && <p className="mt-1 text-sm text-muted">{intro}</p>}
       {children}
     </section>
   );

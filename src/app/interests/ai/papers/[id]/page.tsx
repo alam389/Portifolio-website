@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
+import { MetaList } from "@/components/interests/Items";
 import { papers } from "@/data";
 
 // Only papers with a summary get a page; drafts never ship (same rule as the
@@ -28,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 function Block({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="mt-10">
-      <h2 className="font-mono text-xs tracking-wide text-foreground/50 uppercase">{title}</h2>
+      <h2 className="font-mono text-xs tracking-wide text-muted uppercase">{title}</h2>
       <div className="mt-3">{children}</div>
     </section>
   );
@@ -63,30 +64,20 @@ export default async function PaperPage({ params }: Props) {
       </Link>
 
       <h1 className="mt-6 text-3xl font-semibold tracking-tight">{paper.title}</h1>
-      <p className="mt-2 font-mono text-xs text-foreground/50">
+      <p className="mt-2 font-mono text-xs text-muted">
         {paper.authors} · {paper.venue ? `${paper.venue} ` : ""}
         {paper.year}
       </p>
-      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-        <ul aria-label="Topics" className="flex flex-wrap gap-1.5">
-          {paper.tags.map((tag) => (
-            <li
-              key={tag}
-              className="rounded-full border border-foreground/15 px-2.5 py-0.5 text-xs text-foreground/70"
-            >
-              {tag}
-            </li>
-          ))}
-        </ul>
-        <a
-          href={paper.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm underline-offset-4 hover:underline"
-        >
-          Read the paper <span aria-hidden className="text-foreground/40">↗</span>
-        </a>
-      </div>
+      <MetaList label="Topics" items={paper.tags} />
+      <a
+        href={paper.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-4 inline-block text-sm underline-offset-4 hover:underline"
+      >
+        Read the paper <span aria-hidden className="text-muted">↗</span>
+        <span className="sr-only"> (opens in a new tab)</span>
+      </a>
 
       <p className="mt-8 text-lg leading-relaxed text-foreground/85">{summary.overview}</p>
 
@@ -94,7 +85,7 @@ export default async function PaperPage({ params }: Props) {
         <dl className="mt-8 grid grid-cols-2 gap-2 sm:grid-cols-3">
           {summary.stats.map((s) => (
             <div key={s.label} className="rounded-md bg-foreground/5 px-3 py-2.5">
-              <dt className="text-xs text-foreground/50">{s.label}</dt>
+              <dt className="text-xs text-muted">{s.label}</dt>
               <dd className="mt-0.5 font-mono text-lg">{s.value}</dd>
             </div>
           ))}
@@ -122,7 +113,7 @@ export default async function PaperPage({ params }: Props) {
         </Block>
       )}
 
-      <p className="mt-12 text-xs text-foreground/45">
+      <p className="mt-12 text-xs text-muted">
         A summary of what the paper itself reports. Read the original for the full argument.
       </p>
     </article>
