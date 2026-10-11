@@ -1,5 +1,6 @@
 // Uploads a folder of photos to the Supabase `media` bucket as WebP, keeping
-// subfolders: <dir>/journey/banff.jpeg -> media/journey/banff.webp.
+// subfolders: <dir>/journey/banff.jpeg -> media/journey/banff.webp. Videos
+// (mp4, webm) go up unchanged under the same path.
 //
 //   node --env-file=.env scripts/upload-media.mjs <dir>
 //
@@ -28,38 +29,40 @@ if (!url || !key) {
 }
 
 const IMAGE = /\.(jpe?g|png|webp|avif)$/i;
+const VIDEO = { ".mp4": "video/mp4", ".webm": "video/webm" };
+const videoType = (file) => VIDEO[path.extname(file).toLowerCase()];
 
 async function* walk(dir) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) yield* walk(full);
-    else if (IMAGE.test(entry.name)) yield full;
+    else if (IMAGE.test(entry.name) || videoType(entry.name)) yield full;
   }
 }
 
 let failed = 0;
 for await (const file of walk(SOURCE_DIR)) {
+  const video = videoType(file);
   // <dir>/journey/banff.jpeg -> journey/banff.webp
-  const objectPath = path
-    .relative(SOURCE_DIR, file)
-    .split(path.sep)
-    .join("/")
-    .replace(IMAGE, ".webp");
+  const relative = path.relative(SOURCE_DIR, file).split(path.sep).join("/");
+  const objectPath = video ? relative : relative.replace(IMAGE, ".webp");
 
   const input = await readFile(file);
   // rotate() bakes in EXIF orientation before the metadata is stripped.
-  const body = await sharp(input)
-    .rotate()
-    .resize({ width: MAX_WIDTH, withoutEnlargement: true })
-    .webp({ quality: QUALITY })
-    .toBuffer();
+  const body = video
+    ? input
+    : await sharp(input)
+        .rotate()
+        .resize({ width: MAX_WIDTH, withoutEnlargement: true })
+        .webp({ quality: QUALITY })
+        .toBuffer();
 
   const res = await fetch(`${url}/storage/v1/object/${BUCKET}/${objectPath}`, {
     method: "POST",
     headers: {
       apikey: key,
       Authorization: `Bearer ${key}`,
-      "Content-Type": "image/webp",
+      "Content-Type": video ?? "image/webp",
       "Cache-Control": "max-age=31536000",
       "x-upsert": "true",
     },

@@ -75,6 +75,10 @@ export interface Project {
   technologies: string[];
   github?: string;
   live?: string;
+  /** Screenshot shown at the top of the card. */
+  image?: Photo;
+  /** Demo clip shown at the top of the card (path under public/). Takes the place of `image`. */
+  video?: Video;
 }
 
 export interface SkillGroup {
@@ -117,6 +121,15 @@ export interface JourneyStop {
 export interface Photo {
   src: string;
   alt: string;
+  /** Intrinsic size in px, to reserve layout space; project card images default to 1400×711. */
+  width?: number;
+  height?: number;
+}
+
+/** A video clip played with native controls; `label` is its accessible name. */
+export interface Video {
+  src: string;
+  label: string;
 }
 
 /** An AI paper Anthony has read, with what he took from it. */

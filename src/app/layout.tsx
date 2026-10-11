@@ -37,13 +37,17 @@ export default function RootLayout({
   return (
     // suppressHydrationWarning: the theme script sets data-theme on <html>
     // before React hydrates.
-    <html lang="en" suppressHydrationWarning>
+    // The font variables go on <html>: Tailwind's @theme tokens are declared
+    // on :root and reference them, so they must be defined there.
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable}`}
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} antialiased`}
-      >
+      <body className="antialiased">
         <SmoothScroll />
         <Sidebar />
         <PetMount />

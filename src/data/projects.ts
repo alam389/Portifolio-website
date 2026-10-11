@@ -1,3 +1,4 @@
+import { media } from "./media";
 import type { Project, ProjectStatus } from "./types";
 
 export const projectStatusLabel: Record<ProjectStatus, string> = {
@@ -42,6 +43,24 @@ export const projects: Project[] = [
     github: "https://github.com/PlanCatalyst/TSI-Data-Dashboard",
   },
   {
+    id: "wowie",
+    title: "WoWie",
+    tagline: "Hack Western 12 checkout nudge to invest",
+    description:
+      "A Chrome extension that meets women where they already shop: it reads the cart total at checkout and shows a playful \"Girl Math\" popup with what that money could be worth today had it gone into a stock, plus a \"Years Until Free\" opportunity-cost figure. I built the FastAPI backend, the stock engine (CAGR from yfinance history, with a fallback when data looks bad), the personalized recommendations and the frontend API integration, with two teammates on the extension UI, scraping and stock service.",
+    status: "shipped",
+    tags: ["Backend", "Hackathon"],
+    period: "Nov 2025",
+    technologies: ["Python", "FastAPI", "yfinance", "React", "TypeScript", "Chrome extension"],
+    github: "https://github.com/sarahchiang0529/Hack-Western-XII",
+    image: {
+      src: media("projects/wowie.webp"),
+      alt: "Two WoWie popup cards: an intro reading \"Girl... What happened to becoming a WoW?\" over an Oprah GIF, and a result showing that about $153 in NVDA six months ago would have made $201.76, a 232% return.",
+      width: 806,
+      height: 500,
+    },
+  },
+  {
     id: "intern-compass",
     title: "Intern Compass",
     tagline: "Hack the Valley onboarding assistant",
@@ -52,18 +71,26 @@ export const projects: Project[] = [
     period: "Oct 2025",
     technologies: ["Express", "TypeScript", "Postgres", "Gemini", "React"],
     github: "https://github.com/alam389/Inter-Compass-Service",
+    image: {
+      src: media("projects/intern-compass.webp"),
+      alt: "The Intern Compass chat screen: a sidebar with Chat, Outline and Admin, a welcome message from the assistant and four quick-start questions.",
+    },
   },
   {
     id: "asl-digits",
-    title: "ASL Digit Recognition",
+    title: "ASL Hand-Gesture Recognition",
     tagline: "CNN on webcam hand gestures",
     description:
-      "A DATASCI 3000 group project that recognizes American Sign Language digits from images or a live webcam. The final version classifies 0 vs 1 with a SimpleCNN after a YOLOv8 hand crop, at about 130 ms per frame.",
+      "A DATASCI 3000B group project, presented March 31, 2026, that recognizes American Sign Language from images or a live webcam. It trains on ASL-HG phone photos with real backgrounds, crops each hand with MediaPipe landmarks (cached once), converts it to 128×128 grayscale and classifies it with an ASLNet CNN (BatchNorm, dropout) over 36 classes, digits 0-9 and letters A-Z. It scores 99.98% on a held-out test set of 5,394 images. The split is random, so volunteers overlap, and look-alike signs (2/V, 6/W, 0/O) and the motion letters J and Z can't be told apart from a single frame.",
     status: "school",
     tags: ["AI", "Computer Vision"],
     period: "Winter 2026",
-    technologies: ["Python", "PyTorch", "YOLOv8", "OpenCV"],
-    github: "https://github.com/JoshRay27/DataSci_3000_project",
+    technologies: ["Python", "PyTorch", "MediaPipe", "OpenCV"],
+    github: "https://github.com/alam389/ASL_numbers_CNN",
+    video: {
+      src: media("projects/asl-cnn-demo.mp4"),
+      label: "Live webcam demo of the ASL classifier recognizing hand gestures.",
+    },
   },
   {
     id: "pony-ai",
