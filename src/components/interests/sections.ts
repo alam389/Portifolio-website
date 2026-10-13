@@ -10,7 +10,7 @@ import {
 } from "@/data";
 import { live, paperHref } from "./Items";
 
-/** One compact row on an overview card. */
+/** One entry previewed on the Interests overview. */
 export type Preview = {
   key: string;
   /** Small label above the title, e.g. "Paper". */
@@ -20,7 +20,7 @@ export type Preview = {
   /** Anthony's one-line take, when the entry has one. */
   takeaway?: string;
   href?: string;
-  /** Square thumbnail, for entries with a photo. */
+  /** Photo: a small square on index rows, the tile itself on galleries. */
   thumb?: Photo;
   draft?: string;
 };
@@ -29,11 +29,16 @@ export type InterestSection = {
   id: string;
   title: string;
   intro: string;
+  /**
+   * How the overview shows it: "index" for text rows (reading lists),
+   * "gallery" for photo tiles under Hobbies.
+   */
+  layout: "index" | "gallery";
   /** Preview rows per subsection, in display order. Array order is curation. */
   previews: () => Preview[][];
 };
 
-// Each subsection gets a turn, so a card shows the range of the section
+// Each subsection gets a turn, so a preview shows the range of the section
 // (a paper, a book, a podcast) rather than three of the first kind.
 export function pickPreviews(lists: Preview[][], max = 3) {
   const picked: Preview[] = [];
@@ -45,6 +50,13 @@ export function pickPreviews(lists: Preview[][], max = 3) {
   return picked;
 }
 
+// Galleries are photo-led: within the round-robin, entries with a photo go
+// first, so a row fills with pictures before it falls back to blank tiles.
+export function pickGallery(lists: Preview[][], max = 3) {
+  const photosFirst = (l: Preview[]) => [...l].sort((x, y) => +!!y.thumb - +!!x.thumb);
+  return photosFirst(pickPreviews(lists.map(photosFirst), max));
+}
+
 export function hasContent(section: InterestSection) {
   return section.previews().some((l) => l.length > 0);
 }
@@ -54,6 +66,7 @@ export const interestSections: InterestSection[] = [
   {
     id: "ai",
     title: "AI",
+    layout: "index",
     intro: interestIntros.ai,
     previews: () => [
       live(papers).map((p) => ({
@@ -77,8 +90,8 @@ export const interestSections: InterestSection[] = [
       live(podcasts).map((p) => ({
         key: p.id,
         kind: "Podcast",
-        title: p.episode,
-        meta: `${p.show} · ${p.date}`,
+        title: p.episode ?? p.show,
+        meta: [p.episode && p.show, p.date].filter(Boolean).join(" · ") || undefined,
         takeaway: p.takeaway,
         href: p.url,
         draft: p.draft,
@@ -88,6 +101,7 @@ export const interestSections: InterestSection[] = [
   {
     id: "food",
     title: "Food",
+    layout: "gallery",
     intro: interestIntros.food,
     previews: () => [
       live(dishes).map((d) => ({
@@ -111,12 +125,13 @@ export const interestSections: InterestSection[] = [
   {
     id: "active",
     title: "Active",
+    layout: "gallery",
     intro: interestIntros.active,
     previews: () => [
       live(activities).map((a) => ({
         key: a.id,
         title: a.title,
-        meta: a.facts.join(" · ") || undefined,
+        meta: a.description,
         thumb: a.photo,
         draft: a.draft,
       })),

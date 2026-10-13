@@ -151,6 +151,46 @@ export const papers: Paper[] = [
       ],
     },
   },
+  {
+    id: "attention-is-all-you-need",
+    title: "Attention Is All You Need",
+    authors: "Vaswani et al.",
+    year: 2017,
+    venue: "NeurIPS",
+    url: "https://arxiv.org/abs/1706.03762",
+    tags: ["transformers", "LLMs"],
+    summary: {
+      overview:
+        "The Google paper that introduced the Transformer: an encoder-decoder model built only from attention, with no recurrence or convolution. It set new machine-translation records while training in a fraction of the time, and it's the architecture today's large language models are built on.",
+      problem:
+        "The best sequence models of 2017 were recurrent networks (LSTMs, GRUs) with attention on top. Recurrence processes a sentence one position at a time, so training can't be parallelized within a sequence, and signals between distant words have to pass through many steps. Convolutional alternatives parallelize better, but the number of operations needed to relate two positions still grows with the distance between them.",
+      approach: [
+        "Keeps the encoder-decoder shape but builds each side from 6 identical layers. An encoder layer is multi-head self-attention followed by a position-wise feed-forward network, each wrapped in a residual connection and layer normalization. The decoder adds attention over the encoder's output and masks future positions so each prediction only sees earlier words.",
+        "Scaled dot-product attention: each position compares its query with every key, takes softmax(QKᵀ / √dₖ) and uses the result to weight the values. The √dₖ scaling keeps large dot products from pushing the softmax into regions with tiny gradients.",
+        "Multi-head attention runs 8 attention heads in parallel on smaller 64-dimensional projections (model width 512), so the model can attend to different kinds of relationships at once for about the cost of one full-width head.",
+        "With no recurrence, word order comes from positional encodings: sine and cosine waves of different frequencies added to the embeddings. Learned position embeddings worked about as well; the sinusoids were chosen in the hope they extend to longer sequences than seen in training.",
+        "Trained on WMT 2014 English-German (about 4.5M sentence pairs) and English-French (36M) on 8 NVIDIA P100 GPUs, with a warmup-then-decay learning rate, dropout and label smoothing.",
+      ],
+      findings: [
+        "A self-attention layer connects any two positions in a constant number of sequential steps, versus a number that grows with sentence length for recurrent layers. It's also cheaper per layer whenever the sentence is shorter than the model width, which is the usual case.",
+        "English-German: the big model scored 28.4 BLEU, more than 2 BLEU above the previous best results, ensembles included. Even the base model, trained in about 12 hours, beat every previously published model and ensemble.",
+        "English-French: 41.8 BLEU, a new single-model state of the art, after 3.5 days of training, a small fraction of the training cost of the previous best models.",
+        "Ablations: a single attention head is 0.9 BLEU worse than the best setting, and too many heads also hurts. Bigger models and dropout both help.",
+        "The same architecture, barely tuned, did well on English constituency parsing (91.3 F1 on WSJ alone, 92.7 with extra semi-supervised data), suggesting it generalizes beyond translation.",
+      ],
+      stats: [
+        { label: "BLEU, EN→DE", value: "28.4" },
+        { label: "BLEU, EN→FR", value: "41.8" },
+        { label: "Big-model training", value: "3.5 days" },
+      ],
+      limitations: [
+        "Self-attention compares every position with every other, so its cost grows with the square of the sequence length. The authors suggest restricting attention to a local neighborhood for very long inputs, as future work.",
+        "Averaging over attention-weighted positions blurs fine detail; multi-head attention is the paper's counter to that, not a full fix.",
+        "Generation is still autoregressive, one token at a time. The authors list making it less sequential as a goal.",
+        "Evaluated only on text (translation and parsing). Images, audio and video are named as future directions.",
+      ],
+    },
+  },
 ];
 
 export const books: Book[] = [
@@ -192,16 +232,30 @@ export const books: Book[] = [
   },
 ];
 
-// One entry per episode, so each takeaway stays tied to what was said.
+// A whole show, or one episode (with `episode` and `date`) when the takeaway
+// is about something specific that was said.
 export const podcasts: Podcast[] = [
   {
-    id: "podcast-one",
-    show: "Show name",
-    episode: "Episode title",
-    date: "Oct 2026",
-    url: "https://example.com",
-    tags: ["agents"],
-    draft: MOCK,
+    id: "bloomberg-tech",
+    show: "Bloomberg Tech",
+    url: "https://open.spotify.com/show/5L84QuZlUsILySyMZNM07W",
+    embed: "audio",
+    about:
+      "Bloomberg's daily show on the technology industry: big-tech earnings, chips, startups, funding and the policy and markets stories around them.",
+    takeaway:
+      "I use it to stay on top of what's happening in tech and the wider environment around it, for investing and for making plays on the stock market. It's one of the places I heard about the Hugging Face incident the moment it was reported.",
+    tags: [],
+  },
+  {
+    id: "ai-daily-brief",
+    show: "The AI Daily Brief",
+    url: "https://open.spotify.com/show/7gKwwMLFLc6RmjmRpbMtEO",
+    embed: "video",
+    about:
+      "A daily rundown of the biggest AI news and the discussion around it: model releases, company moves, research and what it all means. The host draws on top research experts and the AI giants for sources.",
+    takeaway:
+      "It keeps me on top of new model releases, and of the political and economic state of AI and how it's affecting everybody.",
+    tags: [],
   },
 ];
 

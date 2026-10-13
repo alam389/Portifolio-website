@@ -184,12 +184,18 @@ export interface Podcast {
   id: string;
   /** The show, e.g. "Latent Space". */
   show: string;
-  episode: string;
+  /** Leave out to list the whole show rather than one episode. */
+  episode?: string;
   guest?: string;
   /** Display date, e.g. "Oct 2026". */
-  date: string;
-  /** Episode link (Spotify, Apple, YouTube or the show's site). */
+  date?: string;
+  /** Episode or show link (Spotify, Apple, YouTube or the show's site). */
   url: string;
+  /** Show Spotify's player under the entry ("video" for video podcasts). Needs an open.spotify.com `url`. */
+  embed?: "audio" | "video";
+  /** What the show is and what it covers. */
+  about?: string;
+  /** How Anthony uses it. */
   takeaway?: string;
   tags: string[];
   draft?: string;

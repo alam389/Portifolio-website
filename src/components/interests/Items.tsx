@@ -130,18 +130,40 @@ export function BookItem({ book }: { book: Book }) {
   );
 }
 
+// Spotify's player for a show or episode link; theme=0 is its dark-gray
+// variant, the closest it gets to the site's grayscale.
+function SpotifyEmbed({ url, kind, title }: { url: string; kind: "audio" | "video"; title: string }) {
+  const [, type, id] = new URL(url).pathname.split("/");
+  if (type !== "show" && type !== "episode") return null;
+  const video = kind === "video" ? "/video" : "";
+  return (
+    <iframe
+      src={`https://open.spotify.com/embed/${type}/${id}${video}?theme=0`}
+      title={`${title} on Spotify`}
+      height={kind === "video" ? 351 : 152}
+      loading="lazy"
+      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+      className="mt-3 w-full rounded-xl border-0"
+    />
+  );
+}
+
 export function PodcastItem({ podcast: p }: { podcast: Podcast }) {
+  const title = p.episode ?? p.show;
+  const byline = [p.episode && p.show, p.guest && `with ${p.guest}`, p.date].filter(Boolean);
   return (
     <li className="py-5 first:pt-0">
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <OutLink href={p.url} title={p.episode} />
+        <OutLink href={p.url} title={title} />
         {p.draft && <DraftBadge note={p.draft} />}
       </div>
-      <p className="mt-1 font-mono text-xs text-muted">
-        {[p.show, p.guest && `with ${p.guest}`, p.date].filter(Boolean).join(" · ")}
-      </p>
+      {byline.length > 0 && (
+        <p className="mt-1 font-mono text-xs text-muted">{byline.join(" · ")}</p>
+      )}
+      {p.about && <p className="mt-2 text-sm text-muted">{p.about}</p>}
       <Takeaway text={p.takeaway} />
       <MetaList label="Topics" items={p.tags} />
+      {p.embed && <SpotifyEmbed url={p.url} kind={p.embed} title={title} />}
     </li>
   );
 }
