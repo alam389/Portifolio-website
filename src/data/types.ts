@@ -46,8 +46,17 @@ export interface Experience {
   location: string;
   period: string;
   highlights: string[];
+  /** Longer accounts of the work behind the highlights. Read by the AI twin; not rendered yet. */
+  details?: ExperienceDetail[];
   /** Roles held under this one, e.g. client projects led within an organization. */
   subroles?: Experience[];
+}
+
+/** One piece of work in a role, told in Anthony's own voice as if in conversation. */
+export interface ExperienceDetail {
+  title: string;
+  /** First-person paragraphs. */
+  story: string[];
 }
 
 export type ProjectStatus = "shipped" | "in-progress" | "early" | "school";
@@ -57,6 +66,7 @@ export type ProjectTag =
   | "AI"
   | "RAG"
   | "Backend"
+  | "Frontend"
   | "Data"
   | "Mobile"
   | "Computer Vision"
@@ -79,6 +89,8 @@ export interface Project {
   image?: Photo;
   /** Demo clip shown at the top of the card (path under public/). Takes the place of `image`. */
   video?: Video;
+  /** The longer story, first person, as if Anthony were telling it. Read by the AI twin; not rendered yet. */
+  story?: string[];
 }
 
 export interface SkillGroup {
@@ -235,4 +247,25 @@ export interface Activity {
   prs?: { label: string; value: string }[];
   photo?: Photo;
   draft?: string;
+}
+
+// AI twin. Facts only the twin needs: what visitors ask that the site doesn't
+// show. Everything the site shows, the twin reads from the modules above.
+
+/** A question visitors ask, with Anthony's own answer. */
+export interface TwinFact {
+  id: string;
+  question: string;
+  /** In Anthony's words, first person. The twin may rephrase but not add to it. */
+  answer: string;
+  /** Set on placeholders. Drafts never reach the twin in production. */
+  draft?: string;
+}
+
+export interface Twin {
+  /** How the twin talks, e.g. "Short answers, no buzzwords". */
+  voice: string[];
+  /** Topics the twin declines and points to email instead, e.g. salary expectations. */
+  offLimits: string[];
+  facts: TwinFact[];
 }
