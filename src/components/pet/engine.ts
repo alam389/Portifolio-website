@@ -58,6 +58,8 @@ type Mode =
 
 /** Modes the pet can be pulled out of to go after the ball or the cursor. */
 const FREE: ReadonlySet<Mode> = new Set(["idle", "walk", "sit", "sleep", "land", "happy", "zoom"]);
+/** Little antics it'll also cut short to stop and say hi (batting at the cursor, a stretch). */
+const ANTICS: ReadonlySet<Mode> = new Set(["stretch", "look", "shake", "swat"]);
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 
@@ -71,6 +73,8 @@ export class PetEngine {
   speech: { text: string; until: number; id: number } | null = null;
   /** Whether it talks at all (the visitor can mute it). */
   talk = true;
+  /** Pats so far; the page glue watches it to notice the visitor. */
+  patted = 0;
   /** Share of the food eaten so far, 0 to 1 (drawn as bites). */
   foodEaten = 0;
   /** The visitor's cursor: what the pet follows, and where the dog brings the ball. */
@@ -111,6 +115,8 @@ export class PetEngine {
   private spoken = 0;
   /** The platform it's standing on and since when, for remarks about the page. */
   private perchEl: Element | null = null;
+  /** The AI twin's chat is open: it sits where it is and the chat speaks for it. */
+  private listening = false;
   private perchSince = 0;
   private world: World;
 
@@ -133,7 +139,9 @@ export class PetEngine {
   }
 
   pet() {
-    if (this.on && !this.reduced && FREE.has(this.mode)) {
+    if (!this.on) return;
+    this.patted++;
+    if (!this.reduced && FREE.has(this.mode)) {
       this.set("happy", 1.2);
       this.say("pat");
     }
@@ -145,7 +153,8 @@ export class PetEngine {
   }
 
   private show(text: string, ambient: boolean) {
-    if (!this.talk || this.reduced) return false;
+    // While the twin talks through it, the chat bubble is its only voice.
+    if (!this.talk || this.reduced || this.listening) return false;
     if (ambient && (this.speech || this.time < this.quietUntil)) return false;
     this.speech = { text, until: this.time + lingerFor(text), id: ++this.spoken };
     this.quietUntil = this.speech.until + 4;
@@ -167,6 +176,57 @@ export class PetEngine {
     const el = this.on?.el ?? null;
     if (!el || this.mode === "air" || this.mode === "held") return null;
     return { el, seconds: this.time - this.perchSince };
+  }
+
+  /**
+   * The chat opened: drop everything and sit down right where it is (once it
+   * lands, if it's in the air). The chat's bubble is anchored to it.
+   */
+  summon() {
+    this.listening = true;
+    this.speech = null;
+    this.fetching = 0;
+    this.attention = null;
+    this.leaving = false;
+    this.launch = null;
+    this.dropBall();
+    if (this.on && this.mode !== "held") this.set("sit", Infinity);
+  }
+
+  /** The chat closed: back to its own business. */
+  dismiss() {
+    if (!this.listening) return;
+    this.listening = false;
+    if (this.mode === "held" || !this.on) return;
+    if (this.reduced) this.set("sleep", Infinity);
+    else this.set("idle", 0.5);
+  }
+
+  /** Acts out the chat: looks about while the twin thinks, bounces at an answer. */
+  react(mood: "thinking" | "answered" | "idle") {
+    if (!this.listening || !this.on || this.mode === "held" || this.reduced) return;
+    if (mood === "thinking") this.set("look", Infinity);
+    else if (mood === "answered") this.set("happy", 1.2);
+    else this.set("sit", Infinity);
+  }
+
+  /**
+   * Sit still for `seconds` (while it shows an invite), if it's free to,
+   * facing `lookAt` (a viewport x) if given. Returns whether it did; under
+   * reduced motion it's always still already.
+   */
+  stay(seconds: number, lookAt?: number) {
+    if (!this.on || this.listening || this.mode === "held") return false;
+    if (this.reduced) return true;
+    if (!(FREE.has(this.mode) || ANTICS.has(this.mode)) || this.target()) return false;
+    if (lookAt !== undefined) this.facing = Math.sign(lookAt - (this.x + this.size / 2)) || this.facing;
+    this.breather("sit", seconds);
+    return true;
+  }
+
+  /** Whether the chat is talking through it. */
+  get relaying() {
+    return this.listening;
   }
 
   /** Picked up: dangle from the pointer until released. */
@@ -382,6 +442,7 @@ export class PetEngine {
       return;
     }
 
+    if (this.listening) return this.listen(dt);
     if (this.reduced) return;
     this.timer -= dt;
     const on = this.on!;
@@ -517,6 +578,20 @@ export class PetEngine {
     }
     if (r < 0.65 && this.tryJump(surfaces)) return true;
     return this.stepOff();
+  }
+
+  /**
+   * One frame of sitting still while the chat talks through it. Pats, landings
+   * and the chat's moods play out, then it settles back into a sit.
+   */
+  private listen(dt: number) {
+    if (this.reduced) {
+      if (this.mode !== "sit") this.set("sit", Infinity);
+      return;
+    }
+    this.timer -= dt;
+    const acting = this.mode === "look" || this.mode === "happy" || this.mode === "land";
+    if (this.mode !== "sit" && (!acting || this.timer <= 0)) this.set("sit", Infinity);
   }
 
   /** Keep walking past the edge and drop off it. */

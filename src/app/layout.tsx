@@ -3,8 +3,9 @@ import { Fraunces, Geist, Geist_Mono } from "next/font/google";
 import PetMount from "@/components/pet/PetMount";
 import Sidebar from "@/components/Sidebar";
 import SmoothScroll from "@/components/SmoothScroll";
+import TwinChat from "@/components/twin/TwinChat";
 import { themeInitScript } from "@/components/theme";
-import { profile, site } from "@/data";
+import { profile, site, twin } from "@/data";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -51,6 +52,7 @@ export default function RootLayout({
         <SmoothScroll />
         <Sidebar />
         <PetMount />
+        <TwinChat greeting={twin.greeting} starters={twin.starters} privacyNote={twin.privacyNote} />
         <div className="md:pl-18">
           <main className="mx-auto box-content max-w-3xl px-6 pt-10 pb-28 md:px-16 md:py-16">
             {children}

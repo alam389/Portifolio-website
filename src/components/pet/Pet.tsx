@@ -5,9 +5,20 @@ import { useEffect, useRef } from "react";
 import { useReducedMotion } from "../useReducedMotion";
 import { crispScale, drawFrame } from "./draw";
 import { PetEngine } from "./engine";
-import { FEED_EVENT, PAT_EVENT, THROW_BALL_EVENT } from "./events";
+import { clamp } from "./physics";
+import {
+  FEED_EVENT,
+  PAT_EVENT,
+  THROW_BALL_EVENT,
+  TWIN_BUBBLE_SELECTOR,
+  TWIN_DISMISS_EVENT,
+  TWIN_MOOD_EVENT,
+  TWIN_OPEN_EVENT,
+  TWIN_SUMMON_EVENT,
+  type TwinMood,
+} from "./events";
 import { attachGestures } from "./gestures";
-import { hourLine, perchLine, routeLine, themeLine } from "./speech";
+import { hourLine, inviteLine, perchLine, routeLine, themeLine, type Presence } from "./speech";
 import {
   BALL,
   BALL_COLORS,
@@ -28,6 +39,25 @@ const REMARK_GAP_MS = 14000;
 const PERCH_SECONDS = 2.5;
 /** Said once per visit, however often the pet is swapped. */
 let greeted = false;
+/** How long an invite to chat stays up (longer while hovered). */
+const INVITE_SHOW_MS = 9000;
+/** An invite stays this long after the cursor leaves it (or the pet), to reach it. */
+const HOVER_GRACE_MS = 1500;
+/** Quiet after an invite; doubles, triples… with each one the visitor ignores. */
+const INVITE_COOLDOWN_MS = 20000;
+/** The cursor lingers this close (in pet widths) for this long: someone's here. */
+const NEAR_WIDTHS = 2.5;
+const LINGER_MS = 700;
+/** Away from the tab at least this long, then back: they returned. */
+const AWAY_MS = 15000;
+/** Scrolling, then still this long, after this long on the page: they're reading. */
+const READING_MS = 4000;
+const SETTLED_MS = 8000;
+// Per visit, so swapping pets doesn't reset them.
+let inviteQuietUntil = 0;
+let ignored = 0;
+/** The visitor has found the chat: no more invites this visit. */
+let asked = false;
 
 const currentTheme = (): Theme =>
   document.documentElement.dataset.theme === "light" ? "light" : "dark";
@@ -53,6 +83,9 @@ export default function Pet({
   const bubble = useRef<HTMLDivElement>(null);
   const bubbleText = useRef<HTMLSpanElement>(null);
   const bubbleTail = useRef<HTMLSpanElement>(null);
+  const invite = useRef<HTMLButtonElement>(null);
+  const inviteText = useRef<HTMLSpanElement>(null);
+  const inviteTail = useRef<HTMLSpanElement>(null);
   const box = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const ballBox = useRef<HTMLDivElement>(null);
@@ -91,6 +124,7 @@ export default function Pet({
     onRoute.current = (to) => {
       const text = routeLine(species, to);
       if (text) pending = { text, at: performance.now() + 1800 };
+      newPage(performance.now());
     };
     if (!greeted) {
       greeted = true;
@@ -138,12 +172,26 @@ export default function Pet({
     let shownId = 0;
     let bubbleW = 0;
     let bubbleH = 0;
+    /** Puts a bubble of size w×h over the pet's head (or under it near the top), tail at its middle. */
+    const anchor = (box: HTMLElement, tail: HTMLElement, w: number, h: number, lift: number) => {
+      const pad = 8;
+      const gap = 6;
+      const centre = engine.x + engine.size / 2;
+      const left = Math.min(Math.max(centre - w / 2, pad), innerWidth - w - pad);
+      const above = engine.y - engine.size - lift - h - gap;
+      const below = above < pad;
+      const top = below ? engine.y + gap : above;
+      tail.style.left = `${Math.min(Math.max(centre - left, 10), w - 10)}px`;
+      tail.dataset.side = below ? "top" : "bottom";
+      box.style.transform = `translate(${snap(left)}px, ${snap(top)}px)`;
+    };
     const place = (lift: number) => {
       const box = bubble.current;
       const text = bubbleText.current;
       const tail = bubbleTail.current;
       if (!box || !text || !tail) return;
-      const say = engine.talk ? engine.speech : null;
+      // The invite has the floor while it's up.
+      const say = engine.talk && !inviting ? engine.speech : null;
       if (!say) {
         box.style.opacity = "0";
         shownId = 0;
@@ -155,17 +203,130 @@ export default function Pet({
         bubbleW = box.offsetWidth;
         bubbleH = box.offsetHeight;
       }
-      const pad = 8;
-      const gap = 6;
-      const centre = engine.x + engine.size / 2;
-      const left = Math.min(Math.max(centre - bubbleW / 2, pad), innerWidth - bubbleW - pad);
-      const above = engine.y - engine.size - lift - bubbleH - gap;
-      const below = above < pad;
-      const top = below ? engine.y + gap : above;
-      tail.style.left = `${Math.min(Math.max(centre - left, 10), bubbleW - 10)}px`;
-      tail.dataset.side = below ? "top" : "bottom";
-      box.style.transform = `translate(${snap(left)}px, ${snap(top)}px)`;
+      anchor(box, tail, bubbleW, bubbleH, lift);
       box.style.opacity = "1";
+    };
+
+    // It notices the visitor (a cursor lingering near it, a pat, coming back
+    // to the tab, pausing to read), then stops, sits, faces them and invites
+    // them to ask it about Anthony: a real button in its bubble that opens the
+    // chat. Not while muted or the chat is open, and never again once the
+    // visitor has used the chat.
+    let inviting: Presence | null = null;
+    let inviteUntil = 0;
+    /** The cursor is on the invite, or on the pet itself. */
+    let hovering = false;
+    let petHover = false;
+    let inviteW = 0;
+    let inviteH = 0;
+    let noticed: { why: Presence; at: number; lookAt?: number } | null = null;
+    const notice = (why: Presence, delay = 0, lookAt?: number) => {
+      const now = performance.now();
+      if (asked || inviting || noticed || now < inviteQuietUntil) return;
+      noticed = { why, at: now + delay, lookAt };
+    };
+
+    let nearSince: number | null = null;
+    let pats = engine.patted;
+    let pageSince = 0;
+    let scrolledAt: number | null = null;
+    let readNoticed = false;
+    const newPage = (now: number) => {
+      pageSince = now;
+      scrolledAt = null;
+      readNoticed = false;
+    };
+    newPage(performance.now());
+    const sense = (now: number) => {
+      // The cursor on the pet: always worth an invite, whatever the cooldown.
+      if (petHover && !inviting && noticed?.why !== "hover") noticed = { why: "hover", at: now };
+      const p = engine.pointer;
+      const head = { x: engine.x + engine.size / 2, y: engine.y - engine.size / 2 };
+      const near =
+        !!p && now - p.at < 1500 && Math.hypot(p.x - head.x, p.y - head.y) < engine.size * NEAR_WIDTHS;
+      nearSince = near ? (nearSince ?? now) : null;
+      if (p && nearSince !== null && now - nearSince > LINGER_MS) notice("near", 0, p.x);
+      if (engine.patted !== pats) {
+        pats = engine.patted;
+        // After its happy wiggle.
+        notice("pat", 1300);
+      }
+      if (!readNoticed && scrolledAt !== null && now - scrolledAt > READING_MS && now - pageSince > SETTLED_MS) {
+        readNoticed = true;
+        notice("reading");
+      }
+    };
+
+    const hideInvite = (now: number, taken = false) => {
+      // Hovering the pet was the visitor's idea, so it doesn't count against the cooldown.
+      if (inviting !== "hover") {
+        if (!taken) ignored++;
+        inviteQuietUntil = now + INVITE_COOLDOWN_MS * (1 + ignored);
+      }
+      inviting = null;
+      const box = invite.current;
+      if (box) {
+        box.style.opacity = "0";
+        box.style.visibility = "hidden";
+      }
+    };
+    const placeInvite = (now: number, lift: number) => {
+      const box = invite.current;
+      const text = inviteText.current;
+      const tail = inviteTail.current;
+      if (!box || !text || !tail) return;
+      if (!inviting) {
+        if (!noticed || now < noticed.at) return;
+        const hover = noticed.why === "hover";
+        // Hovering the pet is the visitor's own doing: it answers even once the chat's been used, or muted.
+        const unwelcome = !hover && (asked || !talkRef.current);
+        // The moment passes if it can't stop to say it soon (unless it's still being hovered).
+        const stale = hover ? !petHover : now > noticed.at + 2000;
+        if (unwelcome || engine.relaying || stale) {
+          noticed = null;
+          return;
+        }
+        if (!engine.stay(INVITE_SHOW_MS / 1000, noticed.lookAt)) return;
+        inviting = noticed.why;
+        // A hover invite is a tooltip: it lasts while hovered, plus a moment to reach it.
+        inviteUntil = now + (hover ? HOVER_GRACE_MS : INVITE_SHOW_MS);
+        text.textContent = inviteLine(species, noticed.why);
+        noticed = null;
+        inviteW = box.offsetWidth;
+        inviteH = box.offsetHeight;
+        box.style.visibility = "visible";
+        box.style.opacity = "1";
+      }
+      if (hovering || petHover) inviteUntil = Math.max(inviteUntil, now + HOVER_GRACE_MS);
+      // Keep it still under the invite; if it's whisked away (picked up, a ball), the moment's gone.
+      const left = (inviteUntil - now) / 1000;
+      const done = (asked && inviting !== "hover") || engine.relaying || left <= 0;
+      if (done || !engine.stay(left)) return hideInvite(now, asked);
+      anchor(box, tail, inviteW, inviteH, lift);
+    };
+
+    // The AI twin's chat bubble, while the chat talks through the pet: over its
+    // head, or under its feet when there's no room above. Clamped on screen.
+    let twinBubble: HTMLElement | null = null;
+    const placeTwin = (lift: number) => {
+      const el = twinBubble;
+      if (!el) return;
+      if (!el.isConnected) return void (twinBubble = null);
+      const pad = 12;
+      const gap = 10;
+      const w = el.offsetWidth;
+      const h = el.offsetHeight;
+      const centre = engine.x + engine.size / 2;
+      const head = engine.y - engine.size - lift;
+      const left = clamp(centre - w / 2, pad, innerWidth - w - pad);
+      const roomAbove = head - gap - pad;
+      const below = roomAbove < h && innerHeight - engine.y - gap - pad > roomAbove;
+      const top = clamp(below ? engine.y + gap : head - gap - h, pad, innerHeight - h - pad);
+      el.style.left = `${snap(left)}px`;
+      el.style.top = `${snap(top)}px`;
+      el.style.right = el.style.bottom = "auto";
+      el.style.setProperty("--tail-x", `${clamp(centre - left, 18, w - 18)}px`);
+      el.dataset.side = below ? "top" : "bottom";
     };
 
     let raf = 0;
@@ -190,6 +351,9 @@ export default function Pet({
       }
 
       place(lift);
+      sense(now);
+      placeInvite(now, lift);
+      placeTwin(lift);
 
       const ball = engine.ball;
       if (ballBox.current) {
@@ -232,6 +396,45 @@ export default function Pet({
     const throwBall = () => engine.throwBall();
     const pat = () => engine.pet();
     const feed = () => engine.feed(food.frame[0].length);
+    // The AI twin's chat talks through the pet: it sits and carries the bubble.
+    const summon = () => {
+      twinBubble = document.querySelector<HTMLElement>(TWIN_BUBBLE_SELECTOR);
+      if (!twinBubble) return;
+      asked = true;
+      engine.summon();
+    };
+    const inviteEl = invite.current;
+    const onInvite = () => {
+      hideInvite(performance.now(), true);
+      dispatchEvent(new Event(TWIN_OPEN_EVENT));
+    };
+    // Mouse or pen only: a touch "hover" is a tap, which pats it instead.
+    const onPetEnter = (e: PointerEvent) => {
+      if (e.pointerType !== "touch") petHover = true;
+    };
+    const onPetLeave = () => {
+      petHover = false;
+    };
+    el.addEventListener("pointerenter", onPetEnter);
+    el.addEventListener("pointerleave", onPetLeave);
+    const onInviteEnter = () => {
+      hovering = true;
+    };
+    const onInviteLeave = () => {
+      hovering = false;
+    };
+    inviteEl?.addEventListener("click", onInvite);
+    inviteEl?.addEventListener("pointerenter", onInviteEnter);
+    inviteEl?.addEventListener("pointerleave", onInviteLeave);
+    inviteEl?.addEventListener("focus", onInviteEnter);
+    inviteEl?.addEventListener("blur", onInviteLeave);
+    const dismiss = () => {
+      twinBubble = null;
+      engine.dismiss();
+    };
+    const mood = (e: Event) => engine.react((e as CustomEvent<TwinMood>).detail);
+    // A new pet picked mid-chat takes over the open bubble.
+    summon();
     // Dev shortcuts: B throws a ball, F feeds.
     const onKey = (e: KeyboardEvent) => {
       const typing = (e.target as HTMLElement | null)?.closest("input, textarea, [contenteditable]");
@@ -240,12 +443,19 @@ export default function Pet({
       if (e.key === "f") feed();
     };
 
+    let awayAt: number | null = null;
     const onVisibility = () => {
       cancelAnimationFrame(raf);
+      const now = performance.now();
       if (document.visibilityState === "visible") {
-        last = performance.now();
+        last = now;
         raf = requestAnimationFrame(tick);
-      }
+        if (awayAt !== null && now - awayAt > AWAY_MS) notice("back", 800);
+        awayAt = null;
+      } else awayAt = now;
+    };
+    const onScroll = () => {
+      scrolledAt = performance.now();
     };
     const themeWatch = new MutationObserver(() => {
       const before = theme;
@@ -258,8 +468,12 @@ export default function Pet({
     addEventListener(THROW_BALL_EVENT, throwBall);
     addEventListener(PAT_EVENT, pat);
     addEventListener(FEED_EVENT, feed);
+    addEventListener(TWIN_SUMMON_EVENT, summon);
+    addEventListener(TWIN_DISMISS_EVENT, dismiss);
+    addEventListener(TWIN_MOOD_EVENT, mood);
     document.addEventListener("visibilitychange", onVisibility);
     addEventListener("resize", measure);
+    addEventListener("scroll", onScroll, { passive: true });
 
     return () => {
       cancelAnimationFrame(raf);
@@ -271,8 +485,19 @@ export default function Pet({
       removeEventListener(THROW_BALL_EVENT, throwBall);
       removeEventListener(PAT_EVENT, pat);
       removeEventListener(FEED_EVENT, feed);
+      removeEventListener(TWIN_SUMMON_EVENT, summon);
+      removeEventListener(TWIN_DISMISS_EVENT, dismiss);
+      removeEventListener(TWIN_MOOD_EVENT, mood);
+      el.removeEventListener("pointerenter", onPetEnter);
+      el.removeEventListener("pointerleave", onPetLeave);
+      inviteEl?.removeEventListener("click", onInvite);
+      inviteEl?.removeEventListener("pointerenter", onInviteEnter);
+      inviteEl?.removeEventListener("pointerleave", onInviteLeave);
+      inviteEl?.removeEventListener("focus", onInviteEnter);
+      inviteEl?.removeEventListener("blur", onInviteLeave);
       document.removeEventListener("visibilitychange", onVisibility);
       removeEventListener("resize", measure);
+      removeEventListener("scroll", onScroll);
     };
   }, [species, coat, food, reduced]);
 
@@ -298,6 +523,20 @@ export default function Pet({
           className="absolute size-1.5 -translate-x-1/2 rotate-45 border-foreground/25 bg-surface data-[side=bottom]:-bottom-[4px] data-[side=bottom]:border-r data-[side=bottom]:border-b data-[side=top]:-top-[4px] data-[side=top]:border-t data-[side=top]:border-l"
         />
       </div>
+      {/* The invite: like the speech bubble, but a button that opens the chat. */}
+      <button
+        ref={invite}
+        type="button"
+        className="fixed top-0 left-0 z-40 cursor-pointer rounded-md border border-foreground/40 bg-surface px-2.5 py-1.5 font-mono text-[11px] leading-none whitespace-nowrap text-foreground opacity-0 shadow-md shadow-black/30 transition-[opacity,border-color] duration-150 hover:border-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground/40 motion-reduce:transition-none light:shadow-black/10"
+        style={{ visibility: "hidden", willChange: "transform" }}
+      >
+        <span ref={inviteText} /> <span aria-hidden>→</span>
+        <span
+          ref={inviteTail}
+          aria-hidden
+          className="absolute size-1.5 -translate-x-1/2 rotate-45 border-foreground/40 bg-surface data-[side=bottom]:-bottom-[4px] data-[side=bottom]:border-r data-[side=bottom]:border-b data-[side=top]:-top-[4px] data-[side=top]:border-t data-[side=top]:border-l"
+        />
+      </button>
       <div
         ref={foodBox}
         aria-hidden

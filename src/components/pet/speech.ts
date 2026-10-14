@@ -177,3 +177,65 @@ export function perchLine(species: SpeciesName, { tag, text }: Spot): string | n
   const lines = PERCH[tag];
   return lines ? pick(lines[species]) : null;
 }
+
+// --- Relaying the AI twin ---
+
+/** What made the pet notice the visitor and invite them to chat; "hover" is the cursor on the pet itself. */
+export type Presence = "hover" | "near" | "pat" | "back" | "reading";
+
+/** Its invite to ask about Anthony, by what it noticed. */
+const INVITE: Record<Presence, PerSpecies> = {
+  hover: {
+    cat: ["ask me anything about Anthony."],
+    dog: ["ask me anything about Anthony!!"],
+    bunny: ["ask me anything about Anthony?"],
+  },
+  near: {
+    cat: ["oh. you. ask me about Anthony.", "hm? questions about Anthony?"],
+    dog: ["oh hi!! ask me about Anthony!!", "a human!! wanna ask about Anthony?"],
+    bunny: ["oh! hi… ask me about Anthony?", "eep, hi! questions about Anthony?"],
+  },
+  pat: {
+    cat: ["fine. now ask me about Anthony.", "since you're here: ask about Anthony."],
+    dog: ["best pats!! now ask me about Anthony!", "more pats? or ask about Anthony!!"],
+    bunny: ["hehe… ask me about Anthony?", "thank you… questions about him?"],
+  },
+  back: {
+    cat: ["you're back. ask me about Anthony.", "oh. you returned. questions?"],
+    dog: ["you're back!! ask me about Anthony!", "welcome back!! questions??"],
+    bunny: ["you came back! ask me about Anthony?", "hi again… questions?"],
+  },
+  reading: {
+    cat: ["reading about Anthony? just ask me.", "skip the reading. ask me."],
+    dog: ["reading?? just ask me about Anthony!!", "I can answer questions!! ask me!"],
+    bunny: ["um… I can answer questions about this", "reading? you could ask me…"],
+  },
+};
+
+export const inviteLine = (species: SpeciesName, why: Presence) => pick(INVITE[why][species]);
+
+/**
+ * When the chat talks through the pet: its hello, what it does while the twin
+ * thinks, and its aside before passing on Anthony's answer. The pet never
+ * states facts itself; the answer under the aside is the twin's.
+ */
+const RELAY: Record<SpeciesName, { hello: string; thinking: string[]; aside: string[] }> = {
+  cat: {
+    hello: "I live on this site. Ask me about Anthony and I'll pass it on. Reluctantly.",
+    thinking: ["*considers this*", "*slow blink*", "hm. asking him."],
+    aside: ["he says:", "fine. he says:", "*yawns* he says:"],
+  },
+  dog: {
+    hello: "hi!! I live on this site! Ask me anything about Anthony and I'll fetch his answer!",
+    thinking: ["*sniffs around for it*", "asking him!!", "*tail wag* hold on!"],
+    aside: ["he says!!", "ooh, he says:", "*wag wag* he says:"],
+  },
+  bunny: {
+    hello: "hi… I live on this site. You can ask me about Anthony, if you want.",
+    thinking: ["*nose twitch*", "*thinks very hard*", "um, asking him…"],
+    aside: ["he says…", "*binky* he says:", "um, he says:"],
+  },
+};
+
+export const relayHello = (species: SpeciesName) => RELAY[species].hello;
+export const relayLine = (species: SpeciesName, kind: "thinking" | "aside") => pick(RELAY[species][kind]);

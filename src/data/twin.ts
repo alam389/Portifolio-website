@@ -7,6 +7,14 @@ const MOCK = "Placeholder. Write the real answer or delete.";
 // dropped in production, so the twin says it doesn't know instead.
 
 export const twin: Twin = {
+  greeting:
+    "Hi, I'm an AI version of Anthony, built from what's on this site. Ask me about my work, projects or background.",
+  starters: [
+    "What did you build at McGregor-Allsop?",
+    "What are you working on right now?",
+    "How did you build this site?",
+  ],
+  privacyNote: "Chats are saved so I can improve the twin.",
   voice: [],
   offLimits: [],
   facts: [

@@ -69,7 +69,7 @@ export default function PawMenu({
           aria-label="Pet settings"
           className={`absolute ${place} z-40 rounded-xl border border-foreground/10 bg-surface p-2 shadow-lg shadow-black/40 light:shadow-black/10`}
         >
-          <PawPanel />
+          <PawPanel onClose={() => setOpen(false)} />
         </div>
       )}
     </div>

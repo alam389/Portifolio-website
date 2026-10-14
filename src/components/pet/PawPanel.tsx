@@ -1,9 +1,20 @@
 "use client";
 
-import { Bone, Carrot, CircleDot, Eye, EyeOff, Fish, Hand, MessageCircle, MessageCircleOff } from "lucide-react";
+import {
+  Bone,
+  Carrot,
+  CircleDot,
+  Eye,
+  EyeOff,
+  Fish,
+  Hand,
+  MessageCircle,
+  MessageCircleOff,
+  MessageCircleQuestion,
+} from "lucide-react";
 import { useEffect, useRef } from "react";
 import { drawFrame } from "./draw";
-import { FEED_EVENT, PAT_EVENT, THROW_BALL_EVENT } from "./events";
+import { FEED_EVENT, PAT_EVENT, THROW_BALL_EVENT, TWIN_OPEN_EVENT } from "./events";
 import { setPetPreference, usePetPreference } from "./preferences";
 import {
   SPECIES,
@@ -45,7 +56,8 @@ function Preview({ species, coat }: { species: SpeciesName; coat: string }) {
   );
 }
 
-export default function PawPanel() {
+/** `onClose` closes the menu, for actions that move focus elsewhere. */
+export default function PawPanel({ onClose }: { onClose?: () => void }) {
   const { species, coat, enabled, talk } = usePetPreference();
   const Treat = TREAT_ICON[species];
 
@@ -83,6 +95,17 @@ export default function PawPanel() {
       </div>
 
       <div className="flex flex-col border-t border-foreground/10 pt-1.5">
+        {/* The AI twin; works with the pet hidden too (a plain panel opens). */}
+        <button
+          type="button"
+          onClick={() => {
+            onClose?.();
+            dispatchEvent(new Event(TWIN_OPEN_EVENT));
+          }}
+          className={action}
+        >
+          <MessageCircleQuestion size={14} aria-hidden /> Ask about Anthony
+        </button>
         <button
           type="button"
           disabled={!enabled}

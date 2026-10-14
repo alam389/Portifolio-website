@@ -269,4 +269,130 @@ describe("PetEngine", () => {
       expect(engine.frame().name).toMatch(/^sleep/);
     });
   });
+
+  describe("relaying the AI twin", () => {
+    /** A pet that has wandered a while, then is asked to relay the chat. */
+    const listening = (species: "cat" | "dog" | "bunny", reduced = false, stage = new Stage()) => {
+      const engine = make(species, reduced, stage);
+      run(engine, 3);
+      engine.summon();
+      return engine;
+    };
+
+    it.each(["cat", "dog", "bunny"] as const)("the %s sits down where it is and stays put", (species) => {
+      const engine = listening(species);
+      const { x, y } = engine;
+      expect(engine.frame().name).toBe("sit");
+      run(engine, 10);
+      expect(engine.x).toBe(x);
+      expect(engine.y).toBe(y);
+      expect(engine.frame().name).toBe("sit");
+    });
+
+    it("rides its platform when the page scrolls", () => {
+      const stage = new Stage();
+      const shelf = stage.add(0, 1000, 400);
+      const engine = make("cat", false, stage);
+      until(engine, () => engine.y === 400);
+      engine.summon();
+      stage.scroll(100);
+      run(engine, 0.5);
+      expect(engine.y).toBe(stage.get(shelf)!.top);
+      expect(engine.frame().name).toBe("sit");
+    });
+
+    it("stays quiet, so the chat is its only voice", () => {
+      const engine = listening("dog");
+      engine.pet();
+      expect(engine.speech).toBeNull();
+    });
+
+    it("looks about while thinking and bounces at an answer, then sits again", () => {
+      const engine = listening("cat");
+      engine.react("thinking");
+      run(engine, 1);
+      expect(engine.frame().name).toBe("idle1");
+      engine.react("answered");
+      expect(engine.frame().name).toBe("happy");
+      run(engine, 2);
+      expect(engine.frame().name).toBe("sit");
+    });
+
+    it("sits wherever it lands after being thrown", () => {
+      const engine = listening("bunny");
+      engine.grab();
+      engine.holdAt(300, 100);
+      engine.release(-300, -200);
+      expect(until(engine, () => engine.y === floor.top)).toBe(true);
+      const x = engine.x;
+      run(engine, 3);
+      expect(engine.x).toBe(x);
+      expect(engine.frame().name).toBe("sit");
+    });
+
+    it("goes back to its own business when dismissed", () => {
+      vi.spyOn(Math, "random").mockReturnValue(0.9); // decide() picks a walk
+      const engine = listening("dog");
+      const x = engine.x;
+      engine.dismiss();
+      expect(engine.relaying).toBe(false);
+      expect(until(engine, () => engine.x !== x)).toBe(true);
+    });
+
+    it("holds still to show an invite, even with the cursor nearby", () => {
+      vi.spyOn(Math, "random").mockReturnValue(0.25); // decide() sits rather than jumps
+      const engine = listening("dog");
+      engine.dismiss();
+      run(engine, 1);
+      expect(engine.stay(2)).toBe(true);
+      const x = engine.x;
+      run(engine, 1.5, () => engine.point(x + 60, engine.y - 20, performance.now()));
+      expect(engine.x).toBe(x);
+      expect(engine.frame().name).toBe("sit");
+    });
+
+    it("turns to face whoever it's inviting", () => {
+      vi.spyOn(Math, "random").mockReturnValue(0.25);
+      const engine = make("cat");
+      run(engine, 3);
+      expect(engine.stay(2, engine.x - 200)).toBe(true);
+      expect(engine.frame().face).toBe(-1);
+      expect(engine.stay(2, engine.x + 200)).toBe(true);
+      expect(engine.frame().face).toBe(1);
+    });
+
+    it("counts pats, so the page can tell someone's there", () => {
+      const engine = make("bunny");
+      run(engine, 3);
+      engine.pet();
+      engine.pet();
+      expect(engine.patted).toBe(2);
+    });
+
+    it("cuts a stretch short to stop for an invite", () => {
+      vi.spyOn(Math, "random").mockReturnValue(0.33); // decide() picks a stretch
+      const engine = make("dog");
+      run(engine, 3);
+      expect(until(engine, () => engine.frame().name === "crouch" || engine.frame().name === "idle1", 5)).toBe(true);
+      expect(engine.stay(2)).toBe(true);
+      expect(engine.frame().name).toBe("sit");
+    });
+
+    it("won't stop for an invite while held or relaying", () => {
+      const engine = listening("cat");
+      expect(engine.stay(2)).toBe(false);
+      engine.dismiss();
+      engine.grab();
+      expect(engine.stay(2)).toBe(false);
+    });
+
+    it("under reduced motion sits up from its nap without moving", () => {
+      const engine = listening("cat", true);
+      const { x, y } = engine;
+      engine.step(DT);
+      expect(engine.frame().name).toBe("sit");
+      expect(engine.x).toBe(x);
+      expect(engine.y).toBe(y);
+    });
+  });
 });

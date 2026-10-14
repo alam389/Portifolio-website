@@ -297,6 +297,12 @@ export interface TwinFact {
 }
 
 export interface Twin {
+  /** The twin's opening message in the chat widget. */
+  greeting: string;
+  /** Suggested first questions shown as buttons; keep them answerable from src/data. */
+  starters: string[];
+  /** Shown under the question box: chats are saved (to Supabase), so say so. */
+  privacyNote: string;
   /** How the twin talks, e.g. "Short answers, no buzzwords". */
   voice: string[];
   /** Topics the twin declines and points to email instead, e.g. salary expectations. */
