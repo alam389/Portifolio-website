@@ -1,3 +1,4 @@
+import Link from "next/link";
 import GithubContributions from "@/components/GithubContributions";
 import ResumeLink from "@/components/ResumeLink";
 import { profile, skills } from "@/data";
@@ -12,6 +13,11 @@ export default function About() {
         <p className="mt-1 text-foreground/60">
           {profile.role} · {profile.location}
         </p>
+        {profile.availability && (
+          <p className="mt-1 font-mono text-sm text-foreground/60">
+            {profile.availability}
+          </p>
+        )}
         <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
           {profile.socials.map(({ label, href }) => (
             <li key={label}>
@@ -32,6 +38,24 @@ export default function About() {
             <p key={p}>{p}</p>
           ))}
         </div>
+      </section>
+
+      <section>
+        <h2 className="text-xl font-semibold">Selected work</h2>
+        <ul className="mt-3 flex flex-col gap-5">
+          {profile.selectedWork.map((w) => (
+            <li key={w.title}>
+              <p className="font-mono text-xs text-foreground/50">{w.context}</p>
+              <Link
+                href={w.href}
+                className="mt-0.5 inline-block font-medium underline decoration-foreground/30 underline-offset-4 transition-colors duration-150 hover:decoration-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground/40"
+              >
+                {w.title}
+              </Link>
+              <p className="mt-1 text-foreground/80">{w.outcome}</p>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section>

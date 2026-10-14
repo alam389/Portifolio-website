@@ -51,7 +51,7 @@ function Jobs({ jobs, nested = false }: { jobs: Job[]; nested?: boolean }) {
   return (
     <ol className={nested ? "mt-5 flex flex-col gap-6" : "flex flex-col gap-8"}>
       {jobs.map((job) => (
-        <li key={job.id}>
+        <li key={job.id} id={job.id} className="scroll-mt-8">
           <Row
             left={
               <Title className={nested ? "font-semibold" : "text-lg font-semibold"}>

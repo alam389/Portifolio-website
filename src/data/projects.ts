@@ -137,6 +137,46 @@ export const projects: Project[] = [
       "On a held-out test set of 5,394 images it scores 99.98%, with exactly one mistake: an H read as an I. I'll be honest about that number, though. The split is random, so the same volunteers show up in training and test, and splitting by person would give a fairer score. Some signs also just can't be told apart from a single frame, like 2 and V, 6 and W, 0 and O, and J and Z are motion signs. Live, it works well if your whole hand and wrist are in frame at arm's length, like the dataset photos.",
       "The biggest thing I took from it: a great validation score means nothing until you test it in the real conditions people will use it in. Our first version looked fine on paper and fell apart on a webcam.",
     ],
+    // Every line here restates the description or story above.
+    architecture: {
+      steps: [
+        {
+          id: "input",
+          label: "Photo or webcam frame",
+          detail: "Trained on ASL-HG, 36,000 photos",
+          why: "ASL-HG is phone photos with real backgrounds and different skin tones, so training looks like what a webcam actually sees.",
+          instead:
+            "A Kaggle set of bright hands on pure black backgrounds. The model learned 'bright shape on black' and got most signs wrong in a normal room.",
+        },
+        {
+          id: "crop",
+          label: "MediaPipe hand crop",
+          detail: "Crop box from hand landmarks",
+          why: "MediaPipe's hand landmarks give a proper crop around the hand.",
+          instead:
+            "YOLOv8n, which has no hand class, so half the time it cropped the whole body.",
+        },
+        {
+          id: "preprocess",
+          label: "Grayscale + cache",
+          detail: "128×128, cached once",
+          why: "Each crop is cached once, so training doesn't rerun the detector every epoch.",
+        },
+        {
+          id: "model",
+          label: "ASLNet CNN",
+          detail: "BatchNorm · dropout · augmentation",
+          why: "A CNN because that's what actually worked on images. Trained with augmentation on an Apple GPU, with a test suite behind it.",
+          instead: "KNN and random forests, the classic models in the proposal.",
+        },
+        {
+          id: "output",
+          label: "36 classes",
+          detail: "Digits 0–9, letters A–Z",
+          why: "99.98% on 5,394 held-out images, with one mistake: an H read as an I. The split is random, so the same volunteers are in training and test; splitting by person would be fairer. 2/V, 6/W and 0/O look alike in a single frame, and J and Z are motion signs.",
+        },
+      ],
+    },
   },
   {
     id: "pony-ai",

@@ -48,6 +48,28 @@ export const profile: Profile = {
     { label: "LinkedIn", href: "https://www.linkedin.com/in/anthony-lam/" },
     { label: "Email", href: "mailto:lamanthony167@gmail.com" },
   ],
+  // Restates highlights in experiences.ts; update both when a number changes.
+  selectedWork: [
+    {
+      title: "Shopify beauty assistant",
+      context: "Kiyoko Beauty · 2026",
+      outcome: "20% of conversations ended in an add-to-cart across 1,000+ beta sessions.",
+      href: "/experience#kiyoko",
+    },
+    {
+      title: "MAL-Athena, on-prem Graph-RAG search",
+      context: "McGregor-Allsop · 2025–26",
+      outcome:
+        "Indexes 10,000+ pages of engineering documents and answers up to 100x faster than searching the file server by hand.",
+      href: "/experience#mcgregor-allsop",
+    },
+    {
+      title: "In-house HCM platform",
+      context: "McGregor-Allsop · 2025–26",
+      outcome: "Rolled out to 30+ employees and replaced about $6,000 of SaaS tools.",
+      href: "/experience#mcgregor-allsop",
+    },
+  ],
   // Restates the summary; update both when something changes.
   now: {
     updated: "Oct 2026",

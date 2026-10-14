@@ -31,12 +31,27 @@ export interface Profile {
     awards: Award[];
   };
   socials: Social[];
+  /** One factual line under the headline for recruiters, e.g. "Open to new-grad roles from May 2027". Hidden when unset. */
+  availability?: string;
+  /** The "Selected work" section on About: the strongest results, for a quick scan. */
+  selectedWork: SelectedWork[];
   /** The "Now" section on About: what Anthony is focused on at the moment. */
   now: {
     /** Display date for when this was last true, e.g. "Oct 2026". */
     updated: string;
     items: string[];
   };
+}
+
+/** A headline result on About, linking to where the full account lives. */
+export interface SelectedWork {
+  title: string;
+  /** Where and when, shown as metadata, e.g. "Kiyoko Beauty · 2026". */
+  context: string;
+  /** One sentence with the measurable result. */
+  outcome: string;
+  /** Internal link, e.g. "/experience#kiyoko". */
+  href: string;
 }
 
 export interface Experience {
@@ -89,8 +104,27 @@ export interface Project {
   image?: Photo;
   /** Demo clip shown at the top of the card (path under public/). Takes the place of `image`. */
   video?: Video;
-  /** The longer story, first person, as if Anthony were telling it. Read by the AI twin; not rendered yet. */
+  /** The longer story, first person, as if Anthony were telling it. Rendered on the project's page when it has `architecture`; also read by the AI twin. */
   story?: string[];
+  /** A pipeline diagram where each step explains its design decision. Gives the project its own page at /projects/[id]. */
+  architecture?: Architecture;
+}
+
+/** A system drawn as steps in order; each step carries the reason it's built that way. */
+export interface Architecture {
+  steps: ArchitectureStep[];
+}
+
+export interface ArchitectureStep {
+  id: string;
+  /** What the step is, e.g. "MediaPipe hand crop". */
+  label: string;
+  /** Short specifics under the label, e.g. "128×128 grayscale". */
+  detail?: string;
+  /** Why it's built this way; shown when the step is hovered, focused or tapped. */
+  why: string;
+  /** What was tried or proposed first, and why it lost. */
+  instead?: string;
 }
 
 export interface SkillGroup {

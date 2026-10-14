@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { projectStatusLabel, type Project, type ProjectTag } from "@/data";
@@ -54,7 +55,7 @@ function ProjectCard({
   }, [open]);
 
   return (
-    <li className="overflow-hidden rounded-lg border border-foreground/10 p-5">
+    <li className="flex flex-col overflow-hidden rounded-lg border border-foreground/10 p-5">
       {p.video ? (
         <video
           src={p.video.src}
@@ -65,28 +66,40 @@ function ProjectCard({
           className="-mx-5 -mt-5 mb-5 aspect-video max-w-none border-b border-foreground/10 bg-surface object-contain"
           style={{ width: "calc(100% + 2.5rem)" }}
         />
+      ) : p.image ? (
+        <Image
+          src={p.image.src}
+          alt={p.image.alt}
+          width={p.image.width ?? 1400}
+          height={p.image.height ?? 711}
+          sizes="(min-width: 640px) 380px, 100vw"
+          priority={first}
+          className="-mx-5 -mt-5 mb-5 aspect-video max-w-none border-b border-foreground/10 bg-surface object-contain"
+          style={{ width: "calc(100% + 2.5rem)" }}
+        />
       ) : (
-        p.image && (
-          <Image
-            src={p.image.src}
-            alt={p.image.alt}
-            width={p.image.width ?? 1400}
-            height={p.image.height ?? 711}
-            sizes="(min-width: 768px) 700px, 100vw"
-            priority={first}
-            className="-mx-5 -mt-5 mb-5 aspect-video max-w-none border-b border-foreground/10 bg-surface object-contain"
-            style={{ width: "calc(100% + 2.5rem)" }}
-          />
-        )
+        // No screenshot yet: a blank panel the same size, so cards in a
+        // grid row line up.
+        <div
+          aria-hidden
+          className="-mx-5 -mt-5 mb-5 flex aspect-video items-center justify-center border-b border-foreground/10 bg-foreground/[0.03] px-6 text-center font-display text-2xl text-foreground/25"
+        >
+          {p.title}
+        </div>
       )}
       <p className="font-mono text-xs text-foreground/60">
         {projectStatusLabel[p.status]}
         {p.period ? ` · ${p.period}` : ""}
       </p>
       <div className="mt-1.5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-        <h2 className="text-2xl font-medium tracking-tight">{p.title}</h2>
-        {(p.github || p.live) && (
+        <h2 className="text-xl font-medium tracking-tight">{p.title}</h2>
+        {(p.architecture || p.github || p.live) && (
           <div className="flex gap-5 text-sm">
+            {p.architecture && (
+              <Link href={`/projects/${p.id}`} className={link}>
+                How it works <span aria-hidden>→</span>
+              </Link>
+            )}
             {p.github && (
               <a
                 href={p.github}
@@ -124,12 +137,13 @@ function ProjectCard({
           aria-expanded={open}
           aria-controls={`${p.id}-description`}
           onClick={() => setOpen(!open)}
-          className={`${link} mt-1 text-sm text-foreground/70`}
+          className={`${link} mt-1 self-start text-sm text-foreground/70`}
         >
           {open ? "Show less" : "Read more"}
         </button>
       )}
-      <p className="mt-4 font-mono text-xs text-foreground/60">
+      {/* Pinned to the bottom so meta lines up across a grid row. */}
+      <p className="mt-auto pt-4 font-mono text-xs text-foreground/60">
         <span className="sr-only">Tags: </span>
         {p.tags.map((tag, i) => (
           <span key={tag}>
@@ -204,7 +218,7 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
         Showing {shown.length} of {projects.length} projects
       </p>
 
-      <ul className="mt-6 grid gap-4">
+      <ul className="mt-6 grid gap-4 sm:grid-cols-2">
         {shown.map((p, i) => (
           <ProjectCard key={p.id} project={p} filter={filter} first={i === 0} />
         ))}
