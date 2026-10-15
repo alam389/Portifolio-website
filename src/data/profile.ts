@@ -45,7 +45,7 @@ export const profile: Profile = {
   },
   socials: [
     { label: "GitHub", href: "https://github.com/alam389" },
-    { label: "LinkedIn", href: "https://www.linkedin.com/in/anthony-lam/" },
+    { label: "LinkedIn", href: "https://www.linkedin.com/in/anthony---lam/" },
     { label: "Email", href: "mailto:lamanthony167@gmail.com" },
   ],
   // Restates highlights in experiences.ts; update both when a number changes.

@@ -14,7 +14,7 @@ export const journey: JourneyStop[] = [
     lng: -79.0849,
     kind: "life",
     title: "Born in Niagara",
-    description: "This is where I spent the majority of my life here. It's a quiet and peaceful area and shaped much of who I am, but it couldn't contain my ambitions",
+    description: "My world was very small in Niagara, I would essentially spend my entire childhood here going out and playing or going to the local community centre. It's a quiet and peaceful area and shaped much of who I am, but there was so much more outside of this world it couldn't contain my ambitions",
 
     photos: [
       { src: media("journey/niagara1.webp"), alt: "A golfer mid-swing at a driving range under an evening sky." },
