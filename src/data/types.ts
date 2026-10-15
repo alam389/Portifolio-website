@@ -116,6 +116,10 @@ export interface Project {
 export interface Architecture {
   /** What the diagram shows, when it's one part of the project, e.g. "The AI twin". */
   title?: string;
+  /** One or two sentences under the title saying what the part is, before the steps. */
+  summary?: string;
+  /** Ends the chapter with an "Ask the twin" button; for the AI twin's own diagram. */
+  twin?: boolean;
   steps: ArchitectureStep[];
 }
 

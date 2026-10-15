@@ -58,6 +58,9 @@ export const projects: Project[] = [
     // or the code in src/lib/twin, src/components/twin and src/app/api/chat.
     architecture: {
       title: "The AI twin: how a question becomes an answer",
+      summary:
+        "A chat on this site where visitors ask about me and get first-person answers, grounded only in the site's own data. The pixel pet is the way in.",
+      twin: true,
       steps: [
         {
           id: "invite",
@@ -70,7 +73,7 @@ export const projects: Project[] = [
         {
           id: "guard",
           label: "Guard + router",
-          detail: "One Jev call",
+          detail: "One decision-model call",
           why: "Jev (TypeSafe, on OpenRouter) is a decision model: it returns typed yes-probabilities, not prose, fast and nearly free. One call refuses off-topic questions, injection attempts and gibberish with a canned reply, and scores which parts of the site's data the answer needs. Messages with no letters or digits are refused before Jev is called.",
           instead:
             "Tool use by the answer model. A typed routing answer is more predictable and easier to log.",

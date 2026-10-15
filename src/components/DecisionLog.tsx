@@ -19,7 +19,10 @@ export default function DecisionLog({ decisions }: { decisions: Decision[] }) {
             </summary>
             <div className="mt-3 flex flex-col gap-3 pb-2 text-sm leading-relaxed sm:pl-[4.5rem]">
               <p className="font-mono text-xs text-muted">
-                {d.status === "accepted" ? "Accepted" : "Superseded"} · {d.date}
+                {d.status === "accepted" ? "Accepted" : "Superseded"} · {d.date} ·{" "}
+                <a href={`#adr-${d.id}`} className="underline-offset-4 hover:text-foreground hover:underline">
+                  Link<span className="sr-only"> to this decision</span>
+                </a>
               </p>
               <Field label="Context">{d.context}</Field>
               <Field label="Decision">{d.decision}</Field>
