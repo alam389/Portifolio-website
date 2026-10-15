@@ -5,16 +5,16 @@ import { useEffect, useRef, type RefObject } from "react";
 import { relayHello, relayLine } from "@/components/pet/speech";
 import type { SpeciesName } from "@/components/pet/sprites";
 import { Composer, Linkified, Starters, Thinking, iconButton } from "./parts";
-import type { TwinChatState } from "./useTwinChat";
+import type { AssistantChatState } from "./useAssistantChat";
 
-// The twin talking through the pet. The pet sits down wherever it is, and
-// Pet.tsx positions this bubble (marked data-twin-bubble) over its head every
+// The assistant talking through the pet. The pet sits down wherever it is, and
+// Pet.tsx positions this bubble (marked data-assistant-bubble) over its head every
 // frame, setting the tail's side (data-side) and position (--tail-x). Until
 // the pet has placed it, it waits in the corner where the launcher was.
 
 /**
  * Show the newest exchange, like a speech bubble would; the full history
- * still goes to the twin, so follow-ups work.
+ * still goes to the assistant, so follow-ups work.
  */
 export default function PetBubble({
   chat,
@@ -25,7 +25,7 @@ export default function PetBubble({
   onClose,
   onNavigate,
 }: {
-  chat: TwinChatState;
+  chat: AssistantChatState;
   species: SpeciesName;
   starters: string[];
   privacyNote: string;
@@ -54,15 +54,15 @@ export default function PetBubble({
     <>
       <section
         role="dialog"
-        aria-labelledby="twin-title"
+        aria-labelledby="assistant-title"
         data-pet-ignore
-        data-twin-bubble
+        data-assistant-bubble
         onKeyDown={(e) => e.key === "Escape" && onClose()}
         className="group fixed right-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 w-[min(22rem,calc(100vw-2rem))] rounded-2xl border border-foreground/25 bg-surface shadow-lg shadow-black/40 transition-opacity duration-200 starting:opacity-0 motion-reduce:transition-none light:shadow-black/10 md:right-6 md:bottom-6"
       >
         <div className="flex items-center justify-between gap-3 pt-2 pr-2 pl-4">
-          <h2 id="twin-title" className="font-mono text-[11px] font-normal text-muted">
-            the {species} · relaying Anthony&apos;s AI twin
+          <h2 id="assistant-title" className="font-mono text-[11px] font-normal text-muted">
+            the {species} · relaying Anthony&apos;s AI assistant
           </h2>
           <button type="button" onClick={onClose} aria-label="Close chat" className={iconButton}>
             <X size={16} strokeWidth={1.75} aria-hidden />

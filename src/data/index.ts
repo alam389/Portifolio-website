@@ -13,4 +13,4 @@ export {
   activities,
 } from "./interests";
 export { site } from "./site";
-export { twin } from "./twin";
+export { assistant } from "./assistant";

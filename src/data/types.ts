@@ -61,7 +61,7 @@ export interface Experience {
   location: string;
   period: string;
   highlights: string[];
-  /** Longer accounts of the work behind the highlights. Read by the AI twin; not rendered yet. */
+  /** Longer accounts of the work behind the highlights. Read by the AI assistant; not rendered yet. */
   details?: ExperienceDetail[];
   /** Roles held under this one, e.g. client projects led within an organization. */
   subroles?: Experience[];
@@ -104,7 +104,7 @@ export interface Project {
   image?: Photo;
   /** Demo clip shown at the top of the card (path under public/). Takes the place of `image`. */
   video?: Video;
-  /** The longer story, first person, as if Anthony were telling it. Rendered on the project's page when it has `architecture`; also read by the AI twin. */
+  /** The longer story, first person, as if Anthony were telling it. Rendered on the project's page when it has `architecture`; also read by the AI assistant. */
   story?: string[];
   /** A pipeline diagram where each step explains its design decision. Gives the project its own page at /projects/[id]. */
   architecture?: Architecture;
@@ -114,12 +114,12 @@ export interface Project {
 
 /** A system drawn as steps in order; each step carries the reason it's built that way. */
 export interface Architecture {
-  /** What the diagram shows, when it's one part of the project, e.g. "The AI twin". */
+  /** What the diagram shows, when it's one part of the project, e.g. "The AI assistant". */
   title?: string;
   /** One or two sentences under the title saying what the part is, before the steps. */
   summary?: string;
-  /** Ends the chapter with an "Ask the twin" button; for the AI twin's own diagram. */
-  twin?: boolean;
+  /** Ends the chapter with an "Ask my assistant" button; for the AI assistant's own diagram. */
+  assistant?: boolean;
   steps: ArchitectureStep[];
 }
 
@@ -307,29 +307,29 @@ export interface Activity {
   draft?: string;
 }
 
-// AI twin. Facts only the twin needs: what visitors ask that the site doesn't
-// show. Everything the site shows, the twin reads from the modules above.
+// AI assistant. Facts only the assistant needs: what visitors ask that the site doesn't
+// show. Everything the site shows, the assistant reads from the modules above.
 
 /** A question visitors ask, with Anthony's own answer. */
-export interface TwinFact {
+export interface AssistantFact {
   id: string;
   question: string;
-  /** In Anthony's words, first person. The twin may rephrase but not add to it. */
+  /** In Anthony's words, first person. The assistant may rephrase but not add to it. */
   answer: string;
-  /** Set on placeholders. Drafts never reach the twin in production. */
+  /** Set on placeholders. Drafts never reach the assistant in production. */
   draft?: string;
 }
 
-export interface Twin {
-  /** The twin's opening message in the chat widget. */
+export interface Assistant {
+  /** The assistant's opening message in the chat widget. */
   greeting: string;
   /** Suggested first questions shown as buttons; keep them answerable from src/data. */
   starters: string[];
   /** Shown under the question box: chats are saved (to Supabase), so say so. */
   privacyNote: string;
-  /** How the twin talks, e.g. "Short answers, no buzzwords". */
+  /** How the assistant talks, e.g. "Short answers, no buzzwords". */
   voice: string[];
-  /** Topics the twin declines and points to email instead, e.g. salary expectations. */
+  /** Topics the assistant declines and points to email instead, e.g. salary expectations. */
   offLimits: string[];
-  facts: TwinFact[];
+  facts: AssistantFact[];
 }

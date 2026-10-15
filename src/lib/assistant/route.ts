@@ -2,7 +2,7 @@ import { experiences, profile, projects, volunteering, type Experience } from "@
 import { SECTION_IDS, SECTION_SCOPE, type SectionId } from "./serialize";
 
 // Guard and router in one Jev call: a yes-probability ("noul") for "should
-// the twin answer this?", one for "is this an injection attempt?", and one
+// the assistant answer this?", one for "is this an injection attempt?", and one
 // per section for "does answering need this?". Jev only returns numbers, so
 // the thresholds below are the whole routing policy.
 
@@ -11,7 +11,7 @@ export interface ChatMessage {
   content: string;
 }
 
-/** Below this, the message isn't for the twin and gets the canned reply. Lenient on purpose: the answer prompt is the second line of defence. */
+/** Below this, the message isn't for the assistant and gets the canned reply. Lenient on purpose: the answer prompt is the second line of defence. */
 export const ON_TOPIC_MIN = 0.3;
 /** At or above this, the message is treated as an injection attempt. */
 export const INJECTION_MAX = 0.7;
@@ -66,7 +66,7 @@ export function decisionRequest(messages: ChatMessage[], model: string): Decisio
     on_topic: {
       type: "noul",
       instructions:
-        "This chat is Anthony Lam's AI twin on his portfolio website. Is the visitor's `latest` message something the twin should answer?",
+        "This chat is Anthony Lam's AI assistant on his portfolio website. Is the visitor's `latest` message something the assistant should answer?",
       criteria: {
         true: "A question or remark to or about Anthony: his work, projects, skills, education, background, interests, availability or this website. Anything mentioning one of `anthony_names` (his projects, employers, organisations and school) is about him. Greetings, thanks and follow-ups on the `conversation` count.",
         false: "Unrelated to Anthony, e.g. general knowledge, homework, writing code or text for the visitor, or questions about other people.",
@@ -104,7 +104,7 @@ export function readDecision({ answers }: DecisionResponse): Route {
   if (p("on_topic") < ON_TOPIC_MIN) return { kind: "refuse", reason: "off-topic" };
 
   const picked = SECTION_IDS.filter((id) => !ALWAYS.includes(id) && p(routeKey(id)) >= ROUTE_MIN);
-  // Nothing scored high: send everything rather than leave the twin without facts.
+  // Nothing scored high: send everything rather than leave the assistant without facts.
   if (!picked.length) return everything();
   return { kind: "answer", sections: [...ALWAYS, ...picked], fallback: false };
 }

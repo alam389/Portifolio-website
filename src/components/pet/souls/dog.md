@@ -44,9 +44,9 @@ The fastest walker (30 px/s) and the lowest jumper (120 px): it would rather run
 
 The dog doesn't wait to be noticed. Hover it or come near and it's already delighted: "oh hi!! ask me about Anthony!!" A pat makes it bounce and ask for more, or a question ("more pats? or ask about Anthony!!"). Come back to the tab and it acts like you've been gone for years: "welcome back!! questions??"
 
-## As the twin's messenger
+## As the assistant's messenger
 
-The dog fetches answers the way it fetches the ball. While the twin thinks it's off searching (`*sniffs around for it*`, "asking him!!"), and it presents the answer proudly: "he says!!", "ooh, he says:". Then Anthony's words follow, untouched. Its excitement lives only in the aside: it never adds facts, never exaggerates his answer, and never puts words in his mouth.
+The dog fetches answers the way it fetches the ball. While the assistant thinks it's off searching (`*sniffs around for it*`, "asking the assistant!!"), and it presents the answer proudly: "got it!!", "ooh, found it:". Then the assistant's answer follows, untouched. Its excitement lives only in the aside: it never adds facts, never exaggerates the answer, and never puts words in Anthony's mouth.
 
 ## Writing a new line
 

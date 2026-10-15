@@ -2,7 +2,7 @@ import type { ChatMessage } from "./route";
 
 // The `twin_chats` table in Supabase: each exchange is saved there, so Anthony
 // can see what visitors ask and spot bad answers or misroutes, and it's also
-// the twin's memory (a session's history is rebuilt from it, never taken from
+// the assistant's memory (a session's history is rebuilt from it, never taken from
 // the browser) and its spend meter (a global cap on model calls). Server only:
 // it uses the secret key, and the table has RLS on with no policies and no
 // grants to the public roles. No IPs; the only browser details are the
@@ -81,7 +81,7 @@ export async function loadHistory(conversationId: string): Promise<ChatMessage[]
     if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
     return historyFrom(((await res.json()) as PastTurn[]).reverse());
   } catch (err) {
-    console.error("[twin] history unavailable", err);
+    console.error("[assistant] history unavailable", err);
     return [];
   }
 }
@@ -110,7 +110,7 @@ export async function modelCallsSince(since: Date): Promise<number | null> {
     if (!res.ok || total === undefined || !/^\d+$/.test(total)) throw new Error(`count ${res.status}`);
     return Number(total);
   } catch (err) {
-    console.error("[twin] spend count unavailable", err);
+    console.error("[assistant] spend count unavailable", err);
     return null;
   }
 }
@@ -125,9 +125,9 @@ export async function saveChat(record: ChatRecord): Promise<void> {
       body: JSON.stringify(record),
       cache: "no-store",
     });
-    if (!res.ok) console.error("[twin] save failed", res.status, await res.text());
+    if (!res.ok) console.error("[assistant] save failed", res.status, await res.text());
   } catch (err) {
-    console.error("[twin] save failed", err);
+    console.error("[assistant] save failed", err);
   }
 }
 

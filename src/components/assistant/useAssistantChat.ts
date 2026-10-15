@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { TWIN_MOOD_EVENT, type TwinMood } from "@/components/pet/events";
-import { ASIDE_SEP } from "@/lib/twin/aside";
-import { Pacer } from "@/lib/twin/pace";
-import { sessionId, visitSource } from "@/lib/twin/visit";
+import { ASSISTANT_MOOD_EVENT, type AssistantMood } from "@/components/pet/events";
+import { ASIDE_SEP } from "@/lib/assistant/aside";
+import { Pacer } from "@/lib/assistant/pace";
+import { sessionId, visitSource } from "@/lib/assistant/visit";
 
 export interface Message {
   role: "user" | "assistant";
@@ -22,10 +22,10 @@ export interface Message {
 /** An error whose message is safe to show the visitor. */
 class ChatError extends Error {}
 
-const OFFLINE = "Couldn't reach the twin. Check your connection and try again.";
+const OFFLINE = "Couldn't reach the assistant. Check your connection and try again.";
 
-/** Tells the pet what the twin is doing; harmless when there's no pet. */
-const mood = (detail: TwinMood) => dispatchEvent(new CustomEvent(TWIN_MOOD_EVENT, { detail }));
+/** Tells the pet what the assistant is doing; harmless when there's no pet. */
+const mood = (detail: AssistantMood) => dispatchEvent(new CustomEvent(ASSISTANT_MOOD_EVENT, { detail }));
 
 /** How often the paced answer is redrawn. */
 const TICK_MS = 50;
@@ -35,10 +35,10 @@ const TICK_MS = 50;
  * arrive as fast as the model writes them but are shown at reading pace
  * (`Pacer`), all at once under reduced motion; `pending` lasts until the
  * whole answer is on screen, so Stop and aria-busy cover the reveal. Shared by
- * the panel and the pet's speech bubble, and kept by TwinChat so switching
+ * the panel and the pet's speech bubble, and kept by AssistantChat so switching
  * between them (the pet turned off mid-chat) keeps the conversation.
  */
-export function useTwinChat() {
+export function useAssistantChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [pending, setPending] = useState(false);
   const abort = useRef<AbortController | null>(null);
@@ -139,7 +139,7 @@ export function useTwinChat() {
   return { messages, pending, send, stop: () => abort.current?.abort() };
 }
 
-export type TwinChatState = ReturnType<typeof useTwinChat>;
+export type AssistantChatState = ReturnType<typeof useAssistantChat>;
 
 function withAside(ms: Message[], aside: string): Message[] {
   const last = ms[ms.length - 1];

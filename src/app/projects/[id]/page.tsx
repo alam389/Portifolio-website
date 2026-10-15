@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ArchitectureDiagram from "@/components/ArchitectureDiagram";
-import AskTwinButton from "@/components/twin/AskTwinButton";
+import AskAssistantButton from "@/components/assistant/AskAssistantButton";
 import DecisionLog from "@/components/DecisionLog";
 import { projects, projectStatusLabel } from "@/data";
 
@@ -127,7 +127,7 @@ export default async function ProjectPage({ params }: Props) {
         <Link href="/projects" className="text-foreground/60 transition-colors hover:text-foreground">
           ← All projects
         </Link>
-        {project.architecture.twin && <AskTwinButton />}
+        {project.architecture.assistant && <AskAssistantButton />}
       </nav>
     </article>
   );

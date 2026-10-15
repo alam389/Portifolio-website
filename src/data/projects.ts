@@ -35,7 +35,7 @@ export const projects: Project[] = [
     title: "Portfolio Website",
     tagline: "This site, built from scratch",
     description:
-      "My personal site: a quiet editorial design with a left sidebar nav, a dark default and a light toggle, and all content kept in typed data modules. The expressive parts are a scroll-paged Journey page on a three.js particle-terrain globe and a canvas pixel-art pet (cat, dog or bunny) that walks on the page, jumps between elements, plays fetch and talks. The resume is served from a private Supabase bucket through a short-lived signed URL. The pet is also the way in to an AI twin: visitors ask it about me and get first-person answers grounded only in the site's own data.",
+      "My personal site: a quiet editorial design with a left sidebar nav, a dark default and a light toggle, and all content kept in typed data modules. The expressive parts are a scroll-paged Journey page on a three.js particle-terrain globe and a canvas pixel-art pet (cat, dog or bunny) that walks on the page, jumps between elements, plays fetch and talks. The resume is served from a private Supabase bucket through a short-lived signed URL. The pet is also the way in to my AI assistant: visitors ask it about me, and it answers from the site's own data and nothing else.",
     status: "in-progress",
     tags: ["Frontend"],
     technologies: ["Next.js", "React", "TypeScript", "Tailwind CSS", "three.js", "Supabase"],
@@ -54,13 +54,13 @@ export const projects: Project[] = [
       "The second is the pixel pet. You can pick a cat, a dog or a bunny, and it walks along the page, jumping between elements like they're platforms. You can pick it up and throw it, play fetch, feed it treats, and it talks in little speech bubbles. I wrote my own physics for it, and the sprites are 16 by 16 pixel art I authored as text, one file per animal.",
       "Beyond that there's an Interests section for the papers, books and podcasts I'm into, plus food and staying active, and a custom 404 that drops you on Null Island. It's still in progress, and I keep adding to it whenever I have an idea I want to try.",
     ],
-    // The AI twin's pipeline and decisions. Every line restates docs/ai-twin.md
-    // or the code in src/lib/twin, src/components/twin and src/app/api/chat.
+    // The AI assistant's pipeline and decisions. Every line restates docs/ai-assistant.md
+    // or the code in src/lib/assistant, src/components/assistant and src/app/api/chat.
     architecture: {
-      title: "The AI twin: how a question becomes an answer",
+      title: "My AI assistant: how a question becomes an answer",
       summary:
-        "A chat on this site where visitors ask about me and get first-person answers, grounded only in the site's own data. The pixel pet is the way in.",
-      twin: true,
+        "A chat on this site where visitors ask my assistant about me. It knows only what the site says, and answers from that alone. The pixel pet is the way in.",
+      assistant: true,
       steps: [
         {
           id: "invite",
@@ -82,14 +82,14 @@ export const projects: Project[] = [
           id: "context",
           label: "Routed data",
           detail: "Only what's needed",
-          why: "The twin reads the same typed modules the site renders, so the two never disagree. Drafts are dropped, and first-person stories are used over card summaries. If nothing scores high, or Jev is down, it gets all of src/data, which still fits.",
+          why: "The assistant reads the same typed modules the site renders, so the two never disagree. Drafts are dropped, and first-person stories are used over card summaries. If nothing scores high, or Jev is down, it gets all of src/data, which still fits.",
         },
         {
           id: "answer",
           label: "Answer",
           detail: "DeepSeek V4.1 Flash",
-          why: "Answers in the first person, only from the facts it was given, and says it hasn't written about something rather than guess. Swapping models is one setting.",
-          instead: "Claude Haiku 5.5, the first default.",
+          why: "Talks about Anthony as his assistant, only from the facts it was given, and says he hasn't written about something rather than guess. Swapping models is one setting.",
+          instead: "Claude Haiku 5.5, answering as Anthony in the first person.",
         },
         {
           id: "pace",
@@ -108,15 +108,15 @@ export const projects: Project[] = [
     decisions: [
       {
         id: "ground-in-data",
-        title: "Ground the twin in src/data, nothing else",
+        title: "Ground the assistant in src/data, nothing else",
         date: "Oct 2026",
         status: "accepted",
         context:
-          "A chatbot speaking as Anthony can make things up, and anything it says reads as his own words to a recruiter.",
+          "A chatbot talking about Anthony can make things up, and a recruiter will take what it says as true.",
         decision:
-          "The twin answers only from the same typed data modules the site renders. They're turned into text with drafts removed, first-person stories are preferred over card summaries, and the prompt tells it to say it hasn't written about something instead of guessing.",
+          "The assistant answers only from the same typed data modules the site renders. They're turned into text with drafts removed, first-person stories are preferred over card summaries, and the prompt tells it to say Anthony hasn't written about something instead of guessing.",
         consequences:
-          "Editing the site's data updates the twin too, and the two can't disagree. Questions the site doesn't cover get \"I haven't written about that here\" and a pointer to email, not an answer.",
+          "Editing the site's data updates the assistant too, and the two can't disagree. Questions the site doesn't cover get \"Anthony hasn't written about that here\" and a pointer to email, not an answer.",
       },
       {
         id: "router-not-tools",
@@ -128,7 +128,7 @@ export const projects: Project[] = [
         decision:
           "One call to Jev, a decision model on OpenRouter, scores which sections a question needs; code fetches them and only those go to the answer model, with the profile always included. If nothing scores high, or Jev fails, everything is sent.",
         consequences:
-          "The extra call is fast and nearly free, and every route is a typed answer that's easy to log. It adds a second model to depend on, and Jev is young; the send-everything fallback keeps a misroute from leaving the twin without facts.",
+          "The extra call is fast and nearly free, and every route is a typed answer that's easy to log. It adds a second model to depend on, and Jev is young; the send-everything fallback keeps a misroute from leaving the assistant without facts.",
         alternatives: [
           "Tool use, where the answer model fetches sections itself: less predictable and harder to log.",
           "Always send all of src/data: simpler, but every answer pays for every section.",
@@ -142,7 +142,7 @@ export const projects: Project[] = [
         context:
           "A public chat will get homework questions, attempts to rewrite its instructions, and keyboard mashing. Each one costs an answer.",
         decision:
-          "The same Jev call also asks whether the message is about Anthony, whether it's trying to manipulate the assistant, and whether it's gibberish. Any of those gets a short canned reply with no answer-model call. Messages with no letters or digits are refused in code before Jev is called. Visitors are limited to 8 messages a minute and 60 a day, 500 characters each, and all visitors together to 120 answers an hour and 500 a day. The browser sends only the new question; earlier turns are read back from the database, so nobody can forge the twin's past replies to steer it.",
+          "The same Jev call also asks whether the message is about Anthony, whether it's trying to manipulate the assistant, and whether it's gibberish. Any of those gets a short canned reply with no answer-model call. Messages with no letters or digits are refused in code before Jev is called. Visitors are limited to 8 messages a minute and 60 a day, 500 characters each, and all visitors together to 120 answers an hour and 500 a day. The browser sends only the new question; earlier turns are read back from the database, so nobody can forge the assistant's past replies to steer it.",
         consequences:
           "Refusals cost almost nothing. The thresholds are lenient, and the gibberish one is high, so short or odd real messages like \"why?\" still get through; the answer prompt is the second line of defence. The per-visitor limit is in memory, so on serverless it's a speed bump; the shared cap is counted in the database, and the OpenRouter key's credit limit is the last backstop.",
       },
@@ -184,6 +184,19 @@ export const projects: Project[] = [
           "Each exchange is saved to a Supabase table after the response has been sent: question, answer, outcome, refusal reason, routed sections, model, timing, page, a random session ID that lasts until the tab closes, and where the visitor came from (the referring site's domain and utm_source, never the full URL). No IPs. The table is server-only, and the chat tells visitors chats are saved.",
         consequences:
           "Misroutes, bad answers and over-eager refusals show up in the data, chats can be read as whole sessions, and it shows whether visitors come from LinkedIn or a resume link. Chats are kept until deleted, so the note in the chat matters.",
+      },
+      {
+        id: "assistant-not-twin",
+        title: "An assistant that talks about Anthony, not a twin that talks as him",
+        date: "Oct 2026",
+        status: "accepted",
+        context:
+          "The chat started as an AI twin: it answered as Anthony, in the first person, and the pet handed answers over with \"he says:\". But the pet is an animal and the model isn't Anthony, and first-person answers read as his own words.",
+        decision:
+          "It's his AI assistant. It speaks as itself and talks about him; facts he wrote in the first person are retold about him. The greeting, starter questions and refusals say so, and the pets hand over the assistant's answer (\"here's the answer:\") instead of quoting him.",
+        consequences:
+          "Nobody mistakes a model's sentence for something Anthony said. Answers are a step less personal than hearing it from him.",
+        alternatives: ["Keep the first-person twin: more personal, but it puts words in Anthony's mouth."],
       },
     ],
   },

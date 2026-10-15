@@ -1,10 +1,10 @@
 import { NextResponse, after, type NextRequest } from "next/server";
-import { ASIDE_SEP, parseRelayed, splitAside } from "@/lib/twin/aside";
-import { MAX_MESSAGE } from "@/lib/twin/limits";
-import { loadHistory, modelCallsSince, recordStream, saveChat, type ChatRecord } from "@/lib/twin/log";
-import { decide, streamAnswer } from "@/lib/twin/openrouter";
-import { refusal, systemPrompt } from "@/lib/twin/prompt";
-import { RateLimiter } from "@/lib/twin/rateLimit";
+import { ASIDE_SEP, parseRelayed, splitAside } from "@/lib/assistant/aside";
+import { MAX_MESSAGE } from "@/lib/assistant/limits";
+import { loadHistory, modelCallsSince, recordStream, saveChat, type ChatRecord } from "@/lib/assistant/log";
+import { decide, streamAnswer } from "@/lib/assistant/openrouter";
+import { refusal, systemPrompt } from "@/lib/assistant/prompt";
+import { RateLimiter } from "@/lib/assistant/rateLimit";
 import {
   decisionRequest,
   everything,
@@ -13,22 +13,22 @@ import {
   readDecision,
   type ChatMessage,
   type Route,
-} from "@/lib/twin/route";
-import { serialize } from "@/lib/twin/serialize";
-import { isPet, soulOf } from "@/lib/twin/souls";
-import { UTM_TOKEN } from "@/lib/twin/visit";
+} from "@/lib/assistant/route";
+import { serialize } from "@/lib/assistant/serialize";
+import { isPet, soulOf } from "@/lib/assistant/souls";
+import { UTM_TOKEN } from "@/lib/assistant/visit";
 
-// The AI twin. One Jev call guards and routes the question, then the answer
+// The AI assistant. One Jev call guards and routes the question, then the answer
 // model streams a reply grounded only in the routed sections of src/data.
 // When the pet relays the chat, the model also writes the pet's aside in its
-// voice (from its soul), and the response is `aside SEP answer` (lib/twin/aside).
-// Each exchange is saved to Supabase once the response is over (lib/twin/log),
-// and that table is also the twin's memory: the browser sends only the new
+// voice (from its soul), and the response is `aside SEP answer` (lib/assistant/aside).
+// Each exchange is saved to Supabase once the response is over (lib/assistant/log),
+// and that table is also the assistant's memory: the browser sends only the new
 // question, and earlier turns are read back from the database, so a visitor
-// can't put words in the twin's mouth by forging its past replies.
-// Needs OPENROUTER_API_KEY; TWIN_MODEL and TWIN_ROUTER_MODEL override the models.
-const ANSWER_MODEL = process.env.TWIN_MODEL ?? "deepseek/deepseek-v4.1-flash";
-const ROUTER_MODEL = process.env.TWIN_ROUTER_MODEL ?? "typesafe/jev-1.13";
+// can't put words in the assistant's mouth by forging its past replies.
+// Needs OPENROUTER_API_KEY; ASSISTANT_MODEL and ASSISTANT_ROUTER_MODEL override the models.
+const ANSWER_MODEL = process.env.ASSISTANT_MODEL ?? "deepseek/deepseek-v4.1-flash";
+const ROUTER_MODEL = process.env.ASSISTANT_ROUTER_MODEL ?? "typesafe/jev-1.13";
 
 /**
  * Model calls allowed across all visitors, counted in the database so every
@@ -46,7 +46,7 @@ const limiter = new RateLimiter();
 export async function POST(req: NextRequest) {
   const started = Date.now();
   const key = process.env.OPENROUTER_API_KEY;
-  if (!key) return NextResponse.json({ error: "The twin is offline right now." }, { status: 503 });
+  if (!key) return NextResponse.json({ error: "The assistant is offline right now." }, { status: 503 });
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "local";
   if (!limiter.take(ip)) {
@@ -74,9 +74,9 @@ export async function POST(req: NextRequest) {
   ]);
   // Uncountable (database down) doesn't block: the per-instance limiter and the key's credit limit still apply.
   if ((lastHour ?? 0) >= HOURLY_CAP || (lastDay ?? 0) >= DAILY_CAP) {
-    console.warn("[twin] spend cap reached", { lastHour, lastDay });
+    console.warn("[assistant] spend cap reached", { lastHour, lastDay });
     return NextResponse.json(
-      { error: "The twin is taking a break. Try again later, or email me." },
+      { error: "The assistant is taking a break. Try again later, or email Anthony." },
       { status: 503 },
     );
   }
@@ -92,11 +92,11 @@ export async function POST(req: NextRequest) {
     } catch (err) {
       // Jev down or slow: send everything rather than fail, but keep a crude
       // injection check so the guard isn't simply off. The answer prompt still holds the line.
-      console.error("[twin] router failed, using every section", err);
+      console.error("[assistant] router failed, using every section", err);
       route = looksLikeInjection(question) ? { kind: "refuse", reason: "injection" } : everything();
     }
   }
-  console.info("[twin]", JSON.stringify(route));
+  console.info("[assistant]", JSON.stringify(route));
 
   const rawPet = (body as { pet?: unknown } | null)?.pet;
   const pet = isPet(rawPet) ? rawPet : null;
@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
     });
     return new Response(stream, { headers: textHeaders });
   } catch (err) {
-    console.error("[twin] answer failed", err);
+    console.error("[assistant] answer failed", err);
     save({ ...routed, answer: null, outcome: "failed" });
     return NextResponse.json({ error: "Something went wrong. Try again in a moment." }, { status: 502 });
   }

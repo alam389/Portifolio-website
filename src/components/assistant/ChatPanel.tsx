@@ -3,10 +3,10 @@
 import { X } from "lucide-react";
 import { useEffect, useRef, type RefObject } from "react";
 import { Composer, Linkified, Starters, Thinking, iconButton } from "./parts";
-import type { TwinChatState } from "./useTwinChat";
+import type { AssistantChatState } from "./useAssistantChat";
 
 /**
- * The twin as a plain chat panel, for when the pet is turned off: a
+ * The assistant as a plain chat panel, for when the pet is turned off: a
  * full-screen sheet on mobile, a corner panel from md up.
  */
 export default function ChatPanel({
@@ -18,7 +18,7 @@ export default function ChatPanel({
   onClose,
   onNavigate,
 }: {
-  chat: TwinChatState;
+  chat: AssistantChatState;
   greeting: string;
   starters: string[];
   privacyNote: string;
@@ -37,15 +37,15 @@ export default function ChatPanel({
   return (
     <section
       role="dialog"
-      aria-labelledby="twin-title"
+      aria-labelledby="assistant-title"
       data-pet-ignore
       onKeyDown={(e) => e.key === "Escape" && onClose()}
       className="fixed inset-0 z-50 flex flex-col bg-surface transition-[opacity,translate] duration-200 starting:translate-y-2 starting:opacity-0 motion-reduce:transition-none md:inset-auto md:right-6 md:bottom-6 md:z-30 md:h-[min(36rem,calc(100dvh-3rem))] md:w-96 md:rounded-[20px] md:border md:border-foreground/10 md:shadow-lg md:shadow-black/40 md:light:shadow-black/10"
     >
       <header className="flex items-start justify-between gap-4 border-b border-foreground/10 px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3 md:pt-3">
         <div>
-          <h2 id="twin-title" className="text-lg font-semibold">
-            Ask my AI twin
+          <h2 id="assistant-title" className="text-lg font-semibold">
+            Ask my AI assistant
           </h2>
           <p className="font-mono text-[11px] text-muted">Built from this site. It can get things wrong.</p>
         </div>
@@ -77,7 +77,7 @@ export default function ChatPanel({
                 key={i}
                 className={`max-w-[92%] whitespace-pre-wrap ${m.error ? "text-muted" : "text-foreground/85"}`}
               >
-                <span className="sr-only">Twin: </span>
+                <span className="sr-only">Assistant: </span>
                 {m.content ? <Linkified text={m.content} onNavigate={onNavigate} /> : <Thinking />}
               </li>
             ),

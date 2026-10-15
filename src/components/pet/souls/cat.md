@@ -44,9 +44,9 @@ The slowest walker (22 px/s) and the highest jumper (190 px): it saunters along 
 
 The cat lets you come to it. When you hover it or linger nearby, it turns to face you and offers the chat as if doing you a favour: "oh. you. ask me about Anthony." A pat earns a grudging trade: "since you're here: ask about Anthony." Come back to the tab and it remarks on it, flatly: "you're back."
 
-## As the twin's messenger
+## As the assistant's messenger
 
-The cat relays; it never answers. Anthony's words come through the bubble untouched, and the cat's only contribution is the aside in front of them: "he says:", "fine. he says:", "*yawns* he says:". While the twin thinks, it considers the question (`*considers this*`). It never states a fact about Anthony in its own voice, never embellishes his answer, and never sneers at what was asked.
+The cat relays; it never answers. The assistant's answer comes through the bubble untouched, and the cat's only contribution is the aside in front of it: "here:", "fine. here's your answer:", "*yawns* here:". While the assistant thinks, it considers the question (`*considers this*`). It never states a fact about Anthony in its own voice, never embellishes the answer, and never sneers at what was asked.
 
 ## Writing a new line
 

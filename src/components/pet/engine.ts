@@ -115,7 +115,7 @@ export class PetEngine {
   private spoken = 0;
   /** The platform it's standing on and since when, for remarks about the page. */
   private perchEl: Element | null = null;
-  /** The AI twin's chat is open: it sits where it is and the chat speaks for it. */
+  /** The AI assistant's chat is open: it sits where it is and the chat speaks for it. */
   private listening = false;
   private perchSince = 0;
   private world: World;
@@ -153,7 +153,7 @@ export class PetEngine {
   }
 
   private show(text: string, ambient: boolean) {
-    // While the twin talks through it, the chat bubble is its only voice.
+    // While the assistant talks through it, the chat bubble is its only voice.
     if (!this.talk || this.reduced || this.listening) return false;
     if (ambient && (this.speech || this.time < this.quietUntil)) return false;
     this.speech = { text, until: this.time + lingerFor(text), id: ++this.spoken };
@@ -202,7 +202,7 @@ export class PetEngine {
     else this.set("idle", 0.5);
   }
 
-  /** Acts out the chat: looks about while the twin thinks, bounces at an answer. */
+  /** Acts out the chat: looks about while the assistant thinks, bounces at an answer. */
   react(mood: "thinking" | "answered" | "idle") {
     if (!this.listening || !this.on || this.mode === "held" || this.reduced) return;
     if (mood === "thinking") this.set("look", Infinity);

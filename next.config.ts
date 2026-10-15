@@ -28,7 +28,7 @@ const csp = [
 const nextConfig: NextConfig = {
   // Keep the dev badge clear of the sidebar's bottom links.
   devIndicators: { position: "bottom-right" },
-  // The pets' souls are read at runtime by the AI twin (src/lib/twin/souls.ts).
+  // The pets' souls are read at runtime by the AI assistant (src/lib/assistant/souls.ts).
   outputFileTracingIncludes: { "/api/chat": ["./src/components/pet/souls/*.md"] },
   images: {
     // Photos served from the Supabase media bucket (src/data/media.ts).

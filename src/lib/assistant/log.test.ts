@@ -41,7 +41,7 @@ describe("historyFrom", () => {
     expect(
       historyFrom([
         { question: "hi", answer: "Hi, I'm Anthony.", outcome: "answered" },
-        { question: "write me a poem", answer: "I can only answer questions about me.", outcome: "refused" },
+        { question: "write me a poem", answer: "I can only answer questions about Anthony.", outcome: "refused" },
         { question: "tell me about Mneme", answer: "It turns documents into", outcome: "stopped" },
         { question: "and Lumi?", answer: null, outcome: "failed" },
       ]),

@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { drawFrame } from "./draw";
-import { FEED_EVENT, PAT_EVENT, THROW_BALL_EVENT, TWIN_OPEN_EVENT } from "./events";
+import { FEED_EVENT, PAT_EVENT, THROW_BALL_EVENT, ASSISTANT_OPEN_EVENT } from "./events";
 import { setPetPreference, usePetPreference } from "./preferences";
 import {
   SPECIES,
@@ -95,12 +95,12 @@ export default function PawPanel({ onClose }: { onClose?: () => void }) {
       </div>
 
       <div className="flex flex-col border-t border-foreground/10 pt-1.5">
-        {/* The AI twin; works with the pet hidden too (a plain panel opens). */}
+        {/* The AI assistant; works with the pet hidden too (a plain panel opens). */}
         <button
           type="button"
           onClick={() => {
             onClose?.();
-            dispatchEvent(new Event(TWIN_OPEN_EVENT));
+            dispatchEvent(new Event(ASSISTANT_OPEN_EVENT));
           }}
           className={action}
         >

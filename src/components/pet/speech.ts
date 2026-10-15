@@ -180,7 +180,7 @@ export function perchLine(species: SpeciesName, { tag, text }: Spot): string | n
   return lines ? pick(lines[species]) : null;
 }
 
-// --- Relaying the AI twin ---
+// --- Relaying the AI assistant ---
 
 /** What made the pet notice the visitor and invite them to chat; "hover" is the cursor on the pet itself. */
 export type Presence = "hover" | "near" | "pat" | "back" | "reading";
@@ -217,25 +217,25 @@ const INVITE: Record<Presence, PerSpecies> = {
 export const inviteLine = (species: SpeciesName, why: Presence) => pick(INVITE[why][species]);
 
 /**
- * When the chat talks through the pet: its hello, what it does while the twin
- * thinks, and its aside before passing on Anthony's answer. The pet never
- * states facts itself; the answer under the aside is the twin's.
+ * When the chat talks through the pet: its hello, what it does while the assistant
+ * thinks, and its aside before passing on the assistant's answer. The pet never
+ * states facts itself; the answer under the aside is the assistant's.
  */
 const RELAY: Record<SpeciesName, { hello: string; thinking: string[]; aside: string[] }> = {
   cat: {
-    hello: "I live on this site. Ask me about Anthony and I'll pass it on. Reluctantly.",
-    thinking: ["*considers this*", "*slow blink*", "hm. asking him."],
-    aside: ["he says:", "fine. he says:", "*yawns* he says:"],
+    hello: "I live on this site. Ask me about Anthony and I'll ask his assistant. Reluctantly.",
+    thinking: ["*considers this*", "*slow blink*", "hm. asking the assistant."],
+    aside: ["here:", "fine. here's your answer:", "*yawns* here:"],
   },
   dog: {
-    hello: "hi!! I live on this site! Ask me anything about Anthony and I'll fetch his answer!",
-    thinking: ["*sniffs around for it*", "asking him!!", "*tail wag* hold on!"],
-    aside: ["he says!!", "ooh, he says:", "*wag wag* he says:"],
+    hello: "hi!! I live on this site! Ask me anything about Anthony and I'll fetch the answer!",
+    thinking: ["*sniffs around for it*", "asking the assistant!!", "*tail wag* hold on!"],
+    aside: ["got it!!", "ooh, found it:", "*wag wag* here!!"],
   },
   bunny: {
     hello: "hi… I live on this site. You can ask me about Anthony, if you want.",
-    thinking: ["*nose twitch*", "*thinks very hard*", "um, asking him…"],
-    aside: ["he says…", "*binky* he says:", "um, he says:"],
+    thinking: ["*nose twitch*", "*thinks very hard*", "um, asking the assistant…"],
+    aside: ["here…", "*binky* found it:", "um, here's the answer:"],
   },
 };
 

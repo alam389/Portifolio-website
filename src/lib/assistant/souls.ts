@@ -20,7 +20,7 @@ export function soulOf(pet: Pet): string | null {
     try {
       cache.set(pet, readFileSync(join(process.cwd(), "src/components/pet/souls", `${pet}.md`), "utf8"));
     } catch (err) {
-      console.error("[twin] soul unreadable", pet, err);
+      console.error("[assistant] soul unreadable", pet, err);
       cache.set(pet, null);
     }
   }

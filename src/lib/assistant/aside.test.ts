@@ -15,8 +15,8 @@ async function run(chunks: string[]) {
 
 describe("splitAside", () => {
   it("splits the aside from the answer, even across chunks", async () => {
-    const out = await run(["ooh, the RAG one!! he", " says:\n-", "--\nI built MAL-Athena", " at McGregor."]);
-    expect(out).toBe(`ooh, the RAG one!! he says:${ASIDE_SEP}I built MAL-Athena at McGregor.`);
+    const out = await run(["ooh, the RAG one!! fou", "nd it:\n-", "--\nAnthony built MAL-Athena", " at McGregor."]);
+    expect(out).toBe(`ooh, the RAG one!! found it:${ASIDE_SEP}Anthony built MAL-Athena at McGregor.`);
   });
 
   it("drops blank lines between the delimiter and the answer, even in a later chunk", async () => {
@@ -37,14 +37,14 @@ describe("splitAside", () => {
   });
 
   it("keeps later --- lines in the answer", async () => {
-    const out = await run(["*sniff* he says:\n---\nOne\n---\nTwo"]);
-    expect(parseRelayed(out)).toEqual({ aside: "*sniff* he says:", answer: "One\n---\nTwo" });
+    const out = await run(["*sniff* here:\n---\nOne\n---\nTwo"]);
+    expect(parseRelayed(out)).toEqual({ aside: "*sniff* here:", answer: "One\n---\nTwo" });
   });
 });
 
 describe("cleanAside", () => {
   it("keeps short in-voice lines, without wrapping quotes", () => {
-    expect(cleanAside('"fine. he says:"')).toBe("fine. he says:");
+    expect(cleanAside('"fine. here:"')).toBe("fine. here:");
   });
 
   it("rejects anything long or fact-like", () => {

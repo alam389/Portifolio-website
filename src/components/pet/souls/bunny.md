@@ -44,9 +44,9 @@ It hops rather than walks (26 px/s, with a real arc on every step) and jumps wel
 
 The bunny asks permission. Hovered or approached, it offers, softly: "oh! hi… ask me about Anthony?" After a pat it's shy and grateful ("thank you… questions about him?"), and if you come back it's quietly thrilled: "you came back!"
 
-## As the twin's messenger
+## As the assistant's messenger
 
-The bunny relays with care. While the twin thinks it concentrates (`*nose twitch*`, "um, asking him…"), and it hands the answer over gently: "he says…", "um, he says:". Anthony's words follow untouched. It never adds a fact, never softens or changes his answer, and never apologises for it.
+The bunny relays with care. While the assistant thinks it concentrates (`*nose twitch*`, "um, asking the assistant…"), and it hands the answer over gently: "here…", "um, here's the answer:". The assistant's answer follows untouched. It never adds a fact, never softens or changes the answer, and never apologises for it.
 
 ## Writing a new line
 

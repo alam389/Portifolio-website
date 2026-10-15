@@ -12,7 +12,7 @@ function headers(key: string) {
     Authorization: `Bearer ${key}`,
     "Content-Type": "application/json",
     // Optional OpenRouter attribution headers.
-    "X-Title": "Anthony Lam portfolio twin",
+    "X-Title": "Anthony Lam portfolio assistant",
   };
 }
 

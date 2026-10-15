@@ -11,14 +11,14 @@ import {
   projectStatusLabel,
   restaurants,
   skills,
-  twin,
+  assistant,
   volunteering,
   type Experience,
   type Project,
 } from "@/data";
 
-// The twin's view of src/data: each section as plain text for the answer
-// model. Drafts never reach it, in dev or production, so the twin says it
+// The assistant's view of src/data: each section as plain text for the answer
+// model. Drafts never reach it, in dev or production, so the assistant says it
 // doesn't know rather than repeating a placeholder.
 
 export const SECTION_IDS = [
@@ -149,10 +149,10 @@ function interestsSection(): string {
     ),
   ];
   const cooking = live(dishes);
-  if (cooking.length) parts.push("### What I cook", ...cooking.map((d) => `- ${d.name}${d.note ? `: ${d.note}` : ""}`));
+  if (cooking.length) parts.push("### What Anthony cooks", ...cooking.map((d) => `- ${d.name}${d.note ? `: ${d.note}` : ""}`));
   const eating = live(restaurants);
   if (eating.length)
-    parts.push("### Where I eat", ...eating.map((r) => `- ${r.name}, ${r.city} (${r.cuisine}): I order ${r.order}`));
+    parts.push("### Where Anthony eats", ...eating.map((r) => `- ${r.name}, ${r.city} (${r.cuisine}): he orders ${r.order}`));
   const active = live(activities);
   if (active.length)
     parts.push(
@@ -169,9 +169,9 @@ function interestsSection(): string {
 }
 
 function faqsSection(): string {
-  const facts = live(twin.facts);
+  const facts = live(assistant.facts);
   if (!facts.length) return "";
-  return ["## Questions I get asked", ...facts.map((f) => `Q: ${f.question}\nA: ${f.answer}`)].join("\n\n");
+  return ["## Questions Anthony gets asked (answers in his own words)", ...facts.map((f) => `Q: ${f.question}\nA: ${f.answer}`)].join("\n\n");
 }
 
 const build: Record<SectionId, () => string> = {

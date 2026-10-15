@@ -3,18 +3,18 @@
 import { MessageCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { TWIN_DISMISS_EVENT, TWIN_OPEN_EVENT, TWIN_SUMMON_EVENT } from "@/components/pet/events";
+import { ASSISTANT_DISMISS_EVENT, ASSISTANT_OPEN_EVENT, ASSISTANT_SUMMON_EVENT } from "@/components/pet/events";
 import { usePetPreference } from "@/components/pet/preferences";
 import ChatPanel from "./ChatPanel";
 import PetBubble from "./PetBubble";
-import { useTwinChat } from "./useTwinChat";
+import { useAssistantChat } from "./useAssistantChat";
 
-// The AI twin, on every page (mounted from layout.tsx, so the conversation
+// The AI assistant, on every page (mounted from layout.tsx, so the conversation
 // survives navigation). With the pet on, there's no button: the pet invites
 // the visitor to ask (and the paw menu has an "Ask" row), then relays the
 // answers in a speech bubble. With it off, a corner button opens a plain panel.
 
-export default function TwinChat({
+export default function AssistantChat({
   greeting,
   starters,
   privacyNote,
@@ -24,7 +24,7 @@ export default function TwinChat({
   privacyNote: string;
 }) {
   const [open, setOpen] = useState(false);
-  const chat = useTwinChat();
+  const chat = useAssistantChat();
   const pet = usePetPreference();
   const input = useRef<HTMLTextAreaElement>(null);
   /** Whatever opened the chat (the launcher, the pet's invite, the paw menu), for focus to return to. */
@@ -37,10 +37,10 @@ export default function TwinChat({
     opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     flushSync(() => setOpen(true));
     input.current?.focus();
-    dispatchEvent(new Event(TWIN_SUMMON_EVENT));
+    dispatchEvent(new Event(ASSISTANT_SUMMON_EVENT));
   }
   function hide() {
-    dispatchEvent(new Event(TWIN_DISMISS_EVENT));
+    dispatchEvent(new Event(ASSISTANT_DISMISS_EVENT));
     flushSync(() => setOpen(false));
     // The launcher re-mounts on close, so it's a new element: focus that instead.
     if (opener.current?.isConnected) opener.current.focus();
@@ -54,8 +54,8 @@ export default function TwinChat({
   });
   useEffect(() => {
     const onOpen = () => showRef.current();
-    addEventListener(TWIN_OPEN_EVENT, onOpen);
-    return () => removeEventListener(TWIN_OPEN_EVENT, onOpen);
+    addEventListener(ASSISTANT_OPEN_EVENT, onOpen);
+    return () => removeEventListener(ASSISTANT_OPEN_EVENT, onOpen);
   }, []);
   // Following a link from a reply: on mobile the chat covers the page, so close it.
   function onNavigate() {

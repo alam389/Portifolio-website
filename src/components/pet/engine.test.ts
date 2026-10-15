@@ -270,7 +270,7 @@ describe("PetEngine", () => {
     });
   });
 
-  describe("relaying the AI twin", () => {
+  describe("relaying the AI assistant", () => {
     /** A pet that has wandered a while, then is asked to relay the chat. */
     const listening = (species: "cat" | "dog" | "bunny", reduced = false, stage = new Stage()) => {
       const engine = make(species, reduced, stage);

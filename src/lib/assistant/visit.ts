@@ -3,8 +3,8 @@
 // session, and it ends when the tab closes. Storage can be blocked (private
 // windows, strict settings); then each page load is its own session.
 
-const SESSION_KEY = "twin-session";
-const SOURCE_KEY = "twin-source";
+const SESSION_KEY = "assistant-session";
+const SOURCE_KEY = "assistant-source";
 
 export interface Source {
   /** The referring site's domain only, e.g. "linkedin.com"; null for direct visits or this site. */

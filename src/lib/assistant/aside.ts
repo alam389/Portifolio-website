@@ -1,6 +1,6 @@
 // When the pet relays the chat, the answer model writes the pet's aside first
-// ("ooh, the Graph-RAG one!! he says:"), then a line of "---", then Anthony's
-// answer. The route splits the two as they stream and sends the client
+// ("ooh, the Graph-RAG one!! found it:"), then a line of "---", then the
+// assistant's answer. The route splits the two as they stream and sends the client
 // `aside SEP answer…`, with the aside empty when the model's wasn't usable;
 // the bubble then falls back to a fixed line from speech.ts.
 

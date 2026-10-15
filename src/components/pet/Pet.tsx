@@ -10,12 +10,12 @@ import {
   FEED_EVENT,
   PAT_EVENT,
   THROW_BALL_EVENT,
-  TWIN_BUBBLE_SELECTOR,
-  TWIN_DISMISS_EVENT,
-  TWIN_MOOD_EVENT,
-  TWIN_OPEN_EVENT,
-  TWIN_SUMMON_EVENT,
-  type TwinMood,
+  ASSISTANT_BUBBLE_SELECTOR,
+  ASSISTANT_DISMISS_EVENT,
+  ASSISTANT_MOOD_EVENT,
+  ASSISTANT_OPEN_EVENT,
+  ASSISTANT_SUMMON_EVENT,
+  type AssistantMood,
 } from "./events";
 import { attachGestures } from "./gestures";
 import { hourLine, inviteLine, perchLine, routeLine, themeLine, type Presence } from "./speech";
@@ -305,13 +305,13 @@ export default function Pet({
       anchor(box, tail, inviteW, inviteH, lift);
     };
 
-    // The AI twin's chat bubble, while the chat talks through the pet: over its
+    // The AI assistant's chat bubble, while the chat talks through the pet: over its
     // head, or under its feet when there's no room above. Clamped on screen.
-    let twinBubble: HTMLElement | null = null;
-    const placeTwin = (lift: number) => {
-      const el = twinBubble;
+    let assistantBubble: HTMLElement | null = null;
+    const placeAssistant = (lift: number) => {
+      const el = assistantBubble;
       if (!el) return;
-      if (!el.isConnected) return void (twinBubble = null);
+      if (!el.isConnected) return void (assistantBubble = null);
       const pad = 12;
       const gap = 10;
       const w = el.offsetWidth;
@@ -353,7 +353,7 @@ export default function Pet({
       place(lift);
       sense(now);
       placeInvite(now, lift);
-      placeTwin(lift);
+      placeAssistant(lift);
 
       const ball = engine.ball;
       if (ballBox.current) {
@@ -396,17 +396,17 @@ export default function Pet({
     const throwBall = () => engine.throwBall();
     const pat = () => engine.pet();
     const feed = () => engine.feed(food.frame[0].length);
-    // The AI twin's chat talks through the pet: it sits and carries the bubble.
+    // The AI assistant's chat talks through the pet: it sits and carries the bubble.
     const summon = () => {
-      twinBubble = document.querySelector<HTMLElement>(TWIN_BUBBLE_SELECTOR);
-      if (!twinBubble) return;
+      assistantBubble = document.querySelector<HTMLElement>(ASSISTANT_BUBBLE_SELECTOR);
+      if (!assistantBubble) return;
       asked = true;
       engine.summon();
     };
     const inviteEl = invite.current;
     const onInvite = () => {
       hideInvite(performance.now(), true);
-      dispatchEvent(new Event(TWIN_OPEN_EVENT));
+      dispatchEvent(new Event(ASSISTANT_OPEN_EVENT));
     };
     // Mouse or pen only: a touch "hover" is a tap, which pats it instead.
     const onPetEnter = (e: PointerEvent) => {
@@ -429,10 +429,10 @@ export default function Pet({
     inviteEl?.addEventListener("focus", onInviteEnter);
     inviteEl?.addEventListener("blur", onInviteLeave);
     const dismiss = () => {
-      twinBubble = null;
+      assistantBubble = null;
       engine.dismiss();
     };
-    const mood = (e: Event) => engine.react((e as CustomEvent<TwinMood>).detail);
+    const mood = (e: Event) => engine.react((e as CustomEvent<AssistantMood>).detail);
     // A new pet picked mid-chat takes over the open bubble.
     summon();
     // Dev shortcuts: B throws a ball, F feeds.
@@ -468,9 +468,9 @@ export default function Pet({
     addEventListener(THROW_BALL_EVENT, throwBall);
     addEventListener(PAT_EVENT, pat);
     addEventListener(FEED_EVENT, feed);
-    addEventListener(TWIN_SUMMON_EVENT, summon);
-    addEventListener(TWIN_DISMISS_EVENT, dismiss);
-    addEventListener(TWIN_MOOD_EVENT, mood);
+    addEventListener(ASSISTANT_SUMMON_EVENT, summon);
+    addEventListener(ASSISTANT_DISMISS_EVENT, dismiss);
+    addEventListener(ASSISTANT_MOOD_EVENT, mood);
     document.addEventListener("visibilitychange", onVisibility);
     addEventListener("resize", measure);
     addEventListener("scroll", onScroll, { passive: true });
@@ -485,9 +485,9 @@ export default function Pet({
       removeEventListener(THROW_BALL_EVENT, throwBall);
       removeEventListener(PAT_EVENT, pat);
       removeEventListener(FEED_EVENT, feed);
-      removeEventListener(TWIN_SUMMON_EVENT, summon);
-      removeEventListener(TWIN_DISMISS_EVENT, dismiss);
-      removeEventListener(TWIN_MOOD_EVENT, mood);
+      removeEventListener(ASSISTANT_SUMMON_EVENT, summon);
+      removeEventListener(ASSISTANT_DISMISS_EVENT, dismiss);
+      removeEventListener(ASSISTANT_MOOD_EVENT, mood);
       el.removeEventListener("pointerenter", onPetEnter);
       el.removeEventListener("pointerleave", onPetLeave);
       inviteEl?.removeEventListener("click", onInvite);

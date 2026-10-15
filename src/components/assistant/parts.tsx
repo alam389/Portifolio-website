@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowUp, Square } from "lucide-react";
 import { useId, useState, type FormEvent, type KeyboardEvent, type RefObject } from "react";
-import { MAX_MESSAGE } from "@/lib/twin/limits";
+import { MAX_MESSAGE } from "@/lib/assistant/limits";
 
 // Pieces shared by the chat panel and the pet's speech bubble.
 

@@ -44,6 +44,10 @@ A canvas pixel-art pet (cat, dog or bunny) that walks on page elements, jumps be
 - `PetLab.tsx` (+ `/pet-lab`) — review page for sprites, dev only. `scripts/pet-sheet.mjs <species>` renders a contact sheet and validates frame size and palette. `sprites/sprites.test.ts` checks that every animation's frames exist and every frame is 16×16 with valid palette characters, so keep it passing when adding a species.
 - The paw menu (`PawMenu` → `PawPanel`, in the sidebar) picks species and coat and dispatches the throw/feed/pat events; the dev-only `B` and `F` keys do the same.
 
+### The AI assistant (`src/lib/assistant/`, `src/components/assistant/`, `src/app/api/chat/`)
+
+A chat where visitors ask Anthony's AI assistant about him. It speaks as itself and talks about him in the third person (never as Anthony), answering only from `src/data` plus `src/data/assistant.ts`. With the pet on, the pet relays it in a speech bubble; otherwise a plain panel opens. `docs/ai-assistant.md` is the plan and the record of its decisions; read it before changing the assistant. It was called the "AI twin" until 2026-10-14; the Supabase table and view (`twin_chats`, `twin_sessions`) keep that name.
+
 ### Conventions worth knowing
 
 - **Tailwind v4, CSS-first config.** No `tailwind.config.js`. Tokens are CSS variables plus `@theme inline` in `src/app/globals.css` (`bg-background`, `text-foreground`, `bg-surface`; `light:` variant for the few spots tokens can't cover).

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { activities, experiences, journey, profile, projects, twin } from "@/data";
+import { activities, experiences, journey, profile, projects, assistant } from "@/data";
 import { SECTION_IDS, serialize } from "./serialize";
 
 const sections = serialize();
@@ -13,7 +13,7 @@ describe("serialize", () => {
   it("never includes draft entries", () => {
     for (const stop of journey.filter((s) => s.draft)) expect(sections.journey).not.toContain(stop.title);
     for (const a of activities.filter((a) => a.draft)) expect(all).not.toContain(a.description);
-    for (const f of twin.facts.filter((f) => f.draft)) expect(all).not.toContain(f.question);
+    for (const f of assistant.facts.filter((f) => f.draft)) expect(all).not.toContain(f.question);
     expect(all).not.toContain("Placeholder");
   });
 
