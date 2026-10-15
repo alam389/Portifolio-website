@@ -35,7 +35,7 @@ export const projects: Project[] = [
     title: "Portfolio Website",
     tagline: "This site, built from scratch",
     description:
-      "My personal site: a quiet editorial design with a left sidebar nav, a dark default and a light toggle, and all content kept in typed data modules. The expressive parts are a scroll-paged Journey page on a three.js particle-terrain globe and a canvas pixel-art pet (cat, dog or bunny) that walks on the page, jumps between elements, plays fetch and talks. The resume is served from a private Supabase bucket through a short-lived signed URL.",
+      "My personal site: a quiet editorial design with a left sidebar nav, a dark default and a light toggle, and all content kept in typed data modules. The expressive parts are a scroll-paged Journey page on a three.js particle-terrain globe and a canvas pixel-art pet (cat, dog or bunny) that walks on the page, jumps between elements, plays fetch and talks. The resume is served from a private Supabase bucket through a short-lived signed URL. The pet is also the way in to an AI twin: visitors ask it about me and get first-person answers grounded only in the site's own data.",
     status: "in-progress",
     tags: ["Frontend"],
     technologies: ["Next.js", "React", "TypeScript", "Tailwind CSS", "three.js", "Supabase"],
@@ -53,6 +53,135 @@ export const projects: Project[] = [
       "The first fun part is the Journey page. It's a three.js globe made of particle terrain, and as you scroll, the camera flies between the places that shaped me, drawing arcs between stops, with photos and stories for each one. All the scroll maths sits in its own tested module, so the 3D components just follow what it says.",
       "The second is the pixel pet. You can pick a cat, a dog or a bunny, and it walks along the page, jumping between elements like they're platforms. You can pick it up and throw it, play fetch, feed it treats, and it talks in little speech bubbles. I wrote my own physics for it, and the sprites are 16 by 16 pixel art I authored as text, one file per animal.",
       "Beyond that there's an Interests section for the papers, books and podcasts I'm into, plus food and staying active, and a custom 404 that drops you on Null Island. It's still in progress, and I keep adding to it whenever I have an idea I want to try.",
+    ],
+    // The AI twin's pipeline and decisions. Every line restates docs/ai-twin.md
+    // or the code in src/lib/twin, src/components/twin and src/app/api/chat.
+    architecture: {
+      title: "The AI twin: how a question becomes an answer",
+      steps: [
+        {
+          id: "invite",
+          label: "Pet invites",
+          detail: "On hover, pat, return",
+          why: "The pet notices the visitor and stops to invite them to ask about Anthony, then relays the answers in a speech bubble anchored to it. Hovering it always works; the other invites back off each time one is ignored and stop once the chat has been used. With the pet hidden, a corner button opens a plain chat panel.",
+          instead:
+            "A floating \"Ask me\" button in the corner, then a mat in the corner the pet leapt onto. Both cluttered the quiet design, and the pet already lives on every page.",
+        },
+        {
+          id: "guard",
+          label: "Guard + router",
+          detail: "One Jev call",
+          why: "Jev (TypeSafe, on OpenRouter) is a decision model: it returns typed yes-probabilities, not prose, fast and nearly free. One call refuses off-topic questions, injection attempts and gibberish with a canned reply, and scores which parts of the site's data the answer needs. Messages with no letters or digits are refused before Jev is called.",
+          instead:
+            "Tool use by the answer model. A typed routing answer is more predictable and easier to log.",
+        },
+        {
+          id: "context",
+          label: "Routed data",
+          detail: "Only what's needed",
+          why: "The twin reads the same typed modules the site renders, so the two never disagree. Drafts are dropped, and first-person stories are used over card summaries. If nothing scores high, or Jev is down, it gets all of src/data, which still fits.",
+        },
+        {
+          id: "answer",
+          label: "Answer",
+          detail: "DeepSeek V4.1 Flash",
+          why: "Answers in the first person, only from the facts it was given, and says it hasn't written about something rather than guess. Swapping models is one setting.",
+          instead: "Claude Haiku 5.5, the first default.",
+        },
+        {
+          id: "pace",
+          label: "Reading pace",
+          detail: "~240 words/min",
+          why: "The server streams as fast as the model writes; the chat shows it a word at a time at reading speed, so it reads like someone talking. Stop ends it where it is, and with reduced motion it appears at once.",
+        },
+        {
+          id: "log",
+          label: "Logged",
+          detail: "Supabase, no IPs",
+          why: "Each exchange is saved after the response has gone out, so it never slows the chat: question, answer, why it was refused if it was, which data was used and the model. The table is server-only, and the chat says chats are saved.",
+        },
+      ],
+    },
+    decisions: [
+      {
+        id: "ground-in-data",
+        title: "Ground the twin in src/data, nothing else",
+        date: "Oct 2026",
+        status: "accepted",
+        context:
+          "A chatbot speaking as Anthony can make things up, and anything it says reads as his own words to a recruiter.",
+        decision:
+          "The twin answers only from the same typed data modules the site renders. They're turned into text with drafts removed, first-person stories are preferred over card summaries, and the prompt tells it to say it hasn't written about something instead of guessing.",
+        consequences:
+          "Editing the site's data updates the twin too, and the two can't disagree. Questions the site doesn't cover get \"I haven't written about that here\" and a pointer to email, not an answer.",
+      },
+      {
+        id: "router-not-tools",
+        title: "Route with a decision model instead of tool use",
+        date: "Oct 2026",
+        status: "accepted",
+        context:
+          "All of src/data is about 12k tokens. Sending it every time is wasteful, and the answer model needs the right sections to answer well.",
+        decision:
+          "One call to Jev, a decision model on OpenRouter, scores which sections a question needs; code fetches them and only those go to the answer model, with the profile always included. If nothing scores high, or Jev fails, everything is sent.",
+        consequences:
+          "The extra call is fast and nearly free, and every route is a typed answer that's easy to log. It adds a second model to depend on, and Jev is young; the send-everything fallback keeps a misroute from leaving the twin without facts.",
+        alternatives: [
+          "Tool use, where the answer model fetches sections itself: less predictable and harder to log.",
+          "Always send all of src/data: simpler, but every answer pays for every section.",
+        ],
+      },
+      {
+        id: "guard",
+        title: "Refuse off-topic, injection and gibberish before answering",
+        date: "Oct 2026",
+        status: "accepted",
+        context:
+          "A public chat will get homework questions, attempts to rewrite its instructions, and keyboard mashing. Each one costs an answer.",
+        decision:
+          "The same Jev call also asks whether the message is about Anthony, whether it's trying to manipulate the assistant, and whether it's gibberish. Any of those gets a short canned reply with no answer-model call. Messages with no letters or digits are refused in code before Jev is called. Visitors are limited to 8 messages a minute and 60 a day, 500 characters each, and all visitors together to 120 answers an hour and 500 a day. The browser sends only the new question; earlier turns are read back from the database, so nobody can forge the twin's past replies to steer it.",
+        consequences:
+          "Refusals cost almost nothing. The thresholds are lenient, and the gibberish one is high, so short or odd real messages like \"why?\" still get through; the answer prompt is the second line of defence. The per-visitor limit is in memory, so on serverless it's a speed bump; the shared cap is counted in the database, and the OpenRouter key's credit limit is the last backstop.",
+      },
+      {
+        id: "pet-is-the-chat",
+        title: "The pixel pet is the way into the chat",
+        date: "Oct 2026",
+        status: "accepted",
+        context:
+          "The site is quiet on purpose, and its bottom-right corner is the pet's floor. A chat button there competes with both.",
+        decision:
+          "With the pet on there's no button. The pet invites visitors when it notices them (hovering it, the cursor lingering near it, a pat, coming back to the tab, pausing to read) and the chat opens as its speech bubble, wherever it is. The paw menu has an \"Ask about Anthony\" row, and with the pet hidden a corner button opens a plain panel.",
+        consequences:
+          "The chat feels like part of the site rather than a widget bolted on. It's less obvious than a labelled button, so the invites carry discovery, with a cooldown so they don't nag.",
+        alternatives: [
+          "A /chat page: calm, but easy to miss in a quick skim.",
+          "A floating widget: always visible, but clutters the design and collides with the pet.",
+          "The pet leaping onto a mat in the corner to talk: worked, but talking in place felt more natural.",
+        ],
+      },
+      {
+        id: "reading-pace",
+        title: "Reveal answers at reading pace",
+        date: "Oct 2026",
+        status: "accepted",
+        context: "A fast model dumps a paragraph at once, which reads like a wall of text rather than someone talking.",
+        decision:
+          "The server streams as fast as the model writes, and the chat reveals the text a word at a time at about 240 words a minute, never splitting a word. Stop ends the reveal where it is; with reduced motion the answer appears at once.",
+        consequences:
+          "Answers feel conversational and the server stays fast. A long answer takes longer to finish showing than to arrive.",
+      },
+      {
+        id: "log-chats",
+        title: "Save every exchange, without identifying anyone",
+        date: "Oct 2026",
+        status: "accepted",
+        context: "There's no way to know what people ask, or whether answers and routes are any good, without keeping them.",
+        decision:
+          "Each exchange is saved to a Supabase table after the response has been sent: question, answer, outcome, refusal reason, routed sections, model, timing, page, a random session ID that lasts until the tab closes, and where the visitor came from (the referring site's domain and utm_source, never the full URL). No IPs. The table is server-only, and the chat tells visitors chats are saved.",
+        consequences:
+          "Misroutes, bad answers and over-eager refusals show up in the data, chats can be read as whole sessions, and it shows whether visitors come from LinkedIn or a resume link. Chats are kept until deleted, so the note in the chat matters.",
+      },
     ],
   },
   {

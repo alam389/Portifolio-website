@@ -108,11 +108,31 @@ export interface Project {
   story?: string[];
   /** A pipeline diagram where each step explains its design decision. Gives the project its own page at /projects/[id]. */
   architecture?: Architecture;
+  /** Architecture decision records, shown under the diagram on the project's page. */
+  decisions?: Decision[];
 }
 
 /** A system drawn as steps in order; each step carries the reason it's built that way. */
 export interface Architecture {
+  /** What the diagram shows, when it's one part of the project, e.g. "The AI twin". */
+  title?: string;
   steps: ArchitectureStep[];
+}
+
+/** An architecture decision record: one choice, why it was made, and what it costs. */
+export interface Decision {
+  id: string;
+  title: string;
+  /** Display date, e.g. "Oct 2026". */
+  date: string;
+  status: "accepted" | "superseded";
+  /** The problem or constraint that forced a choice. */
+  context: string;
+  decision: string;
+  /** What follows from it, good and bad. */
+  consequences: string;
+  /** Options considered and why they lost. */
+  alternatives?: string[];
 }
 
 export interface ArchitectureStep {

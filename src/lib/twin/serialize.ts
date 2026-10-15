@@ -67,6 +67,9 @@ function project(p: Project): string {
     p.live && `Live: ${p.live}`,
     p.architecture && `Page with architecture diagram: /projects/${p.id}`,
     ...(p.story?.length ? p.story : [p.description]),
+    ...(p.decisions ?? []).map(
+      (d) => `Decision: ${d.title}. Why: ${d.context} What: ${d.decision} Trade-offs: ${d.consequences}`,
+    ),
   );
 }
 

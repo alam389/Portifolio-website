@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ArchitectureDiagram from "@/components/ArchitectureDiagram";
+import DecisionLog from "@/components/DecisionLog";
 import { projects, projectStatusLabel } from "@/data";
 
 // Only projects with an architecture diagram get a page for now.
@@ -72,10 +73,26 @@ export default async function ProjectPage({ params }: Props) {
 
       <section className="mt-10">
         <h2 className="font-mono text-xs tracking-wide text-muted uppercase">How it works</h2>
+        {project.architecture.title && (
+          <p className="mt-3 font-medium">{project.architecture.title}</p>
+        )}
         <div className="mt-4">
           <ArchitectureDiagram architecture={project.architecture} />
         </div>
       </section>
+
+      {project.decisions && project.decisions.length > 0 && (
+        <section className="mt-10">
+          <h2 className="font-mono text-xs tracking-wide text-muted uppercase">Decisions</h2>
+          <p className="mt-3 text-sm text-foreground/70">
+            The choices behind it, as architecture decision records. Open one for the context,
+            what was decided and what it costs.
+          </p>
+          <div className="mt-4">
+            <DecisionLog decisions={project.decisions} />
+          </div>
+        </section>
+      )}
 
       {project.video && (
         <video
