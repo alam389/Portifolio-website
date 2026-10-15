@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { recordStream } from "./log";
+import { historyFrom, recordStream } from "./log";
 
 const source = (chunks: string[]) => {
   const encoder = new TextEncoder();
@@ -33,5 +33,23 @@ describe("recordStream", () => {
     await reader.read();
     controller.abort();
     expect(await finished).toEqual({ text: "Half an ", complete: false });
+  });
+});
+
+describe("historyFrom", () => {
+  it("turns saved exchanges into chat turns, skipping refusals and failures", () => {
+    expect(
+      historyFrom([
+        { question: "hi", answer: "Hi, I'm Anthony.", outcome: "answered" },
+        { question: "write me a poem", answer: "I can only answer questions about me.", outcome: "refused" },
+        { question: "tell me about Mneme", answer: "It turns documents into", outcome: "stopped" },
+        { question: "and Lumi?", answer: null, outcome: "failed" },
+      ]),
+    ).toEqual([
+      { role: "user", content: "hi" },
+      { role: "assistant", content: "Hi, I'm Anthony." },
+      { role: "user", content: "tell me about Mneme" },
+      { role: "assistant", content: "It turns documents into" },
+    ]);
   });
 });

@@ -3,7 +3,9 @@ import type { SpeciesName } from "./sprites";
 /**
  * What the pet says, kept apart from the engine so the copy is easy to tweak.
  * Short on purpose: mostly sounds and single words, in each species' voice
- * (the cat is dry and aloof, the dog excitable, the bunny shy).
+ * (the cat is dry and aloof, the dog excitable, the bunny shy). Each one's
+ * personality and voice rules are in souls/<species>.md: read it before
+ * writing new lines.
  */
 
 export type Moment =

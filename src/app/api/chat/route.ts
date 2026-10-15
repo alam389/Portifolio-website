@@ -1,23 +1,43 @@
 import { NextResponse, after, type NextRequest } from "next/server";
+import { ASIDE_SEP, parseRelayed, splitAside } from "@/lib/twin/aside";
 import { MAX_MESSAGE } from "@/lib/twin/limits";
-import { recordStream, saveChat, type ChatRecord } from "@/lib/twin/log";
+import { loadHistory, modelCallsSince, recordStream, saveChat, type ChatRecord } from "@/lib/twin/log";
 import { decide, streamAnswer } from "@/lib/twin/openrouter";
 import { refusal, systemPrompt } from "@/lib/twin/prompt";
 import { RateLimiter } from "@/lib/twin/rateLimit";
-import { decisionRequest, everything, readDecision, type ChatMessage, type Route } from "@/lib/twin/route";
+import {
+  decisionRequest,
+  everything,
+  looksLikeInjection,
+  obviouslyNonsense,
+  readDecision,
+  type ChatMessage,
+  type Route,
+} from "@/lib/twin/route";
 import { serialize } from "@/lib/twin/serialize";
+import { isPet, soulOf } from "@/lib/twin/souls";
+import { UTM_TOKEN } from "@/lib/twin/visit";
 
 // The AI twin. One Jev call guards and routes the question, then the answer
 // model streams a reply grounded only in the routed sections of src/data.
-// Each exchange is saved to Supabase once the response is over (lib/twin/log).
+// When the pet relays the chat, the model also writes the pet's aside in its
+// voice (from its soul), and the response is `aside SEP answer` (lib/twin/aside).
+// Each exchange is saved to Supabase once the response is over (lib/twin/log),
+// and that table is also the twin's memory: the browser sends only the new
+// question, and earlier turns are read back from the database, so a visitor
+// can't put words in the twin's mouth by forging its past replies.
 // Needs OPENROUTER_API_KEY; TWIN_MODEL and TWIN_ROUTER_MODEL override the models.
 const ANSWER_MODEL = process.env.TWIN_MODEL ?? "deepseek/deepseek-v4.1-flash";
 const ROUTER_MODEL = process.env.TWIN_ROUTER_MODEL ?? "typesafe/jev-1.13";
 
-/** Turns of history kept for the answer model. */
-const MAX_TURNS = 12;
-/** Longest past assistant reply sent back as history. */
-const MAX_REPLY = 4000;
+/**
+ * Model calls allowed across all visitors, counted in the database so every
+ * server instance shares them (the in-memory limiter is per instance). The
+ * real backstop is the credit limit on the OpenRouter key.
+ */
+const HOURLY_CAP = 120;
+const DAILY_CAP = 500;
+const HOUR_MS = 60 * 60_000;
 
 // src/data is static, so serialize once per server instance.
 const sections = serialize();
@@ -37,32 +57,62 @@ export async function POST(req: NextRequest) {
   }
 
   const body: unknown = await req.json().catch(() => null);
-  const messages = parse(body);
-  if (!messages) {
+  const question = parse(body);
+  if (!question) {
     return NextResponse.json(
-      { error: `Messages must be under ${MAX_MESSAGE} characters.` },
+      { error: `Send a question of up to ${MAX_MESSAGE} characters.` },
       { status: 400 },
     );
   }
+  const where = visit(body);
+
+  const now = Date.now();
+  const [history, lastHour, lastDay] = await Promise.all([
+    loadHistory(where.conversation_id),
+    modelCallsSince(new Date(now - HOUR_MS)),
+    modelCallsSince(new Date(now - 24 * HOUR_MS)),
+  ]);
+  // Uncountable (database down) doesn't block: the per-instance limiter and the key's credit limit still apply.
+  if ((lastHour ?? 0) >= HOURLY_CAP || (lastDay ?? 0) >= DAILY_CAP) {
+    console.warn("[twin] spend cap reached", { lastHour, lastDay });
+    return NextResponse.json(
+      { error: "The twin is taking a break. Try again later, or email me." },
+      { status: 503 },
+    );
+  }
+  const messages: ChatMessage[] = [...history, { role: "user", content: question }];
 
   let route: Route;
-  try {
-    route = readDecision(await decide(decisionRequest(messages, ROUTER_MODEL), key));
-  } catch (err) {
-    // Jev down or slow: skip the guard and send everything. The answer prompt still holds the line.
-    console.error("[twin] router failed, using every section", err);
-    route = everything();
+  if (obviouslyNonsense(question)) {
+    // Nothing to read at all: no need to ask Jev.
+    route = { kind: "refuse", reason: "nonsense" };
+  } else {
+    try {
+      route = readDecision(await decide(decisionRequest(messages, ROUTER_MODEL), key));
+    } catch (err) {
+      // Jev down or slow: send everything rather than fail, but keep a crude
+      // injection check so the guard isn't simply off. The answer prompt still holds the line.
+      console.error("[twin] router failed, using every section", err);
+      route = looksLikeInjection(question) ? { kind: "refuse", reason: "injection" } : everything();
+    }
   }
   console.info("[twin]", JSON.stringify(route));
 
-  const base = { ...visit(body), question: messages[messages.length - 1].content };
+  const rawPet = (body as { pet?: unknown } | null)?.pet;
+  const pet = isPet(rawPet) ? rawPet : null;
+  const soul = pet && soulOf(pet);
+  const relay = pet && soul ? { pet, soul } : undefined;
+  // With a pet, every response starts with its (possibly empty) aside.
+  const prefix = pet ? ASIDE_SEP : "";
+
+  const base = { ...where, pet, question };
   const save = (record: Omit<ChatRecord, keyof typeof base | "duration_ms">) =>
     after(() => saveChat({ ...base, ...record, duration_ms: Date.now() - started }));
 
   if (route.kind === "refuse") {
-    const reply = refusal();
+    const reply = refusal(route.reason);
     save({ answer: reply, outcome: "refused", refused_reason: route.reason });
-    return text(reply);
+    return text(prefix + reply);
   }
 
   const routed = { sections: route.sections, fallback: route.fallback, model: ANSWER_MODEL };
@@ -70,18 +120,26 @@ export async function POST(req: NextRequest) {
     const answer = await streamAnswer({
       key,
       model: ANSWER_MODEL,
-      system: systemPrompt(route.sections, sections),
+      system: systemPrompt(route.sections, sections, relay),
       messages,
       signal: req.signal,
     });
+    // A pet without a soul still gets the prefix, with no aside: the bubble uses a fixed one.
+    const relayed = relay
+      ? answer.pipeThrough(splitAside())
+      : prefix
+        ? answer.pipeThrough(prepend(prefix))
+        : answer;
     // Saved once the answer has finished streaming (or the visitor stopped it).
-    const { stream, finished } = recordStream(answer, req.signal);
+    const { stream, finished } = recordStream(relayed, req.signal);
     after(async () => {
       const { text, complete } = await finished;
+      const { aside, answer } = prefix ? parseRelayed(text) : { aside: null, answer: text };
       await saveChat({
         ...base,
         ...routed,
-        answer: text,
+        answer,
+        aside,
         outcome: complete ? "answered" : "stopped",
         duration_ms: Date.now() - started,
       });
@@ -95,35 +153,37 @@ export async function POST(req: NextRequest) {
 }
 
 /**
- * The chat's random conversation ID and the page it was asked from, for the
- * saved record. Anything malformed gets a fresh ID / no page rather than a 400.
+ * The chat's random session ID, the page it was asked from and where the
+ * visitor came from, for the saved record. Anything malformed is dropped (or
+ * gets a fresh ID) rather than failing the chat.
  */
-function visit(body: unknown): Pick<ChatRecord, "conversation_id" | "page"> {
-  const { conversationId, page } = (body ?? {}) as { conversationId?: unknown; page?: unknown };
+function visit(body: unknown): Pick<ChatRecord, "conversation_id" | "page" | "referrer" | "utm_source"> {
+  const { conversationId, page, referrer, utmSource } = (body ?? {}) as Record<string, unknown>;
   const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const domain = /^[a-z0-9-]+(\.[a-z0-9-]+)+$/i;
   return {
     conversation_id: typeof conversationId === "string" && uuid.test(conversationId) ? conversationId : crypto.randomUUID(),
     page: typeof page === "string" && page.startsWith("/") ? page.slice(0, 200) : null,
+    referrer: typeof referrer === "string" && referrer.length <= 100 && domain.test(referrer) ? referrer : null,
+    utm_source: typeof utmSource === "string" && UTM_TOKEN.test(utmSource) ? utmSource : null,
   };
 }
 
-/** Validates the body and trims history; null when it's malformed or the latest message is too long. */
-function parse(body: unknown): ChatMessage[] | null {
-  const raw = (body as { messages?: unknown } | null)?.messages;
-  if (!Array.isArray(raw) || raw.length === 0) return null;
+/** The visitor's new question; null when it's missing, empty or too long. */
+function parse(body: unknown): string | null {
+  const raw = (body as { question?: unknown } | null)?.question;
+  if (typeof raw !== "string") return null;
+  const question = raw.trim();
+  return question && question.length <= MAX_MESSAGE ? question : null;
+}
 
-  const messages: ChatMessage[] = [];
-  for (const m of raw.slice(-MAX_TURNS)) {
-    if (!m || (m.role !== "user" && m.role !== "assistant") || typeof m.content !== "string") return null;
-    const content = m.content.trim();
-    if (!content) return null;
-    if (m.role === "user" && content.length > MAX_MESSAGE) return null;
-    messages.push({ role: m.role, content: content.slice(0, MAX_REPLY) });
-  }
-  // History must start with the visitor and end on their new message.
-  while (messages[0]?.role === "assistant") messages.shift();
-  if (messages.at(-1)?.role !== "user") return null;
-  return messages;
+/** Puts `text` in front of a stream. */
+function prepend(text: string): TransformStream<Uint8Array, Uint8Array> {
+  return new TransformStream({
+    start(out) {
+      out.enqueue(new TextEncoder().encode(text));
+    },
+  });
 }
 
 const textHeaders = { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" };

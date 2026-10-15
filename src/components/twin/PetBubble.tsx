@@ -44,7 +44,11 @@ export default function PetBubble({
 
   // The pet's asides are picked here, in the event, so renders stay pure.
   const ask = (text: string) =>
-    void send(text, { aside: relayLine(species, "aside"), thinking: relayLine(species, "thinking") });
+    void send(text, {
+      pet: species,
+      aside: relayLine(species, "aside"),
+      thinking: relayLine(species, "thinking"),
+    });
 
   return (
     <>
